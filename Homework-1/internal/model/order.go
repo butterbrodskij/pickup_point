@@ -2,10 +2,8 @@ package model
 
 import "time"
 
-type Order struct {
+type OrderInput struct {
 	ID         int
 	Recipient  int
 	ExpireDate time.Time
-	IsReturned bool
-	IsGiven    bool
 }
