@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"homework1/pup/internal/model"
 	"homework1/pup/internal/service"
 	"homework1/pup/internal/storage"
 )
@@ -28,6 +29,10 @@ func help() {
 		list		 -recipient (optional args: number of orders to list)
 		return  	 -id -recipient
 		list-return	 args: page number
+	
+	Flags requirements:
+		-id, -recipient: positive number
+		-expire: date in 'dd.mm.yyyy' format (2.1.2006 for 2nd Jan 2006)
 	`)
 }
 
@@ -45,7 +50,7 @@ func main() {
 		fmt.Println("can not connect to storage")
 		return
 	}
-	serv := service.New(stor)
+	serv := service.New(&stor)
 	_, _ = arguments, serv
 
 	switch *command {
@@ -58,5 +63,15 @@ func main() {
 			fmt.Println("miss required flags")
 			return
 		}
+		err = serv.Get(model.OrderInput{
+			ID:         *id,
+			Recipient:  *recipient,
+			ExpireDate: *expireString,
+		})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("got new order from courier")
 	}
 }
