@@ -1,5 +1,62 @@
 package main
 
-func main() {
+import (
+	"flag"
+	"fmt"
+	"homework1/pup/internal/service"
+	"homework1/pup/internal/storage"
+)
 
+func help() {
+	fmt.Println(`
+	usage: go run ./cmd -command=<help|get|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [<args>]
+
+	Command desciption:
+		help: список доступных команд с кратким описанием
+		get: принять заказ от курьера
+		remove: вернуть заказ курьеру
+		give: выдать заказ клиенту
+		list: получить список заказов
+		return: принять возврат от клиента
+		list-return: получить список возвратов
+
+	Needed flags or arguments for each command:
+		help	
+		get 		 -id -recipient -expire
+		remove  	 -id
+		give		 args: order ids to give (example: go run ./cmd -command=give 1 2 3 4)
+		list		 -recipient (optional args: number of orders to list)
+		return  	 -id -recipient
+		list-return	 args: page number
+	`)
+}
+
+func main() {
+	command := flag.String("command", "", "name of command")
+	id := flag.Int("id", 0, "order id")
+	recipient := flag.Int("recipient", 0, "recipient id")
+	expireString := flag.String("expire", "", "expire date")
+
+	flag.Parse()
+	arguments := flag.Args()
+
+	stor, err := storage.New()
+	if err != nil {
+		fmt.Println("can not connect to storage")
+		return
+	}
+	serv := service.New(stor)
+	_, _ = arguments, serv
+
+	switch *command {
+	case "":
+		fmt.Println("expected a command")
+	case "help":
+		help()
+	case "get":
+		if id == nil || recipient == nil || expireString == nil {
+			fmt.Println("miss required flags")
+			return
+		}
+	}
 }
