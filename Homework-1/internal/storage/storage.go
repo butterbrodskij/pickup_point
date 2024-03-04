@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"homework1/pup/internal/model"
 	"io"
 	"os"
@@ -38,6 +39,13 @@ func (s *Storage) Get(order model.Order) error {
 	}
 
 	newOrder := Order2DTO(order)
+
+	for _, ord := range all {
+		if ord.ID == newOrder.ID {
+			return errors.New("trying to get existing order")
+		}
+	}
+
 	all = append(all, newOrder)
 
 	return writeBytes(all)

@@ -28,6 +28,10 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 		return model.Order{}, errors.New("wrong date format")
 	}
 
+	if t.Before(time.Now()) {
+		return model.Order{}, errors.New("trying to get expired order")
+	}
+
 	return model.Order{
 		ID:         input.ID,
 		Recipient:  input.Recipient,
