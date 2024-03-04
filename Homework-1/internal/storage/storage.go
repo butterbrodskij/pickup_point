@@ -1,6 +1,9 @@
 package storage
 
-import "os"
+import (
+	"homework1/pup/internal/model"
+	"os"
+)
 
 const storageName = "storage"
 
@@ -15,4 +18,12 @@ func New() (Storage, error) {
 		return Storage{}, err
 	}
 	return Storage{storage: file}, nil
+}
+
+func Into2DTO(order model.OrderInput) OrderDTO {
+	return OrderDTO{
+		ID:         order.ID,
+		Recipient:  order.Recipient,
+		ExpireDate: order.ExpireDate,
+	}
 }
