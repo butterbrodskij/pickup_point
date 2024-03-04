@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"homework1/pup/internal/model"
 	"io"
 	"os"
@@ -72,6 +73,40 @@ func (s *Storage) Remove(id int) error {
 	return errors.New("order not found")
 }
 
+func (s *Storage) Give(ids []int) error {
+	all, err := s.listAll()
+	if err != nil {
+		return err
+	}
+	var recipient int
+	toModify := make([]int, len(ids))
+
+	for i, id := range ids {
+		idx, ok := searchId(all, id)
+		if !ok {
+			return fmt.Errorf("order %d is not in the storage", id)
+		}
+		if recipient != 0 && all[idx].Recipient != recipient {
+			return errors.New("orders belong to different recipients")
+		}
+		if all[idx].IsGiven {
+			return fmt.Errorf("order %d is already given", id)
+		}
+		if all[idx].ExpireDate.Before(time.Now()) {
+			return fmt.Errorf("order %d is expired", id)
+		}
+		recipient = all[idx].Recipient
+		toModify[i] = idx
+	}
+
+	for _, i := range toModify {
+		all[i].IsGiven = true
+		all[i].GivenTime = time.Now()
+	}
+
+	return writeBytes(all)
+}
+
 func writeBytes(toDos []OrderDTO) error {
 	rawBytes, err := json.Marshal(toDos)
 	if err != nil {
@@ -99,4 +134,13 @@ func (s *Storage) listAll() ([]OrderDTO, error) {
 	}
 
 	return orders, nil
+}
+
+func searchId(all []OrderDTO, id int) (int, bool) {
+	for i, order := range all {
+		if order.ID == id {
+			return i, true
+		}
+	}
+	return 0, false
 }

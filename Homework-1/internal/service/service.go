@@ -3,12 +3,14 @@ package service
 import (
 	"errors"
 	"homework1/pup/internal/model"
+	"strconv"
 	"time"
 )
 
 type storage interface {
 	Get(model.Order) error
 	Remove(int) error
+	Give([]int) error
 }
 
 type Service struct {
@@ -57,4 +59,16 @@ func (s Service) Remove(id int) error {
 		return errors.New("id should be positive")
 	}
 	return s.s.Remove(id)
+}
+
+func (s Service) Give(idString []string) error {
+	ids := make([]int, len(idString))
+	for i, str := range idString {
+		id, err := strconv.Atoi(str)
+		if err != nil {
+			return err
+		}
+		ids[i] = id
+	}
+	return s.s.Give(ids)
 }

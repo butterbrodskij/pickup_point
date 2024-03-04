@@ -32,7 +32,7 @@ func help() {
 	
 	Flags requirements:
 		-id, -recipient: positive number
-		-expire: date in 'dd.mm.yyyy' format (2.1.2006 for 2nd Jan 2006)
+		-expire: date in 'dd.mm.yyyy' format (02.01.2006 for 2nd Jan 2006)
 	`)
 }
 
@@ -51,7 +51,6 @@ func main() {
 		return
 	}
 	serv := service.New(&stor)
-	_, _ = arguments, serv
 
 	switch *command {
 	case "":
@@ -84,5 +83,16 @@ func main() {
 			return
 		}
 		fmt.Printf("removed order %d from our pick-up point\n", *id)
+	case "give":
+		if len(arguments) == 0 {
+			fmt.Println("expected at least one argument as order id")
+			return
+		}
+		err = serv.Give(arguments)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("all orders have been given to its recipient")
 	}
 }
