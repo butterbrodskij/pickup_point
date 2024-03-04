@@ -73,5 +73,16 @@ func main() {
 			return
 		}
 		fmt.Println("got new order from courier")
+	case "remove":
+		if id == nil || recipient == nil || expireString == nil {
+			fmt.Println("miss required flags")
+			return
+		}
+		err = serv.Remove(*id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("removed order %d from our pick-up point\n", *id)
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 type storage interface {
 	Get(model.Order) error
+	Remove(int) error
 }
 
 type Service struct {
@@ -49,4 +50,11 @@ func (s Service) Get(input model.OrderInput) error {
 		return err
 	}
 	return s.s.Get(order)
+}
+
+func (s Service) Remove(id int) error {
+	if id <= 0 {
+		return errors.New("id should be positive")
+	}
+	return s.s.Remove(id)
 }

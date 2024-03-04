@@ -8,5 +8,5 @@ type OrderDTO struct {
 	ExpireDate time.Time
 	IsReturned bool
 	IsGiven    bool
-	GivenTime  bool
+	GivenTime  time.Time
 }

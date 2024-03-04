@@ -7,6 +7,7 @@ import (
 	"homework1/pup/internal/model"
 	"io"
 	"os"
+	"time"
 )
 
 const storageName = "storage"
@@ -49,6 +50,26 @@ func (s *Storage) Get(order model.Order) error {
 	all = append(all, newOrder)
 
 	return writeBytes(all)
+}
+
+func (s *Storage) Remove(id int) error {
+	all, err := s.listAll()
+	if err != nil {
+		return err
+	}
+
+	for i, ord := range all {
+		if ord.ID == id {
+			if ord.ExpireDate.Before(time.Now()) && !ord.IsGiven {
+				all = append(all[:i], all[i+1:]...)
+				return writeBytes(all)
+			} else {
+				return errors.New("trying to remove order that is given or not expired")
+			}
+		}
+	}
+
+	return errors.New("order not found")
 }
 
 func writeBytes(toDos []OrderDTO) error {
