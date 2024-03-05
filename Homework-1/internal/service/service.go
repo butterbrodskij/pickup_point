@@ -86,5 +86,5 @@ func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
 		return all, err
 	}
 
-	return all[:n], err
+	return all[len(all)-n:], err
 }
