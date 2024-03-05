@@ -13,6 +13,7 @@ type storage interface {
 	Give([]int) error
 	List(int, bool) ([]model.Order, error)
 	Return(int, int) error
+	ListReturn() ([]model.Order, error)
 }
 
 type Service struct {
@@ -94,4 +95,26 @@ func (s Service) Return(id, recipient int) error {
 		return errors.New("recipient id should be positive")
 	}
 	return s.s.Return(id, recipient)
+}
+
+func (s Service) ListReturn(n, k int) ([]model.Order, error) {
+	if n < 0 {
+		return []model.Order{}, errors.New("n should not be negative")
+	}
+	if k <= 0 {
+		return []model.Order{}, errors.New("k should be positive")
+	}
+	all, err := s.s.ListReturn()
+	if err != nil || n == 0 {
+		return all, err
+	}
+	firstPos := (n - 1) * k
+	if len(all) == 0 || len(all) <= firstPos {
+		return all, errors.New("empty list")
+	}
+	newLen := k
+	if len(all) < n*k {
+		newLen = len(all) % k
+	}
+	return all[firstPos : firstPos+newLen], nil
 }

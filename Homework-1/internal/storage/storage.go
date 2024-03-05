@@ -116,21 +116,12 @@ func (s *Storage) Give(ids []int) error {
 
 func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
 	all, err := s.listAll()
-	filteredAll := make([]model.Order, 0)
 	if err != nil {
-		return filteredAll, err
+		return []model.Order{}, err
 	}
-
-	for _, order := range all {
-		if order.Recipient == recipient && (!flag || !order.IsGiven) {
-			filteredAll = append(filteredAll, model.Order{
-				ID:         order.ID,
-				Recipient:  order.Recipient,
-				ExpireDate: order.ExpireDate,
-			})
-		}
-	}
-
+	filteredAll := filterOrders(all, func(order OrderDTO) bool {
+		return order.Recipient == recipient && (!flag || !order.IsGiven)
+	})
 	if len(filteredAll) == 0 {
 		return filteredAll, errors.New("can not list orders: orders not found")
 	}
@@ -164,8 +155,38 @@ func (s *Storage) Return(id, recipient int) error {
 	return errors.New("order can not be returned: not found")
 }
 
-func writeBytes(toDos []OrderDTO) error {
-	rawBytes, err := json.Marshal(toDos)
+func (s *Storage) ListReturn() ([]model.Order, error) {
+	all, err := s.listAll()
+	if err != nil {
+		return []model.Order{}, err
+	}
+	filteredAll := filterOrders(all, func(order OrderDTO) bool {
+		return order.IsReturned
+	})
+	if len(filteredAll) == 0 {
+		return filteredAll, errors.New("can not list orders: orders not found")
+	}
+
+	return filteredAll, nil
+}
+
+func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
+	filteredAll := make([]model.Order, 0)
+	for _, order := range all {
+		if filter(order) {
+			filteredAll = append(filteredAll, model.Order{
+				ID:         order.ID,
+				Recipient:  order.Recipient,
+				ExpireDate: order.ExpireDate,
+			})
+		}
+	}
+
+	return filteredAll
+}
+
+func writeBytes(orders []OrderDTO) error {
+	rawBytes, err := json.Marshal(orders)
 	if err != nil {
 		return err
 	}
