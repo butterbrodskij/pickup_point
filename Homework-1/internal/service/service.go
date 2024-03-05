@@ -11,6 +11,7 @@ type storage interface {
 	Get(model.Order) error
 	Remove(int) error
 	Give([]int) error
+	List(int, bool) ([]model.Order, error)
 }
 
 type Service struct {
@@ -71,4 +72,19 @@ func (s Service) Give(idString []string) error {
 		ids[i] = id
 	}
 	return s.s.Give(ids)
+}
+
+func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
+	if recipient <= 0 {
+		return []model.Order{}, errors.New("recipient id should be positive")
+	}
+	if n < 0 {
+		return []model.Order{}, errors.New("n should not be negative")
+	}
+	all, err := s.s.List(recipient, flag)
+	if err != nil || n == 0 || len(all) <= n {
+		return all, err
+	}
+
+	return all[:n], err
 }

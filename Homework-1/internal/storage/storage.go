@@ -92,6 +92,9 @@ func (s *Storage) Give(ids []int) error {
 		if all[idx].IsGiven {
 			return fmt.Errorf("order %d is already given", id)
 		}
+		if all[idx].IsReturned {
+			return fmt.Errorf("order %d is already returned by recipient", id)
+		}
 		if all[idx].ExpireDate.Before(time.Now()) {
 			return fmt.Errorf("order %d is expired", id)
 		}
@@ -105,6 +108,30 @@ func (s *Storage) Give(ids []int) error {
 	}
 
 	return writeBytes(all)
+}
+
+func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
+	all, err := s.listAll()
+	filteredAll := make([]model.Order, 0)
+	if err != nil {
+		return filteredAll, err
+	}
+
+	for _, order := range all {
+		if order.Recipient == recipient && (!flag || !order.IsGiven) {
+			filteredAll = append(filteredAll, model.Order{
+				ID:         order.ID,
+				Recipient:  order.Recipient,
+				ExpireDate: order.ExpireDate,
+			})
+		}
+	}
+
+	if len(filteredAll) == 0 {
+		return filteredAll, errors.New("orders not found")
+	}
+
+	return filteredAll, nil
 }
 
 func writeBytes(toDos []OrderDTO) error {

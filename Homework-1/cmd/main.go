@@ -6,6 +6,7 @@ import (
 	"homework1/pup/internal/model"
 	"homework1/pup/internal/service"
 	"homework1/pup/internal/storage"
+	"strconv"
 )
 
 func help() {
@@ -26,7 +27,7 @@ func help() {
 		get 		 -id -recipient -expire
 		remove  	 -id
 		give		 args: order ids to give (example: go run ./cmd -command=give 1 2 3 4)
-		list		 -recipient (optional args: number of orders to list)
+		list		 -recipient (optional flag -t: boolean value for printing orders located in our point (not already given); optional args: number of orders to list or zero fo all)
 		return  	 -id -recipient
 		list-return	 args: page number
 	
@@ -41,6 +42,7 @@ func main() {
 	id := flag.Int("id", 0, "order id")
 	recipient := flag.Int("recipient", 0, "recipient id")
 	expireString := flag.String("expire", "", "expire date")
+	notGiven := flag.Bool("t", false, "return only not given orders")
 
 	flag.Parse()
 	arguments := flag.Args()
@@ -94,5 +96,28 @@ func main() {
 			return
 		}
 		fmt.Println("all orders have been given to its recipient")
+	case "list":
+		if recipient == nil {
+			fmt.Println("miss required flags")
+			return
+		}
+		var n int
+		if len(arguments) > 0 {
+			n, err = strconv.Atoi(arguments[0])
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+		foundArr, err := serv.List(*recipient, n, *notGiven)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("found %d orders:\n", len(foundArr))
+
+		for i, order := range foundArr {
+			fmt.Printf("%d.\tid: %d\texpires: %s\n", i+1, order.ID, order.ExpireDate.Format("01.02.2006"))
+		}
 	}
 }
