@@ -35,6 +35,10 @@ func Order2DTO(order model.Order) OrderDTO {
 }
 
 func (s *Storage) Get(order model.Order) error {
+	if order.ExpireDate.Before(time.Now()) {
+		return errors.New("can not get order: trying to get expired order")
+	}
+
 	all, err := s.listAll()
 	if err != nil {
 		return err
@@ -44,7 +48,7 @@ func (s *Storage) Get(order model.Order) error {
 
 	for _, ord := range all {
 		if ord.ID == newOrder.ID {
-			return errors.New("trying to get existing order")
+			return errors.New("can not get order: trying to get existing order")
 		}
 	}
 
@@ -65,12 +69,12 @@ func (s *Storage) Remove(id int) error {
 				all = append(all[:i], all[i+1:]...)
 				return writeBytes(all)
 			} else {
-				return errors.New("trying to remove order that is given or not expired")
+				return errors.New("order can not be removed: trying to remove order that is given or not expired")
 			}
 		}
 	}
 
-	return errors.New("order not found")
+	return errors.New("order can not be removed: order not found")
 }
 
 func (s *Storage) Give(ids []int) error {
@@ -84,19 +88,19 @@ func (s *Storage) Give(ids []int) error {
 	for i, id := range ids {
 		idx, ok := searchId(all, id)
 		if !ok {
-			return fmt.Errorf("order %d is not in the storage", id)
+			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
 		}
 		if recipient != 0 && all[idx].Recipient != recipient {
-			return errors.New("orders belong to different recipients")
+			return errors.New("can not give orders: orders belong to different recipients")
 		}
 		if all[idx].IsGiven {
-			return fmt.Errorf("order %d is already given", id)
+			return fmt.Errorf("can not give orders: order %d is already given", id)
 		}
 		if all[idx].IsReturned {
-			return fmt.Errorf("order %d is already returned by recipient", id)
+			return fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
 		}
 		if all[idx].ExpireDate.Before(time.Now()) {
-			return fmt.Errorf("order %d is expired", id)
+			return fmt.Errorf("can not give orders: order %d is expired", id)
 		}
 		recipient = all[idx].Recipient
 		toModify[i] = idx
@@ -128,10 +132,36 @@ func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
 	}
 
 	if len(filteredAll) == 0 {
-		return filteredAll, errors.New("orders not found")
+		return filteredAll, errors.New("can not list orders: orders not found")
 	}
 
 	return filteredAll, nil
+}
+
+func (s *Storage) Return(id, recipient int) error {
+	all, err := s.listAll()
+	if err != nil {
+		return err
+	}
+
+	for i, order := range all {
+		if order.ID == id {
+			if order.Recipient != recipient {
+				return errors.New("order can not be returned: order belongs to different recipient")
+			}
+			if !order.IsGiven {
+				return errors.New("order can not be returned: order is not given yet")
+			}
+			if order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
+				return errors.New("order can not be returned: more than 2 days passed")
+			}
+			all[i].IsGiven = false
+			all[i].IsReturned = true
+			return writeBytes(all)
+		}
+	}
+
+	return errors.New("order can not be returned: not found")
 }
 
 func writeBytes(toDos []OrderDTO) error {

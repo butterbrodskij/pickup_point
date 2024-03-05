@@ -119,5 +119,16 @@ func main() {
 		for i, order := range foundArr {
 			fmt.Printf("%d.\tid: %d\texpires: %s\n", i+1, order.ID, order.ExpireDate.Format("01.02.2006"))
 		}
+	case "return":
+		if id == nil || recipient == nil {
+			fmt.Println("miss required flags")
+			return
+		}
+		err = serv.Return(*id, *recipient)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("order %d is returned successfully\n", *id)
 	}
 }

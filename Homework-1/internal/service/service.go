@@ -12,6 +12,7 @@ type storage interface {
 	Remove(int) error
 	Give([]int) error
 	List(int, bool) ([]model.Order, error)
+	Return(int, int) error
 }
 
 type Service struct {
@@ -30,10 +31,6 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 	t, err := time.Parse("2.1.2006", input.ExpireDate)
 	if err != nil {
 		return model.Order{}, errors.New("wrong date format")
-	}
-
-	if t.Before(time.Now()) {
-		return model.Order{}, errors.New("trying to get expired order")
 	}
 
 	return model.Order{
@@ -87,4 +84,14 @@ func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
 	}
 
 	return all[len(all)-n:], err
+}
+
+func (s Service) Return(id, recipient int) error {
+	if id <= 0 {
+		return errors.New("id should be positive")
+	}
+	if recipient <= 0 {
+		return errors.New("recipient id should be positive")
+	}
+	return s.s.Return(id, recipient)
 }
