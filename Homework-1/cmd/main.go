@@ -9,6 +9,7 @@ import (
 	"strconv"
 )
 
+// help prints usage guide
 func help() {
 	fmt.Println(`
 	usage: go run ./cmd -command=<help|get|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
@@ -29,7 +30,7 @@ func help() {
 		give		 args: order ids to give (example: go run ./cmd -command=give 1 2 3 4)
 		list		 -recipient (optional flag -t: boolean value for printing orders located in our point (not already given); optional args: number of orders to list or zero fo all)
 		return  	 -id -recipient
-		list-return	 args: page number and number of orders per page (default: all pages and 10 orders per page)
+		list-return	 args: page number and number of orders per page (default: all pages and 10 orders per page) (example: "-command=list-return 2 5" prints 2nd page of returned orders grouped by 5 orders in each page)
 	
 	Flags requirements:
 		-id, -recipient: positive number

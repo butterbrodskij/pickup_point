@@ -20,6 +20,7 @@ type Service struct {
 	s storage
 }
 
+// Input2Order converts OrderInput to Order and checks validity of fields
 func Input2Order(input model.OrderInput) (model.Order, error) {
 	if input.ID <= 0 {
 		return model.Order{}, errors.New("id should be positive")
@@ -41,10 +42,12 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 	}, nil
 }
 
+// New returns type Service associated with storage
 func New(stor storage) Service {
 	return Service{s: stor}
 }
 
+// Get checks validity of given data and adds new order to storage
 func (s Service) Get(input model.OrderInput) error {
 	order, err := Input2Order(input)
 	if err != nil {
@@ -53,6 +56,7 @@ func (s Service) Get(input model.OrderInput) error {
 	return s.s.Get(order)
 }
 
+// Remove checks validity of given id and deletes an order from storage
 func (s Service) Remove(id int) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
@@ -60,6 +64,7 @@ func (s Service) Remove(id int) error {
 	return s.s.Remove(id)
 }
 
+// Give checks validity of given ids and gives orders to recipient
 func (s Service) Give(idString []string) error {
 	ids := make([]int, len(idString))
 	for i, str := range idString {
@@ -72,6 +77,7 @@ func (s Service) Give(idString []string) error {
 	return s.s.Give(ids)
 }
 
+// List checks validity of given recipient id and n and returns slice of all his orders (last n)
 func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
 	if recipient <= 0 {
 		return []model.Order{}, errors.New("recipient id should be positive")
@@ -87,6 +93,7 @@ func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
 	return all[len(all)-n:], err
 }
 
+// Return checks validity of given order id and recipient id and gets order back from recipient
 func (s Service) Return(id, recipient int) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
@@ -97,6 +104,7 @@ func (s Service) Return(id, recipient int) error {
 	return s.s.Return(id, recipient)
 }
 
+// ListReturn checks validity of given args and returns k returned orders on nth page
 func (s Service) ListReturn(n, k int) ([]model.Order, error) {
 	if n < 0 {
 		return []model.Order{}, errors.New("n should not be negative")

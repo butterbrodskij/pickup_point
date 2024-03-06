@@ -26,37 +26,33 @@ func New() (Storage, error) {
 	return Storage{storage: file}, nil
 }
 
-func Order2DTO(order model.Order) OrderDTO {
-	return OrderDTO{
-		ID:         order.ID,
-		Recipient:  order.Recipient,
-		ExpireDate: order.ExpireDate,
-	}
-}
-
+// Get adds new order to storage
 func (s *Storage) Get(order model.Order) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
-
 	all, err := s.listAll()
 	if err != nil {
 		return err
 	}
 
-	newOrder := Order2DTO(order)
+	newOrder := OrderDTO{
+		ID:         order.ID,
+		Recipient:  order.Recipient,
+		ExpireDate: order.ExpireDate,
+	}
 
 	for _, ord := range all {
 		if ord.ID == newOrder.ID {
 			return errors.New("can not get order: trying to get existing order")
 		}
 	}
-
 	all = append(all, newOrder)
 
 	return writeBytes(all)
 }
 
+// Remove deletes an order from storage
 func (s *Storage) Remove(id int) error {
 	all, err := s.listAll()
 	if err != nil {
@@ -77,6 +73,7 @@ func (s *Storage) Remove(id int) error {
 	return errors.New("order can not be removed: order not found")
 }
 
+// Give gives orders to recipient by changing flag IsGiven
 func (s *Storage) Give(ids []int) error {
 	all, err := s.listAll()
 	if err != nil {
@@ -114,6 +111,7 @@ func (s *Storage) Give(ids []int) error {
 	return writeBytes(all)
 }
 
+// List returns all recipient's orders
 func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
 	all, err := s.listAll()
 	if err != nil {
@@ -129,6 +127,7 @@ func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
 	return filteredAll, nil
 }
 
+// Return gets order back from recipient by changing flag IsReturned
 func (s *Storage) Return(id, recipient int) error {
 	all, err := s.listAll()
 	if err != nil {
@@ -155,6 +154,7 @@ func (s *Storage) Return(id, recipient int) error {
 	return errors.New("order can not be returned: not found")
 }
 
+// ListReturn returns all returned orders in the storage
 func (s *Storage) ListReturn() ([]model.Order, error) {
 	all, err := s.listAll()
 	if err != nil {
@@ -170,6 +170,7 @@ func (s *Storage) ListReturn() ([]model.Order, error) {
 	return filteredAll, nil
 }
 
+// fliterOrders filters slice of orders by filter function
 func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
 	filteredAll := make([]model.Order, 0)
 	for _, order := range all {
@@ -185,6 +186,7 @@ func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
 	return filteredAll
 }
 
+// writeBytes writes orders in file in json
 func writeBytes(orders []OrderDTO) error {
 	rawBytes, err := json.Marshal(orders)
 	if err != nil {
@@ -194,6 +196,7 @@ func writeBytes(orders []OrderDTO) error {
 	return os.WriteFile(storageName, rawBytes, 0777)
 }
 
+// listAll returns all orders in storage
 func (s *Storage) listAll() ([]OrderDTO, error) {
 	reader := bufio.NewReader(s.storage)
 	rawBytes, err := io.ReadAll(reader)
@@ -214,6 +217,7 @@ func (s *Storage) listAll() ([]OrderDTO, error) {
 	return orders, nil
 }
 
+// searchId finds index of order with given id in slice of orders
 func searchId(all []OrderDTO, id int) (int, bool) {
 	for i, order := range all {
 		if order.ID == id {
