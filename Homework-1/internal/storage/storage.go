@@ -11,19 +11,32 @@ import (
 	"time"
 )
 
-const storageName = "storage"
-
 type Storage struct {
-	storage *os.File
+	storageName string
+	storage     *os.File
+	content     []OrderDTO
 }
 
 // New returns new storage associated with file storageName
-func New() (Storage, error) {
+func New(storageName string) (Storage, error) {
 	file, err := os.OpenFile(storageName, os.O_CREATE, 0777)
 	if err != nil {
 		return Storage{}, err
 	}
-	return Storage{storage: file}, nil
+	content, err := listAll(file)
+	if err != nil {
+		return Storage{}, err
+	}
+	return Storage{
+		storageName: storageName,
+		storage:     file,
+		content:     content,
+	}, nil
+}
+
+// Close closes file associated with storage
+func (s *Storage) Close() error {
+	return s.storage.Close()
 }
 
 // Get adds new order to storage
@@ -31,10 +44,7 @@ func (s *Storage) AcceptFromCourier(order model.Order) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
-	all, err := s.listAll()
-	if err != nil {
-		return err
-	}
+	all := s.content
 
 	newOrder := OrderDTO{
 		ID:          order.ID,
@@ -49,21 +59,18 @@ func (s *Storage) AcceptFromCourier(order model.Order) error {
 	}
 	all = append(all, newOrder)
 
-	return writeBytes(all)
+	return s.writeBytes(all)
 }
 
 // Remove deletes an order from storage
 func (s *Storage) Remove(id int64) error {
-	all, err := s.listAll()
-	if err != nil {
-		return err
-	}
+	all := s.content
 
 	for i, ord := range all {
 		if ord.ID == id {
 			if ord.ExpireDate.Before(time.Now()) && !ord.IsGiven {
 				all = append(all[:i], all[i+1:]...)
-				return writeBytes(all)
+				return s.writeBytes(all)
 			} else {
 				return errors.New("order can not be removed: trying to remove order that is given or not expired")
 			}
@@ -75,10 +82,7 @@ func (s *Storage) Remove(id int64) error {
 
 // Give gives orders to recipient by changing flag IsGiven
 func (s *Storage) Give(ids []int64) error {
-	all, err := s.listAll()
-	if err != nil {
-		return err
-	}
+	all := s.content
 	var recipient int64
 	toModify := make([]int, len(ids))
 
@@ -108,15 +112,12 @@ func (s *Storage) Give(ids []int64) error {
 		all[i].GivenTime = time.Now()
 	}
 
-	return writeBytes(all)
+	return s.writeBytes(all)
 }
 
 // List returns all recipient's orders
 func (s *Storage) List(recipient int64, flag bool) ([]model.Order, error) {
-	all, err := s.listAll()
-	if err != nil {
-		return []model.Order{}, err
-	}
+	all := s.content
 	filteredAll := filterOrders(all, func(order OrderDTO) bool {
 		return order.RecipientID == recipient && (!flag || !order.IsGiven)
 	})
@@ -129,10 +130,7 @@ func (s *Storage) List(recipient int64, flag bool) ([]model.Order, error) {
 
 // Return gets order back from recipient by changing flag IsReturned
 func (s *Storage) Return(id, recipient int64) error {
-	all, err := s.listAll()
-	if err != nil {
-		return err
-	}
+	all := s.content
 
 	for i, order := range all {
 		if order.ID == id {
@@ -147,7 +145,7 @@ func (s *Storage) Return(id, recipient int64) error {
 			}
 			all[i].IsGiven = false
 			all[i].IsReturned = true
-			return writeBytes(all)
+			return s.writeBytes(all)
 		}
 	}
 
@@ -156,10 +154,7 @@ func (s *Storage) Return(id, recipient int64) error {
 
 // ListReturn returns all returned orders in the storage
 func (s *Storage) ListReturn() ([]model.Order, error) {
-	all, err := s.listAll()
-	if err != nil {
-		return []model.Order{}, err
-	}
+	all := s.content
 	filteredAll := filterOrders(all, func(order OrderDTO) bool {
 		return order.IsReturned
 	})
@@ -187,18 +182,19 @@ func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
 }
 
 // writeBytes writes orders in file in json
-func writeBytes(orders []OrderDTO) error {
+func (s *Storage) writeBytes(orders []OrderDTO) error {
+	s.content = orders
 	rawBytes, err := json.Marshal(orders)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(storageName, rawBytes, 0777)
+	return os.WriteFile(s.storageName, rawBytes, 0777)
 }
 
 // listAll returns all orders in storage
-func (s *Storage) listAll() ([]OrderDTO, error) {
-	reader := bufio.NewReader(s.storage)
+func listAll(file *os.File) ([]OrderDTO, error) {
+	reader := bufio.NewReader(file)
 	rawBytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err

@@ -13,6 +13,7 @@ type storage interface {
 	List(int64, bool) ([]model.Order, error)
 	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
+	Close() error
 }
 
 type Service struct {

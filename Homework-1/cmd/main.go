@@ -19,11 +19,16 @@ func main() {
 	flag.Parse()
 	arguments := flag.Args()
 
-	stor, err := storage.New()
+	stor, err := storage.New("storage.json")
 	if err != nil {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
+	defer func() {
+		if err := stor.Close(); err != nil {
+			fmt.Printf("error while closing storage: %s\n", err)
+		}
+	}()
 	serv := service.New(&stor)
 
 	switch *command {
