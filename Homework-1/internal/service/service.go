@@ -14,7 +14,6 @@ type storage interface {
 	ListNotGiven(int64) ([]model.Order, error)
 	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
-	Close() error
 }
 
 type Service struct {
@@ -53,6 +52,9 @@ func (s Service) AcceptFromCourier(input model.OrderInput) error {
 	order, err := Input2Order(input)
 	if err != nil {
 		return err
+	}
+	if order.ExpireDate.Before(time.Now()) {
+		return errors.New("can not get order: trying to get expired order")
 	}
 	return s.s.AcceptFromCourier(order)
 }

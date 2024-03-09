@@ -1,49 +1,44 @@
 package storage
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"homework1/pup/internal/model"
-	"io"
 	"os"
 	"time"
 )
 
 type Storage struct {
 	storageName string
-	storage     *os.File
 	content     []OrderDTO
 }
 
 // New returns new storage associated with file storageName
 func New(storageName string) (Storage, error) {
-	file, err := os.OpenFile(storageName, os.O_CREATE, 0777)
-	if err != nil {
+	_, err := os.Stat(storageName)
+	if os.IsNotExist(err) {
+		f, err := os.Create(storageName)
+		if err != nil {
+			return Storage{}, err
+		}
+		err = f.Close()
+		return Storage{}, err
+	} else if err != nil {
 		return Storage{}, err
 	}
-	content, err := listAll(file)
+	content, err := listAll(storageName)
 	if err != nil {
 		return Storage{}, err
 	}
 	return Storage{
 		storageName: storageName,
-		storage:     file,
 		content:     content,
 	}, nil
 }
 
-// Close closes file associated with storage
-func (s *Storage) Close() error {
-	return s.storage.Close()
-}
-
 // Get adds new order to storage
 func (s *Storage) AcceptFromCourier(order model.Order) error {
-	if order.ExpireDate.Before(time.Now()) {
-		return errors.New("can not get order: trying to get expired order")
-	}
 	all := s.content
 
 	newOrder := OrderDTO{
@@ -206,9 +201,8 @@ func (s *Storage) writeBytes(orders []OrderDTO) error {
 }
 
 // listAll returns all orders in storage
-func listAll(file *os.File) ([]OrderDTO, error) {
-	reader := bufio.NewReader(file)
-	rawBytes, err := io.ReadAll(reader)
+func listAll(storageName string) ([]OrderDTO, error) {
+	rawBytes, err := os.ReadFile(storageName)
 	if err != nil {
 		return nil, err
 	}

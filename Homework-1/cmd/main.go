@@ -24,11 +24,6 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	defer func() {
-		if err := stor.Close(); err != nil {
-			fmt.Printf("error while closing storage: %s\n", err)
-		}
-	}()
 	serv := service.New(&stor)
 
 	switch *command {
