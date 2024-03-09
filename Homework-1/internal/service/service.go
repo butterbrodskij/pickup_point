@@ -10,7 +10,8 @@ type storage interface {
 	AcceptFromCourier(model.Order) error
 	Remove(int64) error
 	Give([]int64) error
-	List(int64, bool) ([]model.Order, error)
+	ListAll(int64) ([]model.Order, error)
+	ListNotGiven(int64) ([]model.Order, error)
 	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
 	Close() error
@@ -70,14 +71,22 @@ func (s Service) Give(ids []int64) error {
 }
 
 // List checks validity of given recipient id and n and returns slice of all his orders (last n)
-func (s Service) List(recipient int64, n int, flag bool) ([]model.Order, error) {
+func (s Service) List(recipient int64, n int, onlyNotGivenOrders bool) ([]model.Order, error) {
 	if recipient <= 0 {
 		return []model.Order{}, errors.New("recipient id should be positive")
 	}
 	if n < 0 {
 		return []model.Order{}, errors.New("n should not be negative")
 	}
-	all, err := s.s.List(recipient, flag)
+	var (
+		all []model.Order
+		err error
+	)
+	if !onlyNotGivenOrders {
+		all, err = s.s.ListAll(recipient)
+	} else {
+		all, err = s.s.ListNotGiven(recipient)
+	}
 	if err != nil || n == 0 || len(all) <= n {
 		return all, err
 	}

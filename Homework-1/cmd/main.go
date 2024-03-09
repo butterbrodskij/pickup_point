@@ -35,7 +35,7 @@ func main() {
 	case "":
 		fmt.Println("expected a command")
 	case "help":
-		help()
+		serv.Help()
 	case "accept":
 		if id == nil || recipient == nil || expireString == nil {
 			fmt.Println("miss required flags")

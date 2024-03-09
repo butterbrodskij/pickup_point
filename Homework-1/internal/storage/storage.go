@@ -116,10 +116,23 @@ func (s *Storage) Give(ids []int64) error {
 }
 
 // List returns all recipient's orders
-func (s *Storage) List(recipient int64, flag bool) ([]model.Order, error) {
+func (s *Storage) ListAll(recipient int64) ([]model.Order, error) {
 	all := s.content
 	filteredAll := filterOrders(all, func(order OrderDTO) bool {
-		return order.RecipientID == recipient && (!flag || !order.IsGiven)
+		return order.RecipientID == recipient
+	})
+	if len(filteredAll) == 0 {
+		return filteredAll, errors.New("can not list orders: orders not found")
+	}
+
+	return filteredAll, nil
+}
+
+// List returns all recipient's not given orders
+func (s *Storage) ListNotGiven(recipient int64) ([]model.Order, error) {
+	all := s.content
+	filteredAll := filterOrders(all, func(order OrderDTO) bool {
+		return order.RecipientID == recipient && !order.IsGiven
 	})
 	if len(filteredAll) == 0 {
 		return filteredAll, errors.New("can not list orders: orders not found")
