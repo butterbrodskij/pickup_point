@@ -97,24 +97,24 @@ func (s Service) Return(id, recipient int64) error {
 }
 
 // ListReturn checks validity of given args and returns k returned orders on nth page
-func (s Service) ListReturn(n, k int) ([]model.Order, error) {
-	if n < 0 {
-		return []model.Order{}, errors.New("n should not be negative")
+func (s Service) ListReturn(pageNum, ordersPerPage int) ([]model.Order, error) {
+	if pageNum < 0 {
+		return []model.Order{}, errors.New("pageNum should not be negative")
 	}
-	if k <= 0 {
-		return []model.Order{}, errors.New("k should be positive")
+	if ordersPerPage <= 0 {
+		return []model.Order{}, errors.New("ordersPerPage should be positive")
 	}
 	all, err := s.s.ListReturn()
-	if err != nil || n == 0 {
+	if err != nil || pageNum == 0 {
 		return all, err
 	}
-	firstPos := (n - 1) * k
+	firstPos := (pageNum - 1) * ordersPerPage
 	if len(all) == 0 || len(all) <= firstPos {
 		return all, errors.New("empty list")
 	}
-	newLen := k
-	if len(all) < n*k {
-		newLen = len(all) % k
+	newLen := ordersPerPage
+	if len(all) < pageNum*ordersPerPage {
+		newLen = len(all) % ordersPerPage
 	}
 	return all[firstPos : firstPos+newLen], nil
 }

@@ -117,33 +117,33 @@ func main() {
 		}
 		fmt.Printf("order %d is returned successfully\n", *id)
 	case "list-return":
-		var n int
-		k := 10
+		var pageNum int
+		ordersPerPage := 10
 		if len(arguments) > 0 {
-			n, err = strconv.Atoi(arguments[0])
+			pageNum, err = strconv.Atoi(arguments[0])
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
 		if len(arguments) > 1 {
-			k, err = strconv.Atoi(arguments[1])
+			ordersPerPage, err = strconv.Atoi(arguments[1])
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
-		arr, err := serv.ListReturn(n, k)
+		arr, err := serv.ListReturn(pageNum, ordersPerPage)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		startPos := 1
-		if n == 0 {
+		if pageNum == 0 {
 			fmt.Println("all returned not removed orders:")
 		} else {
-			startPos = k*(n-1) + 1
-			fmt.Printf("returned not removed orders from page %d (%d-%d):\n", n, startPos, startPos+len(arr)-1)
+			startPos = ordersPerPage*(pageNum-1) + 1
+			fmt.Printf("returned not removed orders from page %d (%d-%d):\n", pageNum, startPos, startPos+len(arr)-1)
 		}
 
 		for i, order := range arr {
