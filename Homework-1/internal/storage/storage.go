@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"homework1/pup/internal/model"
 	"os"
 	"time"
@@ -37,10 +36,28 @@ func New(storageName string) (Storage, error) {
 	}, nil
 }
 
-// Get adds new order to storage
+// Get returns OrderDTO by its id
+func (s *Storage) Get(id int64) (OrderDTO, bool) {
+	for _, order := range s.content {
+		if order.ID == id {
+			return order, true
+		}
+	}
+	return OrderDTO{}, false
+}
+
+// Map returns map of OrderDTO
+func (s *Storage) Map() map[int64]OrderDTO {
+	m := make(map[int64]OrderDTO, len(s.content))
+	for _, order := range s.content {
+		m[order.ID] = order
+	}
+	return m
+}
+
+// AcceptFromCourier adds new order to storage
 func (s *Storage) AcceptFromCourier(order model.Order) error {
 	all := s.content
-
 	newOrder := OrderDTO{
 		ID:          order.ID,
 		RecipientID: order.RecipientID,
@@ -63,12 +80,8 @@ func (s *Storage) Remove(id int64) error {
 
 	for i, ord := range all {
 		if ord.ID == id {
-			if ord.ExpireDate.Before(time.Now()) && !ord.IsGiven {
-				all = append(all[:i], all[i+1:]...)
-				return s.writeBytes(all)
-			} else {
-				return errors.New("order can not be removed: trying to remove order that is given or not expired")
-			}
+			all = append(all[:i], all[i+1:]...)
+			return s.writeBytes(all)
 		}
 	}
 
@@ -78,33 +91,17 @@ func (s *Storage) Remove(id int64) error {
 // Give gives orders to recipient by changing flag IsGiven
 func (s *Storage) Give(ids []int64) error {
 	all := s.content
-	var recipient int64
-	toModify := make([]int, len(ids))
+	m := make(map[int64]struct{})
 
-	for i, id := range ids {
-		idx, ok := searchId(all, id)
-		if !ok {
-			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
-		}
-		if recipient != 0 && all[idx].RecipientID != recipient {
-			return errors.New("can not give orders: orders belong to different recipients")
-		}
-		if all[idx].IsGiven {
-			return fmt.Errorf("can not give orders: order %d is already given", id)
-		}
-		if all[idx].IsReturned {
-			return fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
-		}
-		if all[idx].ExpireDate.Before(time.Now()) {
-			return fmt.Errorf("can not give orders: order %d is expired", id)
-		}
-		recipient = all[idx].RecipientID
-		toModify[i] = idx
+	for _, id := range ids {
+		m[id] = struct{}{}
 	}
 
-	for _, i := range toModify {
-		all[i].IsGiven = true
-		all[i].GivenTime = time.Now()
+	for i, order := range all {
+		if _, ok := m[order.ID]; ok {
+			all[i].IsGiven = true
+			all[i].GivenTime = time.Now()
+		}
 	}
 
 	return s.writeBytes(all)
@@ -142,22 +139,13 @@ func (s *Storage) Return(id, recipient int64) error {
 
 	for i, order := range all {
 		if order.ID == id {
-			if order.RecipientID != recipient {
-				return errors.New("order can not be returned: order belongs to different recipient")
-			}
-			if !order.IsGiven {
-				return errors.New("order can not be returned: order is not given yet")
-			}
-			if order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
-				return errors.New("order can not be returned: more than 2 days passed")
-			}
 			all[i].IsGiven = false
 			all[i].IsReturned = true
 			return s.writeBytes(all)
 		}
 	}
 
-	return errors.New("order can not be returned: not found")
+	return errors.New("order can not be returned: order not found")
 }
 
 // ListReturn returns all returned orders in the storage
@@ -218,14 +206,4 @@ func listAll(storageName string) ([]OrderDTO, error) {
 	}
 
 	return orders, nil
-}
-
-// searchId finds index of order with given id in slice of orders
-func searchId(all []OrderDTO, id int64) (int, bool) {
-	for i, order := range all {
-		if order.ID == id {
-			return i, true
-		}
-	}
-	return 0, false
 }

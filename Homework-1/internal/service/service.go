@@ -2,11 +2,13 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"homework1/pup/internal/model"
+	"homework1/pup/internal/storage"
 	"time"
 )
 
-type storage interface {
+type storageInterface interface {
 	AcceptFromCourier(model.Order) error
 	Remove(int64) error
 	Give([]int64) error
@@ -14,10 +16,12 @@ type storage interface {
 	ListNotGiven(int64) ([]model.Order, error)
 	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
+	Get(int64) (storage.OrderDTO, bool)
+	Map() map[int64]storage.OrderDTO
 }
 
 type Service struct {
-	s storage
+	s storageInterface
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
@@ -43,7 +47,7 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 }
 
 // New returns type Service associated with storage
-func New(stor storage) Service {
+func New(stor storageInterface) Service {
 	return Service{s: stor}
 }
 
@@ -64,11 +68,39 @@ func (s Service) Remove(id int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
+	if order, ok := s.s.Get(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
+		return errors.New("order can not be removed: trying to remove order that is given or not expired")
+	}
 	return s.s.Remove(id)
 }
 
 // Give checks validity of given ids and gives orders to recipient
 func (s Service) Give(ids []int64) error {
+	m := s.s.Map()
+	var recipient int64
+
+	for _, id := range ids {
+		order, ok := m[id]
+		if !ok {
+			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
+		}
+		if recipient != 0 && order.RecipientID != recipient {
+			return errors.New("can not give orders: orders belong to different recipients")
+		}
+		if order.IsGiven {
+			return fmt.Errorf("can not give orders: order %d is already given", id)
+		}
+		if order.IsReturned {
+			return fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
+		}
+		if order.ExpireDate.Before(time.Now()) {
+			return fmt.Errorf("can not give orders: order %d is expired", id)
+		}
+		if recipient == 0 {
+			recipient = order.RecipientID
+		}
+	}
+
 	return s.s.Give(ids)
 }
 
@@ -103,6 +135,16 @@ func (s Service) Return(id, recipient int64) error {
 	}
 	if recipient <= 0 {
 		return errors.New("recipient id should be positive")
+	}
+	order, ok := s.s.Get(id)
+	if ok && order.RecipientID != recipient {
+		return errors.New("order can not be returned: order belongs to different recipient")
+	}
+	if ok && !order.IsGiven {
+		return errors.New("order can not be returned: order is not given yet")
+	}
+	if ok && order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
+		return errors.New("order can not be returned: more than 2 days passed")
 	}
 	return s.s.Return(id, recipient)
 }
