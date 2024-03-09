@@ -11,8 +11,8 @@ import (
 
 func main() {
 	command := flag.String("command", "", "name of command")
-	id := flag.Int("id", 0, "order id")
-	recipient := flag.Int("recipient", 0, "recipient id")
+	id := flag.Int64("id", 0, "order id")
+	recipient := flag.Int64("recipient", 0, "recipient id")
 	expireString := flag.String("expire", "", "expire date")
 	notGiven := flag.Bool("t", false, "return only not given orders")
 
@@ -37,9 +37,9 @@ func main() {
 			return
 		}
 		err = serv.Get(model.OrderInput{
-			ID:         *id,
-			Recipient:  *recipient,
-			ExpireDate: *expireString,
+			ID:          *id,
+			RecipientID: *recipient,
+			ExpireDate:  *expireString,
 		})
 		if err != nil {
 			fmt.Println(err)
@@ -133,7 +133,7 @@ func main() {
 		}
 
 		for i, order := range arr {
-			fmt.Printf("%d.\tid: %d\trecipient: %d\texpires: %s\n", startPos+i, order.ID, order.Recipient, order.ExpireDate.Format("01.02.2006"))
+			fmt.Printf("%d.\tid: %d\trecipient: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.ExpireDate.Format("01.02.2006"))
 		}
 	}
 }

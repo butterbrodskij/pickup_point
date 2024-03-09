@@ -9,10 +9,10 @@ import (
 
 type storage interface {
 	Get(model.Order) error
-	Remove(int) error
-	Give([]int) error
-	List(int, bool) ([]model.Order, error)
-	Return(int, int) error
+	Remove(int64) error
+	Give([]int64) error
+	List(int64, bool) ([]model.Order, error)
+	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
 }
 
@@ -26,7 +26,7 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 		return model.Order{}, errors.New("id should be positive")
 	}
 
-	if input.Recipient <= 0 {
+	if input.RecipientID <= 0 {
 		return model.Order{}, errors.New("recipient id should be positive")
 	}
 
@@ -36,9 +36,9 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 	}
 
 	return model.Order{
-		ID:         input.ID,
-		Recipient:  input.Recipient,
-		ExpireDate: t,
+		ID:          input.ID,
+		RecipientID: input.RecipientID,
+		ExpireDate:  t,
 	}, nil
 }
 
@@ -57,7 +57,7 @@ func (s Service) Get(input model.OrderInput) error {
 }
 
 // Remove checks validity of given id and deletes an order from storage
-func (s Service) Remove(id int) error {
+func (s Service) Remove(id int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
@@ -66,9 +66,9 @@ func (s Service) Remove(id int) error {
 
 // Give checks validity of given ids and gives orders to recipient
 func (s Service) Give(idString []string) error {
-	ids := make([]int, len(idString))
+	ids := make([]int64, len(idString))
 	for i, str := range idString {
-		id, err := strconv.Atoi(str)
+		id, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (s Service) Give(idString []string) error {
 }
 
 // List checks validity of given recipient id and n and returns slice of all his orders (last n)
-func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
+func (s Service) List(recipient int64, n int, flag bool) ([]model.Order, error) {
 	if recipient <= 0 {
 		return []model.Order{}, errors.New("recipient id should be positive")
 	}
@@ -94,7 +94,7 @@ func (s Service) List(recipient, n int, flag bool) ([]model.Order, error) {
 }
 
 // Return checks validity of given order id and recipient id and gets order back from recipient
-func (s Service) Return(id, recipient int) error {
+func (s Service) Return(id, recipient int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}

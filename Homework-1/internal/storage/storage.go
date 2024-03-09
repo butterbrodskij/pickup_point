@@ -37,9 +37,9 @@ func (s *Storage) Get(order model.Order) error {
 	}
 
 	newOrder := OrderDTO{
-		ID:         order.ID,
-		Recipient:  order.Recipient,
-		ExpireDate: order.ExpireDate,
+		ID:          order.ID,
+		RecipientID: order.RecipientID,
+		ExpireDate:  order.ExpireDate,
 	}
 
 	for _, ord := range all {
@@ -53,7 +53,7 @@ func (s *Storage) Get(order model.Order) error {
 }
 
 // Remove deletes an order from storage
-func (s *Storage) Remove(id int) error {
+func (s *Storage) Remove(id int64) error {
 	all, err := s.listAll()
 	if err != nil {
 		return err
@@ -74,12 +74,12 @@ func (s *Storage) Remove(id int) error {
 }
 
 // Give gives orders to recipient by changing flag IsGiven
-func (s *Storage) Give(ids []int) error {
+func (s *Storage) Give(ids []int64) error {
 	all, err := s.listAll()
 	if err != nil {
 		return err
 	}
-	var recipient int
+	var recipient int64
 	toModify := make([]int, len(ids))
 
 	for i, id := range ids {
@@ -87,7 +87,7 @@ func (s *Storage) Give(ids []int) error {
 		if !ok {
 			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
 		}
-		if recipient != 0 && all[idx].Recipient != recipient {
+		if recipient != 0 && all[idx].RecipientID != recipient {
 			return errors.New("can not give orders: orders belong to different recipients")
 		}
 		if all[idx].IsGiven {
@@ -99,7 +99,7 @@ func (s *Storage) Give(ids []int) error {
 		if all[idx].ExpireDate.Before(time.Now()) {
 			return fmt.Errorf("can not give orders: order %d is expired", id)
 		}
-		recipient = all[idx].Recipient
+		recipient = all[idx].RecipientID
 		toModify[i] = idx
 	}
 
@@ -112,13 +112,13 @@ func (s *Storage) Give(ids []int) error {
 }
 
 // List returns all recipient's orders
-func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
+func (s *Storage) List(recipient int64, flag bool) ([]model.Order, error) {
 	all, err := s.listAll()
 	if err != nil {
 		return []model.Order{}, err
 	}
 	filteredAll := filterOrders(all, func(order OrderDTO) bool {
-		return order.Recipient == recipient && (!flag || !order.IsGiven)
+		return order.RecipientID == recipient && (!flag || !order.IsGiven)
 	})
 	if len(filteredAll) == 0 {
 		return filteredAll, errors.New("can not list orders: orders not found")
@@ -128,7 +128,7 @@ func (s *Storage) List(recipient int, flag bool) ([]model.Order, error) {
 }
 
 // Return gets order back from recipient by changing flag IsReturned
-func (s *Storage) Return(id, recipient int) error {
+func (s *Storage) Return(id, recipient int64) error {
 	all, err := s.listAll()
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (s *Storage) Return(id, recipient int) error {
 
 	for i, order := range all {
 		if order.ID == id {
-			if order.Recipient != recipient {
+			if order.RecipientID != recipient {
 				return errors.New("order can not be returned: order belongs to different recipient")
 			}
 			if !order.IsGiven {
@@ -176,9 +176,9 @@ func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
 	for _, order := range all {
 		if filter(order) {
 			filteredAll = append(filteredAll, model.Order{
-				ID:         order.ID,
-				Recipient:  order.Recipient,
-				ExpireDate: order.ExpireDate,
+				ID:          order.ID,
+				RecipientID: order.RecipientID,
+				ExpireDate:  order.ExpireDate,
 			})
 		}
 	}
@@ -218,7 +218,7 @@ func (s *Storage) listAll() ([]OrderDTO, error) {
 }
 
 // searchId finds index of order with given id in slice of orders
-func searchId(all []OrderDTO, id int) (int, bool) {
+func searchId(all []OrderDTO, id int64) (int, bool) {
 	for i, order := range all {
 		if order.ID == id {
 			return i, true
