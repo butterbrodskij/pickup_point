@@ -50,7 +50,7 @@ func main() {
 
 	stor, err := storage.New()
 	if err != nil {
-		fmt.Println("can not connect to storage")
+		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
 	serv := service.New(&stor)
