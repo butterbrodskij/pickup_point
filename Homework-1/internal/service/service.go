@@ -8,7 +8,7 @@ import (
 )
 
 type storage interface {
-	Get(model.Order) error
+	AcceptFromCourier(model.Order) error
 	Remove(int64) error
 	Give([]int64) error
 	List(int64, bool) ([]model.Order, error)
@@ -48,12 +48,12 @@ func New(stor storage) Service {
 }
 
 // Get checks validity of given data and adds new order to storage
-func (s Service) Get(input model.OrderInput) error {
+func (s Service) AcceptFromCourier(input model.OrderInput) error {
 	order, err := Input2Order(input)
 	if err != nil {
 		return err
 	}
-	return s.s.Get(order)
+	return s.s.AcceptFromCourier(order)
 }
 
 // Remove checks validity of given id and deletes an order from storage

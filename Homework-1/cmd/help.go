@@ -9,7 +9,7 @@ func help() {
 
 	Command desciption:
 		help: список доступных команд с кратким описанием
-		get: принять заказ от курьера
+		accept: принять заказ от курьера
 		remove: вернуть заказ курьеру
 		give: выдать заказ клиенту
 		list: получить список заказов
@@ -18,7 +18,7 @@ func help() {
 
 	Needed flags or arguments for each command:
 		help	
-		get 		 -id -recipient -expire
+		accept 		 -id -recipient -expire
 		remove  	 -id
 		give		 args: order ids to give (example: go run ./cmd -command=give 1 2 3 4)
 		list		 -recipient (optional flag -t: boolean value for printing orders located in our point (not already given); optional args: number of orders to list or zero fo all)

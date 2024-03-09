@@ -27,7 +27,7 @@ func New() (Storage, error) {
 }
 
 // Get adds new order to storage
-func (s *Storage) Get(order model.Order) error {
+func (s *Storage) AcceptFromCourier(order model.Order) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}

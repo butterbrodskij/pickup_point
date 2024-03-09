@@ -31,12 +31,12 @@ func main() {
 		fmt.Println("expected a command")
 	case "help":
 		help()
-	case "get":
+	case "accept":
 		if id == nil || recipient == nil || expireString == nil {
 			fmt.Println("miss required flags")
 			return
 		}
-		err = serv.Get(model.OrderInput{
+		err = serv.AcceptFromCourier(model.OrderInput{
 			ID:          *id,
 			RecipientID: *recipient,
 			ExpireDate:  *expireString,
