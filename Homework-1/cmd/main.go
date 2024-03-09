@@ -62,7 +62,16 @@ func main() {
 			fmt.Println("expected at least one argument as order id")
 			return
 		}
-		err = serv.Give(arguments)
+		ids := make([]int64, len(arguments))
+		for i, s := range arguments {
+			idCur, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			ids[i] = idCur
+		}
+		err = serv.Give(ids)
 		if err != nil {
 			fmt.Println(err)
 			return

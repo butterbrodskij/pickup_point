@@ -5,7 +5,7 @@ import "fmt"
 // help prints usage guide
 func help() {
 	fmt.Println(`
-	usage: go run ./cmd -command=<help|get|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
+	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
 
 	Command desciption:
 		help: список доступных команд с кратким описанием

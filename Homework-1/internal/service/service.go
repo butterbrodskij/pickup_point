@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"homework1/pup/internal/model"
-	"strconv"
 	"time"
 )
 
@@ -65,15 +64,7 @@ func (s Service) Remove(id int64) error {
 }
 
 // Give checks validity of given ids and gives orders to recipient
-func (s Service) Give(idString []string) error {
-	ids := make([]int64, len(idString))
-	for i, str := range idString {
-		id, err := strconv.ParseInt(str, 10, 64)
-		if err != nil {
-			return err
-		}
-		ids[i] = id
-	}
+func (s Service) Give(ids []int64) error {
 	return s.s.Give(ids)
 }
 
