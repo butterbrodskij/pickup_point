@@ -11,7 +11,7 @@ import (
 // help prints usage guide
 func Help() {
 	fmt.Println(`
-	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
+	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return|pickpoints> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
 
 	Command desciption:
 		help: список доступных команд с кратким описанием
@@ -21,6 +21,7 @@ func Help() {
 		list: получить список заказов
 		return: принять возврат от клиента
 		list-return: получить список возвратов
+		pickpoints: активация интерактивного режима записи и чтения данных о ПВЗ
 
 	Needed flags or arguments for each command:
 		help	
@@ -30,11 +31,13 @@ func Help() {
 		list		 -recipient (optional flag -t: boolean value for printing orders located in our point (not already given); optional args: number of orders to list or zero for all)
 		return  	 -id -recipient
 		list-return	 args: page number and number of orders per page (default: all pages and 10 orders per page) (example: "-command=list-return 2 5" prints 2nd page of returned orders grouped by 5 orders in each page)
+		pickpoints
 	
 	Flags requirements:
 		-id, -recipient: positive number
 		-expire: date in 'dd.mm.yyyy' format (02.01.2006 for 2nd Jan 2006)
 	`)
+	HelpPickPoints()
 }
 
 func Accept(serv service.Service, params parsing.Params) {
@@ -165,4 +168,24 @@ func ListReturn(serv service.Service, params parsing.Params) {
 	for i, order := range arr {
 		fmt.Printf("%d.\tid: %d\trecipient: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.ExpireDate.Format("01.02.2006"))
 	}
+}
+
+func HelpPickPoints() {
+	fmt.Println(`
+	interactive mode for command pickpoints usage guide:
+
+	Command desciption:
+		help: список доступных команд с кратким описанием
+		write: добавить информацию о ПВЗ
+		read: считать информацию о ПВЗ
+
+	Needed arguments for each command:
+		help	
+		write 		 id(int)	name(string)	address(string)	   contact(string)
+		read	  	 id(int)
+	
+	Examples:
+		write 10 Chertanovo Chertanovskaya-Street-10 +7(999)888-77-66
+		read 10
+	`)
 }

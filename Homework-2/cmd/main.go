@@ -36,5 +36,7 @@ func main() {
 		command.Return(serv, params)
 	case "list-return":
 		command.ListReturn(serv, params)
+	default:
+		fmt.Println("Unknown command")
 	}
 }
