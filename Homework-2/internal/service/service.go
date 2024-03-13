@@ -14,7 +14,7 @@ type storageInterface interface {
 	Give([]int64) error
 	ListAll(int64) ([]model.Order, error)
 	ListNotGiven(int64) ([]model.Order, error)
-	Return(int64, int64) error
+	Return(int64) error
 	ListReturn() ([]model.Order, error)
 	Get(int64) (storage.OrderDTO, bool)
 }
@@ -153,7 +153,7 @@ func (s Service) Return(id, recipient int64) error {
 	if order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
 		return errors.New("order can not be returned: more than 2 days passed")
 	}
-	return s.s.Return(id, recipient)
+	return s.s.Return(id)
 }
 
 // ListReturn checks validity of given args and returns k returned orders on nth page

@@ -125,7 +125,7 @@ func (s *Storage) ListNotGiven(recipient int64) ([]model.Order, error) {
 }
 
 // Return gets order back from recipient by changing flag IsReturned
-func (s *Storage) Return(id, recipient int64) error {
+func (s *Storage) Return(id int64) error {
 	all := s.content
 
 	for i, order := range all {
