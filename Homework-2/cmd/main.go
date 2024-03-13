@@ -36,6 +36,8 @@ func main() {
 		command.Return(serv, params)
 	case "list-return":
 		command.ListReturn(serv, params)
+	case "pickpoints":
+		command.PickPoints(serv)
 	default:
 		fmt.Println("Unknown command")
 	}

@@ -1,10 +1,12 @@
 package command
 
 import (
+	"bufio"
 	"fmt"
 	"homework2/pup/cmd/parsing"
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/service"
+	"os"
 	"strconv"
 )
 
@@ -170,6 +172,33 @@ func ListReturn(serv service.Service, params parsing.Params) {
 	}
 }
 
+func PickPoints(serv service.Service) {
+	var (
+		line, com, name, address, contact string
+		id                                int
+	)
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		line = scanner.Text()
+		fmt.Sscanf(line, "%s", &com)
+		switch com {
+		case "help":
+			go HelpPickPoints()
+		case "exit":
+			return
+		case "write":
+			_, err := fmt.Sscanf(line, "write %d %s %s %s", &id, &name, &address, &contact)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			fmt.Println(id)
+		default:
+			fmt.Println("Unknown command")
+		}
+	}
+}
+
 func HelpPickPoints() {
 	fmt.Println(`
 	interactive mode for command pickpoints usage guide:
@@ -178,11 +207,13 @@ func HelpPickPoints() {
 		help: список доступных команд с кратким описанием
 		write: добавить информацию о ПВЗ
 		read: считать информацию о ПВЗ
+		exit: завершение работы
 
 	Needed arguments for each command:
 		help	
 		write 		 id(int)	name(string)	address(string)	   contact(string)
 		read	  	 id(int)
+		exit
 	
 	Examples:
 		write 10 Chertanovo Chertanovskaya-Street-10 +7(999)888-77-66
