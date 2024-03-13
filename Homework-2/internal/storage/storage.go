@@ -46,15 +46,6 @@ func (s *Storage) Get(id int64) (OrderDTO, bool) {
 	return OrderDTO{}, false
 }
 
-// Map returns map of OrderDTO
-func (s *Storage) Map() map[int64]OrderDTO {
-	m := make(map[int64]OrderDTO, len(s.content))
-	for _, order := range s.content {
-		m[order.ID] = order
-	}
-	return m
-}
-
 // AcceptFromCourier adds new order to storage
 func (s *Storage) AcceptFromCourier(order model.Order) error {
 	all := s.content

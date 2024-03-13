@@ -17,7 +17,6 @@ type storageInterface interface {
 	Return(int64, int64) error
 	ListReturn() ([]model.Order, error)
 	Get(int64) (storage.OrderDTO, bool)
-	Map() map[int64]storage.OrderDTO
 }
 
 type Service struct {
@@ -76,11 +75,10 @@ func (s Service) Remove(id int64) error {
 
 // Give checks validity of given ids and gives orders to recipient
 func (s Service) Give(ids []int64) error {
-	m := s.s.Map()
 	var recipient int64
 
 	for _, id := range ids {
-		order, ok := m[id]
+		order, ok := s.s.Get(id)
 		if !ok {
 			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
 		}
