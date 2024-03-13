@@ -1,9 +1,9 @@
-package service
+package command
 
 import "fmt"
 
 // help prints usage guide
-func (s Service) Help() {
+func Help() {
 	fmt.Println(`
 	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
 

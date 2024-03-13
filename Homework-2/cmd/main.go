@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"homework2/pup/cmd/flags"
+	"homework2/pup/cmd/command"
+	"homework2/pup/cmd/parsing"
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/service"
 	"homework2/pup/internal/storage"
@@ -10,8 +11,8 @@ import (
 )
 
 func main() {
-	var params flags.Params
-	flags.Parse(&params)
+	var params parsing.Params
+	parsing.Parse(&params)
 
 	stor, err := storage.New("storage.json")
 	if err != nil {
@@ -24,7 +25,7 @@ func main() {
 	case "":
 		fmt.Println("expected a command")
 	case "help":
-		serv.Help()
+		command.Help()
 	case "accept":
 		if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 			fmt.Println("miss required flags")
