@@ -121,8 +121,11 @@ func (s Service) List(recipient int64, n int, onlyNotGivenOrders bool) ([]model.
 	} else {
 		all, err = s.s.ListNotGiven(recipient)
 	}
-	if err != nil || n == 0 || len(all) <= n {
-		return all, err
+	if err != nil {
+		return []model.Order{}, err
+	}
+	if n == 0 || len(all) <= n {
+		return all, nil
 	}
 
 	return all[len(all)-n:], err
