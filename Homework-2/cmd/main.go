@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"homework2/pup/cmd/flags"
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/service"
 	"homework2/pup/internal/storage"
@@ -10,14 +10,8 @@ import (
 )
 
 func main() {
-	command := flag.String("command", "", "name of command")
-	id := flag.Int64("id", 0, "order id")
-	recipient := flag.Int64("recipient", 0, "recipient id")
-	expireString := flag.String("expire", "", "expire date")
-	notGiven := flag.Bool("t", false, "return only not given orders")
-
-	flag.Parse()
-	arguments := flag.Args()
+	var params flags.Params
+	flags.Parse(&params)
 
 	stor, err := storage.New("storage.json")
 	if err != nil {
@@ -26,20 +20,20 @@ func main() {
 	}
 	serv := service.New(&stor)
 
-	switch *command {
+	switch *params.Command {
 	case "":
 		fmt.Println("expected a command")
 	case "help":
 		serv.Help()
 	case "accept":
-		if id == nil || recipient == nil || expireString == nil {
+		if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 			fmt.Println("miss required flags")
 			return
 		}
 		err = serv.AcceptFromCourier(model.OrderInput{
-			ID:          *id,
-			RecipientID: *recipient,
-			ExpireDate:  *expireString,
+			ID:          *params.ID,
+			RecipientID: *params.RecipientID,
+			ExpireDate:  *params.ExpireString,
 		})
 		if err != nil {
 			fmt.Println(err)
@@ -47,23 +41,23 @@ func main() {
 		}
 		fmt.Println("got new order from courier")
 	case "remove":
-		if id == nil || recipient == nil || expireString == nil {
+		if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 			fmt.Println("miss required flags")
 			return
 		}
-		err = serv.Remove(*id)
+		err = serv.Remove(*params.ID)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Printf("removed order %d from our pick-up point\n", *id)
+		fmt.Printf("removed order %d from our pick-up point\n", *params.ID)
 	case "give":
-		if len(arguments) == 0 {
+		if len(params.Args) == 0 {
 			fmt.Println("expected at least one argument as order id")
 			return
 		}
-		ids := make([]int64, len(arguments))
-		for i, s := range arguments {
+		ids := make([]int64, len(params.Args))
+		for i, s := range params.Args {
 			idCur, err := strconv.ParseInt(s, 10, 64)
 			if err != nil {
 				fmt.Println(err)
@@ -78,19 +72,19 @@ func main() {
 		}
 		fmt.Println("all orders have been given to its recipient")
 	case "list":
-		if recipient == nil {
+		if params.RecipientID == nil {
 			fmt.Println("miss required flags")
 			return
 		}
 		var n int
-		if len(arguments) > 0 {
-			n, err = strconv.Atoi(arguments[0])
+		if len(params.Args) > 0 {
+			n, err = strconv.Atoi(params.Args[0])
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
-		foundArr, err := serv.List(*recipient, n, *notGiven)
+		foundArr, err := serv.List(*params.RecipientID, n, *params.NotGiven)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -101,28 +95,28 @@ func main() {
 			fmt.Printf("%d.\tid: %d\texpires: %s\n", i+1, order.ID, order.ExpireDate.Format("01.02.2006"))
 		}
 	case "return":
-		if id == nil || recipient == nil {
+		if params.ID == nil || params.RecipientID == nil {
 			fmt.Println("miss required flags")
 			return
 		}
-		err = serv.Return(*id, *recipient)
+		err = serv.Return(*params.ID, *params.RecipientID)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Printf("order %d is returned successfully\n", *id)
+		fmt.Printf("order %d is returned successfully\n", *params.ID)
 	case "list-return":
 		var pageNum int
 		ordersPerPage := 10
-		if len(arguments) > 0 {
-			pageNum, err = strconv.Atoi(arguments[0])
+		if len(params.Args) > 0 {
+			pageNum, err = strconv.Atoi(params.Args[0])
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
-		if len(arguments) > 1 {
-			ordersPerPage, err = strconv.Atoi(arguments[1])
+		if len(params.Args) > 1 {
+			ordersPerPage, err = strconv.Atoi(params.Args[1])
 			if err != nil {
 				fmt.Println(err)
 				return
