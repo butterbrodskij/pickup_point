@@ -50,6 +50,18 @@ func (s *StoragePoints) Write(point model.PickPoint) error {
 	return s.writeBytes(all)
 }
 
+func (s *StoragePoints) Get(id int64) (model.PickPoint, bool) {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for _, point := range all {
+		if point.ID == id {
+			return point, true
+		}
+	}
+	return model.PickPoint{}, false
+}
+
 // writeBytes writes orders in file in json
 func (s *StoragePoints) writeBytes(orders []model.PickPoint) error {
 	s.content = orders

@@ -9,7 +9,7 @@ import (
 
 type storagePointsInterface interface {
 	Write(model.PickPoint) error
-	//Get(int64) (model.PickPoint, bool)
+	Get(int64) (model.PickPoint, bool)
 }
 
 func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoint, wg *sync.WaitGroup) {
@@ -39,7 +39,13 @@ func (s Service) ReadPoints(ctx context.Context, readChan <-chan int64, wg *sync
 			fmt.Println("reader: context is canceled")
 			return
 		case id := <-readChan:
-			fmt.Println("reader:", id)
+			fmt.Println("reader: trying to find info about pick-up point with id", id)
+			point, ok := s.sPoints.Get(id)
+			if !ok {
+				fmt.Println("reader: point not found")
+			} else {
+				fmt.Printf("reader: found pick-up point:\n\tid: %d\tname: %s\taddress: %s\tcontacts: %s\n", point.ID, point.Name, point.Address, point.Contact)
+			}
 		}
 	}
 }
