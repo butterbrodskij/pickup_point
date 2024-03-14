@@ -12,6 +12,7 @@ import (
 
 const chanSize = 10
 
+// Implementation of command pickpoints
 func PickPoints(serv service.Service) {
 	var (
 		line, com string
@@ -56,6 +57,7 @@ func PickPoints(serv service.Service) {
 	}
 }
 
+// HelpPickPoints prints usage guide for pickpoints
 func HelpPickPoints() {
 	fmt.Println(`
 	interactive mode for command pickpoints usage guide:

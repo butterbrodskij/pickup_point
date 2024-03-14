@@ -37,6 +37,7 @@ func NewPoints(storageName string) (StoragePoints, error) {
 	}, nil
 }
 
+// Write adds new pick-up point to storage
 func (s *StoragePoints) Write(point model.PickPoint) error {
 	s.mt.Lock()
 	defer s.mt.Unlock()
@@ -50,6 +51,7 @@ func (s *StoragePoints) Write(point model.PickPoint) error {
 	return s.writeBytes(all)
 }
 
+// Get returns pick-up point by its id
 func (s *StoragePoints) Get(id int64) (model.PickPoint, bool) {
 	s.mt.Lock()
 	defer s.mt.Unlock()

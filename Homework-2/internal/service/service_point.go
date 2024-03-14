@@ -12,6 +12,7 @@ type storagePointsInterface interface {
 	Get(int64) (model.PickPoint, bool)
 }
 
+// WritePoints writes pick-up points information in storage from channel
 func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoint, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
@@ -31,6 +32,7 @@ func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoi
 	}
 }
 
+// WritePoints prints pick-up points information from storage by getting id from channel
 func (s Service) ReadPoints(ctx context.Context, readChan <-chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {

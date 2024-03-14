@@ -40,6 +40,7 @@ func Help() {
 	HelpPickPoints()
 }
 
+// Implementation of command accept
 func Accept(serv service.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
@@ -57,6 +58,7 @@ func Accept(serv service.Service, params parsing.Params) {
 	fmt.Println("got new order from courier")
 }
 
+// Implementation of command remove
 func Remove(serv service.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
@@ -70,6 +72,7 @@ func Remove(serv service.Service, params parsing.Params) {
 	fmt.Printf("removed order %d from our pick-up point\n", *params.ID)
 }
 
+// Implementation of command give
 func Give(serv service.Service, params parsing.Params) {
 	if len(params.Args) == 0 {
 		fmt.Println("expected at least one argument as order id")
@@ -92,6 +95,7 @@ func Give(serv service.Service, params parsing.Params) {
 	fmt.Println("all orders have been given to its recipient")
 }
 
+// Implementation of command list
 func List(serv service.Service, params parsing.Params) {
 	if params.RecipientID == nil {
 		fmt.Println("miss required flags")
@@ -119,6 +123,7 @@ func List(serv service.Service, params parsing.Params) {
 	}
 }
 
+// Implementation of command return
 func Return(serv service.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil {
 		fmt.Println("miss required flags")
@@ -132,6 +137,7 @@ func Return(serv service.Service, params parsing.Params) {
 	fmt.Printf("order %d is returned successfully\n", *params.ID)
 }
 
+// Implementation of command list-return
 func ListReturn(serv service.Service, params parsing.Params) {
 	var (
 		pageNum, ordersPerPage int
