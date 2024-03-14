@@ -17,7 +17,7 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	storPoints, err := storage.New("storage_points.json")
+	storPoints, err := storage.NewPoints("storage_points.json")
 	if err != nil {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return

@@ -8,7 +8,7 @@ import (
 )
 
 type storagePointsInterface interface {
-	//Write(model.PickPoint) error
+	Write(model.PickPoint) error
 	//Get(int64) (model.PickPoint, bool)
 }
 
@@ -20,7 +20,13 @@ func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoi
 			fmt.Println("writer: context is canceled")
 			return
 		case point := <-writeChan:
-			fmt.Println("writer:", point)
+			fmt.Println("writer: trying to write new pick-up point", point)
+			err := s.sPoints.Write(point)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("writer: point added successfully")
+			}
 		}
 	}
 }

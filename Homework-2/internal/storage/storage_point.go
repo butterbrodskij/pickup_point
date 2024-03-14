@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"errors"
 	"homework2/pup/internal/model"
 	"os"
 	"sync"
@@ -34,6 +35,19 @@ func NewPoints(storageName string) (StoragePoints, error) {
 		storageName: storageName,
 		content:     content,
 	}, nil
+}
+
+func (s *StoragePoints) Write(point model.PickPoint) error {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for _, p := range all {
+		if p.ID == point.ID {
+			return errors.New("can not write new pick-up point: trying to add existing point")
+		}
+	}
+	all = append(all, point)
+	return s.writeBytes(all)
 }
 
 // writeBytes writes orders in file in json
