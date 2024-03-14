@@ -37,7 +37,7 @@ func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoi
 	}
 }
 
-// WritePoints prints pick-up points information from storage by getting id from channel
+// WritePoints sends pick-up points information to logger from storage by getting id from channel
 func (s Service) ReadPoints(ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var status string
@@ -62,6 +62,7 @@ func (s Service) ReadPoints(ctx context.Context, readChan <-chan int64, logChan 
 	}
 }
 
+// LogPoints prints all logs from writer and reader
 func (s Service) LogPoints(ctx context.Context, logWriteChan, logReadChan <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
