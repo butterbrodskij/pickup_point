@@ -7,7 +7,9 @@ import (
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/service"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 )
 
 const chanSize = 10
@@ -21,38 +23,56 @@ func PickPoints(serv service.Service) {
 		wg        sync.WaitGroup
 	)
 	ctx, cancel := context.WithCancel(context.Background())
-	wg.Add(2)
+	wg.Add(3)
 	writeChan := make(chan model.PickPoint, chanSize)
 	readChan := make(chan int64, chanSize)
-	go serv.WritePoints(ctx, writeChan, &wg)
-	go serv.ReadPoints(ctx, readChan, &wg)
+	logReadChan := make(chan string, chanSize)
+	logWriteChan := make(chan string, chanSize)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go serv.WritePoints(ctx, writeChan, logWriteChan, &wg)
+	go serv.ReadPoints(ctx, readChan, logReadChan, &wg)
+	go serv.LogPoints(ctx, logWriteChan, logReadChan, &wg)
+
 	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		line = scanner.Text()
-		fmt.Sscanf(line, "%s", &com)
-		switch com {
-		case "help":
-			HelpPickPoints()
-		case "exit":
+	for {
+		select {
+		case <-sigChan:
 			cancel()
 			wg.Wait()
 			return
-		case "write":
-			_, err := fmt.Sscanf(line, "write %d %s %s %s", &point.ID, &point.Name, &point.Address, &point.Contact)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			writeChan <- point
-		case "read":
-			_, err := fmt.Sscanf(line, "read %d", &id)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			readChan <- id
 		default:
-			fmt.Println("Unknown command")
+			if !scanner.Scan() {
+				continue
+			}
+			scanner.Scan()
+			line = scanner.Text()
+			fmt.Sscanf(line, "%s", &com)
+			switch com {
+			case "help":
+				HelpPickPoints()
+			case "exit":
+				cancel()
+				wg.Wait()
+				return
+			case "write":
+				_, err := fmt.Sscanf(line, "write %d %s %s %s", &point.ID, &point.Name, &point.Address, &point.Contact)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				writeChan <- point
+			case "read":
+				_, err := fmt.Sscanf(line, "read %d", &id)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				readChan <- id
+			default:
+				fmt.Println("Unknown command")
+			}
 		}
 	}
 }
