@@ -17,7 +17,12 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	serv := service.New(&stor)
+	storPoints, err := storage.New("storage_points.json")
+	if err != nil {
+		fmt.Printf("can not connect to storage: %s\n", err)
+		return
+	}
+	serv := service.New(&stor, &storPoints)
 
 	switch *params.Command {
 	case "":

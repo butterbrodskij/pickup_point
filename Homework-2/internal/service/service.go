@@ -1,12 +1,10 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/storage"
-	"sync"
 	"time"
 )
 
@@ -22,7 +20,8 @@ type storageInterface interface {
 }
 
 type Service struct {
-	s storageInterface
+	s       storageInterface
+	sPoints storagePointsInterface
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
@@ -48,8 +47,11 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 }
 
 // New returns type Service associated with storage
-func New(stor storageInterface) Service {
-	return Service{s: stor}
+func New(stor storageInterface, storPoints storagePointsInterface) Service {
+	return Service{
+		s:       stor,
+		sPoints: storPoints,
+	}
 }
 
 // Get checks validity of given data and adds new order to storage
@@ -179,26 +181,4 @@ func (s Service) ListReturn(pageNum, ordersPerPage int) ([]model.Order, error) {
 		newLen = len(all) % ordersPerPage
 	}
 	return all[firstPos : firstPos+newLen], nil
-}
-
-func (s Service) WritePoints(ctx context.Context, writeChan <-chan model.PickPoint, wg *sync.WaitGroup) {
-	defer wg.Done()
-	select {
-	case <-ctx.Done():
-		fmt.Println("writer: context is canceled")
-		return
-	case point := <-writeChan:
-		fmt.Println("writer:", point)
-	}
-}
-
-func (s Service) ReadPoints(ctx context.Context, readChan <-chan int64, wg *sync.WaitGroup) {
-	defer wg.Done()
-	select {
-	case <-ctx.Done():
-		fmt.Println("reader: context is canceled")
-		return
-	case id := <-readChan:
-		fmt.Println("reader:", id)
-	}
 }
