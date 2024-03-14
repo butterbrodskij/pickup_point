@@ -35,18 +35,9 @@ func PickPoints(serv service.Service) {
 	go serv.ReadPoints(ctx, readChan, logReadChan, &wg)
 	go serv.LogPoints(ctx, logWriteChan, logReadChan, &wg)
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		select {
-		case <-sigChan:
-			cancel()
-			wg.Wait()
-			return
-		default:
-			if !scanner.Scan() {
-				continue
-			}
-			scanner.Scan()
+	go func() {
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
 			line = scanner.Text()
 			fmt.Sscanf(line, "%s", &com)
 			switch com {
@@ -54,7 +45,6 @@ func PickPoints(serv service.Service) {
 				HelpPickPoints()
 			case "exit":
 				cancel()
-				wg.Wait()
 				return
 			case "write":
 				_, err := fmt.Sscanf(line, "write %d %s %s %s", &point.ID, &point.Name, &point.Address, &point.Contact)
@@ -73,6 +63,18 @@ func PickPoints(serv service.Service) {
 			default:
 				fmt.Println("Unknown command")
 			}
+		}
+	}()
+
+	for {
+		select {
+		case sig := <-sigChan:
+			fmt.Println("\nsignal caught:", sig)
+			cancel()
+			wg.Wait()
+			return
+		case <-ctx.Done():
+			wg.Wait()
 		}
 	}
 }
