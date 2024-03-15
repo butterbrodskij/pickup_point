@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"homework2/pup/cmd/parsing"
 	"homework2/pup/internal/model"
-	"homework2/pup/internal/service"
+	"homework2/pup/internal/service/order"
 	"strconv"
 )
 
@@ -41,7 +41,7 @@ func Help() {
 }
 
 // Implementation of command accept
-func Accept(serv service.Service, params parsing.Params) {
+func Accept(serv order.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
 		return
@@ -59,7 +59,7 @@ func Accept(serv service.Service, params parsing.Params) {
 }
 
 // Implementation of command remove
-func Remove(serv service.Service, params parsing.Params) {
+func Remove(serv order.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
 		return
@@ -73,7 +73,7 @@ func Remove(serv service.Service, params parsing.Params) {
 }
 
 // Implementation of command give
-func Give(serv service.Service, params parsing.Params) {
+func Give(serv order.Service, params parsing.Params) {
 	if len(params.Args) == 0 {
 		fmt.Println("expected at least one argument as order id")
 		return
@@ -96,7 +96,7 @@ func Give(serv service.Service, params parsing.Params) {
 }
 
 // Implementation of command list
-func List(serv service.Service, params parsing.Params) {
+func List(serv order.Service, params parsing.Params) {
 	if params.RecipientID == nil {
 		fmt.Println("miss required flags")
 		return
@@ -124,7 +124,7 @@ func List(serv service.Service, params parsing.Params) {
 }
 
 // Implementation of command return
-func Return(serv service.Service, params parsing.Params) {
+func Return(serv order.Service, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil {
 		fmt.Println("miss required flags")
 		return
@@ -138,7 +138,7 @@ func Return(serv service.Service, params parsing.Params) {
 }
 
 // Implementation of command list-return
-func ListReturn(serv service.Service, params parsing.Params) {
+func ListReturn(serv order.Service, params parsing.Params) {
 	var (
 		pageNum, ordersPerPage int
 		err                    error

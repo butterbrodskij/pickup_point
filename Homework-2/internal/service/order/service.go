@@ -1,4 +1,4 @@
-package service
+package order
 
 import (
 	"errors"
@@ -20,8 +20,7 @@ type storageInterface interface {
 }
 
 type Service struct {
-	s       storageInterface
-	sPoints storagePointsInterface
+	s storageInterface
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
@@ -47,11 +46,8 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 }
 
 // New returns type Service associated with storage
-func New(stor storageInterface, storPoints storagePointsInterface) Service {
-	return Service{
-		s:       stor,
-		sPoints: storPoints,
-	}
+func New(stor storageInterface) Service {
+	return Service{s: stor}
 }
 
 // Get checks validity of given data and adds new order to storage

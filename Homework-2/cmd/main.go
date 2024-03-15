@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"homework2/pup/cmd/command"
 	"homework2/pup/cmd/parsing"
-	"homework2/pup/internal/service"
+	"homework2/pup/internal/service/order"
+	"homework2/pup/internal/service/pickpoint"
 	"homework2/pup/internal/storage"
 )
 
@@ -12,7 +13,7 @@ func main() {
 	var params parsing.Params
 	parsing.Parse(&params)
 
-	stor, err := storage.New("storage.json")
+	storOrders, err := storage.New("storage.json")
 	if err != nil {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
@@ -22,7 +23,8 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	serv := service.New(&stor, &storPoints)
+	servOrders := order.New(&storOrders)
+	servPoints := pickpoint.New(&storPoints)
 
 	switch *params.Command {
 	case "":
@@ -30,19 +32,19 @@ func main() {
 	case "help":
 		command.Help()
 	case "accept":
-		command.Accept(serv, params)
+		command.Accept(servOrders, params)
 	case "remove":
-		command.Remove(serv, params)
+		command.Remove(servOrders, params)
 	case "give":
-		command.Give(serv, params)
+		command.Give(servOrders, params)
 	case "list":
-		command.List(serv, params)
+		command.List(servOrders, params)
 	case "return":
-		command.Return(serv, params)
+		command.Return(servOrders, params)
 	case "list-return":
-		command.ListReturn(serv, params)
+		command.ListReturn(servOrders, params)
 	case "pickpoints":
-		command.PickPoints(serv)
+		command.PickPoints(servPoints)
 	default:
 		fmt.Println("Unknown command")
 	}
