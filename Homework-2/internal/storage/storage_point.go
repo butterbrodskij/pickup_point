@@ -11,7 +11,7 @@ import (
 type StoragePoints struct {
 	storageName string
 	content     []model.PickPoint
-	mt          sync.Mutex
+	mt          sync.RWMutex
 }
 
 // New returns new storage associated with file storageName
@@ -53,8 +53,8 @@ func (s *StoragePoints) Write(point model.PickPoint) error {
 
 // Get returns pick-up point by its id
 func (s *StoragePoints) Get(id int64) (model.PickPoint, bool) {
-	s.mt.Lock()
-	defer s.mt.Unlock()
+	s.mt.RLock()
+	defer s.mt.RUnlock()
 	all := s.content
 	for _, point := range all {
 		if point.ID == id {

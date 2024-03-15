@@ -75,6 +75,7 @@ func PickPoints(serv service.Service) {
 			return
 		case <-ctx.Done():
 			wg.Wait()
+			return
 		}
 	}
 }
