@@ -32,7 +32,7 @@ func PickPoints(serv pickpoint.Service) {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go WritePoints(serv, ctx, writeChan, logWriteChan, &wg)
-	go ReadPoints(serv, ctx, readChan, logReadChan, &wg)
+	go Reader(serv, ctx, readChan, logReadChan, &wg)
 	go LogPoints(serv, ctx, logWriteChan, logReadChan, &wg)
 
 	go func() {
@@ -80,6 +80,19 @@ func PickPoints(serv pickpoint.Service) {
 	}
 }
 
+// Reader makes pool of readers
+func Reader(s pickpoint.Service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	var wgReader sync.WaitGroup
+	wgReader.Add(chanSize)
+	for i := 1; i <= chanSize; i++ {
+		serial := i
+		go ReadPoints(s, ctx, readChan, logChan, &wgReader, serial)
+	}
+	wgReader.Wait()
+	close(logChan)
+}
+
 // HelpPickPoints prints usage guide for pickpoints
 func HelpPickPoints() {
 	fmt.Println(`
@@ -115,7 +128,7 @@ func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan mode
 			close(logChan)
 			return
 		case point := <-writeChan:
-			message := fmt.Sprint("writer: trying to write new pick-up point ", point)
+			message := fmt.Sprintf("writer: trying to write new pick-up point %v", point)
 			logChan <- message
 			err := s.Write(point)
 			if err != nil {
@@ -129,24 +142,23 @@ func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan mode
 }
 
 // WritePoints sends pick-up points information to logger from storage by getting id from channel
-func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
+func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
 	defer wg.Done()
 	var status string
 	for {
 		select {
 		case <-ctx.Done():
-			message := "reader: context is canceled"
+			message := fmt.Sprintf("reader %d: context is canceled", serial)
 			logChan <- message
-			close(logChan)
 			return
 		case id := <-readChan:
-			message := fmt.Sprint("reader: trying to find info about pick-up point with id ", id)
+			message := fmt.Sprintf("reader %d: trying to find info about pick-up point with id %d", serial, id)
 			logChan <- message
 			point, err := s.Get(id)
 			if err != nil {
-				status = fmt.Sprintf("reader: error while getting point %d: %s", id, err)
+				status = fmt.Sprintf("reader %d: error while getting point %d: %s", serial, id, err)
 			} else {
-				status = fmt.Sprintf("reader: found pick-up point:\n\tid: %d\tname: %s\taddress: %s\tcontacts: %s", point.ID, point.Name, point.Address, point.Contact)
+				status = fmt.Sprintf("reader %d: found pick-up point:\n\tid: %d\tname: %s\taddress: %s\tcontacts: %s", serial, point.ID, point.Name, point.Address, point.Contact)
 			}
 			logChan <- status
 		}
