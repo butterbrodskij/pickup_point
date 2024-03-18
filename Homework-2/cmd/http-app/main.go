@@ -18,20 +18,20 @@ func main() {
 	router.HandleFunc("/pickpoint", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			fallthrough
+			fmt.Println("POST")
 		case http.MethodPut:
-			fallthrough
+			fmt.Println("PUT")
 		default:
-			fmt.Println()
+			fmt.Println("error")
 		}
 	})
 
 	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[A-z]+}", queryParamKey), func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			fallthrough
+			fmt.Println("GET")
 		case http.MethodDelete:
-			fallthrough
+			fmt.Println("DELETE")
 		default:
 			fmt.Println()
 		}
