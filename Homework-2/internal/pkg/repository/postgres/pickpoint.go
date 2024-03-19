@@ -2,10 +2,11 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/pkg/db"
+
+	"github.com/jackc/pgx/v4"
 )
 
 type PickpointRepo struct {
@@ -16,8 +17,11 @@ func NewRepo(db *db.Database) *PickpointRepo {
 	return &PickpointRepo{db: db}
 }
 
-func (r *PickpointRepo) Add(ctx context.Context) (int64, error) {
-	return 0, nil
+func (r *PickpointRepo) Add(ctx context.Context, point *model.PickPoint) (int64, error) {
+	var id int64
+	query := "INSERT INTO pickpoints(name, address, contacts) VALUES ($1, $2, $3) RETURNING id;"
+	err := r.db.ExecQueryRow(ctx, query, point.Name, point.Address, point.Contact).Scan(&id)
+	return id, err
 }
 
 func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint, error) {
@@ -25,7 +29,7 @@ func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint
 	query := "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1"
 	err := r.db.Get(ctx, &point, query, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, model.ErrorObjectNotFound
 		}
 		return nil, err

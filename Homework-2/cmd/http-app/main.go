@@ -2,10 +2,16 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"homework2/pup/internal/model"
 	"homework2/pup/internal/pkg/db"
+	"homework2/pup/internal/pkg/repository/postgres"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -14,6 +20,10 @@ const (
 	queryParamKey = "point"
 	port          = ":9000"
 )
+
+type server struct {
+	repo *postgres.PickpointRepo
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -25,11 +35,37 @@ func main() {
 	}
 	defer database.Close()
 
+	repo := postgres.NewRepo(database)
+	serv := server{repo: repo}
+
 	router := mux.NewRouter()
 	router.HandleFunc("/pickpoint", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			fmt.Println("POST")
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			var point model.PickPointAdd
+			if err = json.Unmarshal(body, &point); err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			pointRepo := &model.PickPoint{
+				Name:    point.Name,
+				Address: point.Address,
+				Contact: point.Contact,
+			}
+			id, err := serv.repo.Add(ctx, pointRepo)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			pointRepo.ID = id
+			pointJSON, _ := json.Marshal(pointRepo)
+			w.Write(pointJSON)
 		case http.MethodPut:
 			fmt.Println("PUT")
 		default:
@@ -37,14 +73,26 @@ func main() {
 		}
 	})
 
-	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[A-z]+}", queryParamKey), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", queryParamKey), func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			fmt.Println("GET")
+			vars := mux.Vars(r)
+			id, _ := strconv.ParseInt(vars[queryParamKey], 10, 64)
+			point, err := serv.repo.GetByID(ctx, id)
+			if err != nil {
+				if errors.Is(err, model.ErrorObjectNotFound) {
+					w.WriteHeader(http.StatusNotFound)
+					return
+				}
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			pointJSON, _ := json.Marshal(point)
+			w.Write(pointJSON)
 		case http.MethodDelete:
 			fmt.Println("DELETE")
 		default:
-			fmt.Println()
+			fmt.Println("error")
 		}
 	})
 
