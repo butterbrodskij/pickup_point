@@ -25,5 +25,5 @@ func NewDB(ctx context.Context) (*Database, error) {
 }
 
 func generateDsn() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=able", host, port, user, password, dbname)
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 }

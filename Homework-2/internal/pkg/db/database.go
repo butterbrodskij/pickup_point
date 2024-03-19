@@ -1,6 +1,11 @@
 package db
 
-import "github.com/jackc/pgx/v4/pgxpool"
+import (
+	"context"
+
+	"github.com/georgysavva/scany/pgxscan"
+	"github.com/jackc/pgx/v4/pgxpool"
+)
 
 type Database struct {
 	cluster *pgxpool.Pool
@@ -8,4 +13,16 @@ type Database struct {
 
 func newDatabase(cluster *pgxpool.Pool) *Database {
 	return &Database{cluster: cluster}
+}
+
+func (db Database) Close() {
+	db.cluster.Close()
+}
+
+func (db Database) GetPool() *pgxpool.Pool {
+	return db.cluster
+}
+
+func (db Database) Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
+	return pgxscan.Get(ctx, db.cluster, dest, query, args...)
 }

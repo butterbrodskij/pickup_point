@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"homework2/pup/internal/pkg/db"
 	"log"
 	"net/http"
 
@@ -14,6 +16,15 @@ const (
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	database, err := db.NewDB(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close()
+
 	router := mux.NewRouter()
 	router.HandleFunc("/pickpoint", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
