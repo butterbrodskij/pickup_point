@@ -9,8 +9,8 @@ goose -dir ./internal/pkg/db/migrations postgres "user=postgres password=postgre
 go run ./cmd/http-app
 
 ### Примеры curl-запросов: 
-- curl -i -X GET localhost:9000/pickpoint/1
-- curl -i -X GET localhost:9000/pickpoint/0 (запрос валидный, однако всегда будет возвращать 404)
-- curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}' localhost:9000/pickpoint
-- curl -i -H "Content-Type: application/json" -X PUT -d '{"id":1, "name":"Chertanovo", "address":"Chertanovskaya street, 31", "contacts":"+7(999)888-77-66"}' localhost:9000/pickpoint
-- curl -i -X DELETE localhost:9000/pickpoint/1
+- curl -i -u admin:pass -X GET localhost:9000/pickpoint/1
+- curl -i -u admin:pass -X GET localhost:9000/pickpoint/0 (запрос валидный, однако всегда будет возвращать 404)
+- curl -i -u admin:pass -H "Content-Type: application/json" -X POST -d '{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}' localhost:9000/pickpoint
+- curl -i -u admin:pass -H "Content-Type: application/json" -X PUT -d '{"id":1, "name":"Chertanovo", "address":"Chertanovskaya street, 31", "contacts":"+7(999)888-77-66"}' localhost:9000/pickpoint
+- curl -i -u admin:pass -X DELETE localhost:9000/pickpoint/1

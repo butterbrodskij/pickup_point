@@ -19,11 +19,16 @@ type Config struct {
 		Password string `yaml:"-"`
 		Dbname   string `yaml:"dbname"`
 	}
+	Users []struct {
+		Login    string `yaml:"login"`
+		Password string `yaml:"password"`
+	}
 }
 
 const (
 	configFile          = "config.yml"
 	databasePasswordEnv = "DATABASE_PASSWORD"
+	QueryParamKey       = "point"
 )
 
 func GetConfig() (Config, error) {

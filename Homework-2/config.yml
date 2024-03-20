@@ -8,3 +8,8 @@ database:
   port: 5432
   user: "postgres"
   dbname: "postgres"
+
+# Users data
+users:
+  - login: "admin"
+    password: "password"

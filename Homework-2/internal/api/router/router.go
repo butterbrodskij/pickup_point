@@ -3,18 +3,23 @@ package router
 import (
 	"context"
 	"fmt"
+	"net/http"
 
+	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/handler"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 
 	"github.com/gorilla/mux"
 )
 
-const queryParamKey = "point"
-
-func MakeRouter(ctx context.Context, serv server.Server) *mux.Router {
+func MakeRouter(ctx context.Context, serv server.Server, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/pickpoint", handler.LogMiddleWare(handler.PickpointHandler(ctx, serv)))
-	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", queryParamKey), handler.LogMiddleWare(handler.PickpointKeyHandler(ctx, serv)))
+	router.Use(handler.LogMiddleWare)
+	router.Use(func(h http.Handler) http.Handler {
+		return handler.AuthMiddleWare(h, cfg)
+	})
+	router.HandleFunc("/pickpoint", handler.PickpointHandler(ctx, serv))
+	path := fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey)
+	router.HandleFunc(path, handler.PickpointKeyHandler(ctx, serv))
 	return router
 }

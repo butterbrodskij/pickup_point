@@ -29,7 +29,7 @@ func main() {
 
 	repo := postgres.NewRepo(database)
 	serv := server.NewServer(repo)
-	router := router.MakeRouter(ctx, serv)
+	router := router.MakeRouter(ctx, serv, cfg)
 
 	http.Handle("/", router)
 	if err := http.ListenAndServe(cfg.Server.Port, nil); err != nil {

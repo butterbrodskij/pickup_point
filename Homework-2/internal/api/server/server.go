@@ -8,13 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 
 	"github.com/gorilla/mux"
 )
-
-const queryParamKey = "point"
 
 type Server struct {
 	repo *postgres.PickpointRepo
@@ -71,7 +70,7 @@ func (s Server) Update(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 func (s Server) Read(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key, ok := vars[queryParamKey]
+	key, ok := vars[config.QueryParamKey]
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -95,7 +94,7 @@ func (s Server) Read(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 func (s Server) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key, ok := vars[queryParamKey]
+	key, ok := vars[config.QueryParamKey]
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
