@@ -5,21 +5,23 @@ import (
 	"log"
 	"net/http"
 
+	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 )
 
-const (
-	port = ":9000"
-)
-
 func main() {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	database, err := db.NewDB(ctx)
+	database, err := db.NewDB(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,7 +32,7 @@ func main() {
 	router := router.MakeRouter(ctx, serv)
 
 	http.Handle("/", router)
-	if err := http.ListenAndServe(port, nil); err != nil {
+	if err := http.ListenAndServe(cfg.Server.Port, nil); err != nil {
 		log.Fatal(err)
 	}
 }

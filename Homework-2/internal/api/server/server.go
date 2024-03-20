@@ -71,7 +71,11 @@ func (s Server) Update(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 func (s Server) Read(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars[queryParamKey], 10, 64)
+	key, ok := vars[queryParamKey]
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	id, err := strconv.ParseInt(key, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -91,7 +95,11 @@ func (s Server) Read(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 func (s Server) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars[queryParamKey], 10, 64)
+	key, ok := vars[queryParamKey]
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	id, err := strconv.ParseInt(key, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

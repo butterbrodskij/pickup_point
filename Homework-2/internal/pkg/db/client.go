@@ -5,25 +5,18 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 )
 
-// temporary solution
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "postgres"
-)
-
-func NewDB(ctx context.Context) (*Database, error) {
-	pool, err := pgxpool.Connect(ctx, generateDsn())
+func NewDB(ctx context.Context, cfg config.Config) (*Database, error) {
+	pool, err := pgxpool.Connect(ctx, generateDsn(cfg))
 	if err != nil {
 		return nil, err
 	}
 	return newDatabase(pool), nil
 }
 
-func generateDsn() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+func generateDsn(cfg config.Config) string {
+	pattern := "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
+	return fmt.Sprintf(pattern, cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.Dbname)
 }
