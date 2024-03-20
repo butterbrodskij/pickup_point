@@ -6,6 +6,7 @@ import (
 	"homework2/pup/internal/model"
 	"homework2/pup/internal/pkg/db"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -37,6 +38,12 @@ func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint
 	return &point, nil
 }
 
-func (r *PickpointRepo) Delete(ctx context.Context) error {
-	return nil
+func (r *PickpointRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn.CommandTag, error) {
+	query := "UPDATE pickpoints SET name=$1, address=$2, contacts=$3 WHERE id=$4"
+	return r.db.Exec(ctx, query, point.Name, point.Address, point.Contact, point.ID)
+}
+
+func (r *PickpointRepo) Delete(ctx context.Context, id int64) (pgconn.CommandTag, error) {
+	query := "DELETE FROM pickpoints WHERE id=$1"
+	return r.db.Exec(ctx, query, id)
 }

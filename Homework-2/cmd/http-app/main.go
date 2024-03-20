@@ -49,7 +49,6 @@ func main() {
 			}
 			var point model.PickPointAdd
 			if err = json.Unmarshal(body, &point); err != nil {
-				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -67,9 +66,25 @@ func main() {
 			pointJSON, _ := json.Marshal(pointRepo)
 			w.Write(pointJSON)
 		case http.MethodPut:
-			fmt.Println("PUT")
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			var point model.PickPoint
+			if err = json.Unmarshal(body, &point); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			tag, err := serv.repo.Update(ctx, &point)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Write(tag)
 		default:
-			fmt.Println("error")
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
 		}
 	})
 
@@ -77,7 +92,11 @@ func main() {
 		switch r.Method {
 		case http.MethodGet:
 			vars := mux.Vars(r)
-			id, _ := strconv.ParseInt(vars[queryParamKey], 10, 64)
+			id, err := strconv.ParseInt(vars[queryParamKey], 10, 64)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			point, err := serv.repo.GetByID(ctx, id)
 			if err != nil {
 				if errors.Is(err, model.ErrorObjectNotFound) {
@@ -90,9 +109,21 @@ func main() {
 			pointJSON, _ := json.Marshal(point)
 			w.Write(pointJSON)
 		case http.MethodDelete:
-			fmt.Println("DELETE")
+			vars := mux.Vars(r)
+			id, err := strconv.ParseInt(vars[queryParamKey], 10, 64)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			tag, err := serv.repo.Delete(ctx, id)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Write(tag)
 		default:
-			fmt.Println("error")
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
 		}
 	})
 
