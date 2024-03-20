@@ -2,10 +2,11 @@ package command
 
 import (
 	"fmt"
-	"homework2/pup/cmd/parsing"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/service/order"
 	"strconv"
+
+	"gitlab.ozon.dev/mer_marat/homework/cmd/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 )
 
 // help prints usage guide

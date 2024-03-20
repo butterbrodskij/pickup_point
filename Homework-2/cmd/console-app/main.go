@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"homework2/pup/cmd/command"
-	"homework2/pup/cmd/parsing"
-	"homework2/pup/internal/service/order"
-	"homework2/pup/internal/service/pickpoint"
-	"homework2/pup/internal/storage"
+
+	"gitlab.ozon.dev/mer_marat/homework/cmd/command"
+	"gitlab.ozon.dev/mer_marat/homework/cmd/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/storage"
 )
 
 func main() {

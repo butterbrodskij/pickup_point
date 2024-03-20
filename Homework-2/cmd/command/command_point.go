@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/service/pickpoint"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
 const chanSize = 10

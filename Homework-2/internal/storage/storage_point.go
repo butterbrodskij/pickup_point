@@ -3,9 +3,10 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	"homework2/pup/internal/model"
 	"os"
 	"sync"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
 type StoragePoints struct {

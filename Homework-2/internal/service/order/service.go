@@ -3,9 +3,10 @@ package order
 import (
 	"errors"
 	"fmt"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/storage"
 	"time"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/storage"
 )
 
 type storageInterface interface {

@@ -2,8 +2,9 @@ package server
 
 import (
 	"context"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/pkg/repository/postgres"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 
 	"github.com/jackc/pgconn"
 )

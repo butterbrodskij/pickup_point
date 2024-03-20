@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"homework2/pup/internal/api/server"
-	"homework2/pup/internal/model"
 	"io"
 	"net/http"
 	"strconv"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 
 	"github.com/gorilla/mux"
 )

@@ -2,7 +2,8 @@ package pickpoint
 
 import (
 	"fmt"
-	"homework2/pup/internal/model"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
 type storageInterface interface {

@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"homework2/pup/internal/api/router"
-	"homework2/pup/internal/api/server"
-	"homework2/pup/internal/pkg/db"
-	"homework2/pup/internal/pkg/repository/postgres"
 	"log"
 	"net/http"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 )
 
 const (

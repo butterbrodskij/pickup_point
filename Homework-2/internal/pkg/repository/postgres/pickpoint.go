@@ -3,8 +3,9 @@ package postgres
 import (
 	"context"
 	"errors"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/pkg/db"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"

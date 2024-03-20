@@ -1,4 +1,4 @@
-module homework2/pup
+module gitlab.ozon.dev/mer_marat/homework
 
 go 1.22.0
 
