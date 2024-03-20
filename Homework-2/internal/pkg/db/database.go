@@ -21,10 +21,6 @@ func (db Database) Close() {
 	db.cluster.Close()
 }
 
-func (db Database) GetPool() *pgxpool.Pool {
-	return db.cluster
-}
-
 func (db Database) Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
 	return pgxscan.Get(ctx, db.cluster, dest, query, args...)
 }

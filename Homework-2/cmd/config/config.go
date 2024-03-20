@@ -22,8 +22,8 @@ type Config struct {
 }
 
 const (
-	configFile         = "config.yml"
-	databsePasswordEnv = "DATABASE_PASSWODR"
+	configFile          = "config.yml"
+	databasePasswordEnv = "DATABASE_PASSWORD"
 )
 
 func GetConfig() (Config, error) {
@@ -39,7 +39,7 @@ func GetConfig() (Config, error) {
 	if err = godotenv.Load(); err != nil {
 		return Config{}, err
 	}
-	pass, ok := os.LookupEnv(databsePasswordEnv)
+	pass, ok := os.LookupEnv(databasePasswordEnv)
 	if !ok {
 		return Config{}, model.ErrorInvalidEnvironment
 	}
