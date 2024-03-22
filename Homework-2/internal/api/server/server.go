@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 

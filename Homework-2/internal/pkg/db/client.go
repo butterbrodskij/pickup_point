@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 )
 
 func NewDB(ctx context.Context, cfg config.Config) (*Database, error) {

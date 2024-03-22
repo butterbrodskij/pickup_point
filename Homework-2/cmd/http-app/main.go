@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
+	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
 )

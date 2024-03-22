@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.ozon.dev/mer_marat/homework/cmd/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
+	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 )
 
 func AuthMiddleWare(handler http.Handler, cfg config.Config) http.HandlerFunc {
