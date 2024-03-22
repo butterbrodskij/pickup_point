@@ -1,36 +1,44 @@
 package pickpoint
 
 import (
-	"fmt"
+	"context"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
 type storageInterface interface {
-	Write(model.PickPoint) error
-	Get(int64) (model.PickPoint, bool)
+	Add(context.Context, *model.PickPoint) (int64, error)
+	GetByID(context.Context, int64) (*model.PickPoint, error)
+}
+
+type ServiceInterface interface {
+	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
+	Read(context.Context, int64) (*model.PickPoint, error)
 }
 
 type Service struct {
-	s storageInterface
+	repo storageInterface
 }
 
 // New returns type Service associated with storage
 func New(stor storageInterface) Service {
-	return Service{s: stor}
+	return Service{repo: stor}
 }
 
-// Write writes pick-up points information in storage
-func (s Service) Write(point model.PickPoint) error {
-	return s.s.Write(point)
-}
-
-// Get gets pick-up points information from storage by id
-func (s Service) Get(id int64) (model.PickPoint, error) {
-	point, ok := s.s.Get(id)
-	if !ok {
-		return model.PickPoint{}, fmt.Errorf("can not get point %d: not found", id)
-	} else {
-		return point, nil
+// Create writes pick-up points information in storage
+func (s Service) Create(ctx context.Context, point *model.PickPoint) (*model.PickPoint, error) {
+	id, err := s.repo.Add(ctx, point)
+	if err != nil {
+		return nil, err
 	}
+	point.ID = id
+	return point, nil
+}
+
+// Read gets pick-up points information from storage by id
+func (s Service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
+	if !validID(id) {
+		return nil, model.ErrorInvalidInput
+	}
+	return s.repo.GetByID(ctx, id)
 }

@@ -131,7 +131,7 @@ func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan mode
 		case point := <-writeChan:
 			message := fmt.Sprintf("writer: trying to write new pick-up point %v", point)
 			logChan <- message
-			err := s.Write(point)
+			_, err := s.Create(context.Background(), &point)
 			if err != nil {
 				status = fmt.Sprintf("writer: error while adding point %d: %s", point.ID, err.Error())
 			} else {
@@ -155,7 +155,7 @@ func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64,
 		case id := <-readChan:
 			message := fmt.Sprintf("reader %d: trying to find info about pick-up point with id %d", serial, id)
 			logChan <- message
-			point, err := s.Get(id)
+			point, err := s.Read(context.Background(), id)
 			if err != nil {
 				status = fmt.Sprintf("reader %d: error while getting point %d: %s", serial, id, err)
 			} else {

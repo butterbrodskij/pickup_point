@@ -13,7 +13,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
-func Read(ctx context.Context, s pickpoint.ServiceRepo) http.HandlerFunc {
+func Read(ctx context.Context, s pickpoint.ServiceRepoInteface) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key, ok := vars[config.QueryParamKey]

@@ -10,7 +10,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
-func Update(ctx context.Context, s pickpoint.ServiceRepo) http.HandlerFunc {
+func Update(ctx context.Context, s pickpoint.ServiceRepoInteface) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var point model.PickPoint
 		if err := json.NewDecoder(r.Body).Decode(&point); err != nil {

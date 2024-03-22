@@ -8,27 +8,24 @@ import (
 )
 
 type repoInterface interface {
-	Add(context.Context, *model.PickPoint) (int64, error)
-	GetByID(context.Context, int64) (*model.PickPoint, error)
+	storageInterface
+	Update(context.Context, *model.PickPoint) (pgconn.CommandTag, error)
+	Delete(context.Context, int64) (pgconn.CommandTag, error)
+}
+
+type ServiceRepoInteface interface {
+	ServiceInterface
 	Update(context.Context, *model.PickPoint) (pgconn.CommandTag, error)
 	Delete(context.Context, int64) (pgconn.CommandTag, error)
 }
 
 type ServiceRepo struct {
+	ServiceInterface
 	repo repoInterface
 }
 
 func NewServiceRepo(repo repoInterface) ServiceRepo {
-	return ServiceRepo{repo: repo}
-}
-
-func (s ServiceRepo) Create(ctx context.Context, point *model.PickPoint) (*model.PickPoint, error) {
-	id, err := s.repo.Add(ctx, point)
-	if err != nil {
-		return nil, err
-	}
-	point.ID = id
-	return point, nil
+	return ServiceRepo{ServiceInterface: Service{repo: repo}, repo: repo}
 }
 
 func (s ServiceRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn.CommandTag, error) {
@@ -36,13 +33,6 @@ func (s ServiceRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn
 		return nil, model.ErrorInvalidInput
 	}
 	return s.repo.Update(ctx, point)
-}
-
-func (s ServiceRepo) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
-	if !validID(id) {
-		return nil, model.ErrorInvalidInput
-	}
-	return s.repo.GetByID(ctx, id)
 }
 
 func (s ServiceRepo) Delete(ctx context.Context, id int64) (pgconn.CommandTag, error) {
