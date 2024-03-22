@@ -23,18 +23,13 @@ func NewServiceRepo(repo repoInterface) ServiceRepo {
 	return ServiceRepo{repo: repo}
 }
 
-func (s ServiceRepo) Create(ctx context.Context, point model.PickPointAdd) (*model.PickPoint, error) {
-	pointRepo := &model.PickPoint{
-		Name:    point.Name,
-		Address: point.Address,
-		Contact: point.Contact,
-	}
-	id, err := s.repo.Add(ctx, pointRepo)
+func (s ServiceRepo) Create(ctx context.Context, point *model.PickPoint) (*model.PickPoint, error) {
+	id, err := s.repo.Add(ctx, point)
 	if err != nil {
 		return nil, err
 	}
-	pointRepo.ID = id
-	return pointRepo, nil
+	point.ID = id
+	return point, nil
 }
 
 func (s ServiceRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn.CommandTag, error) {

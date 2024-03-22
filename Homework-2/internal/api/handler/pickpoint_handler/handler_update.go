@@ -3,7 +3,6 @@ package pickpointhandler
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
@@ -11,13 +10,8 @@ import (
 )
 
 func Update(ctx context.Context, s pickpoint.ServiceRepo, w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	var point model.PickPoint
-	if err = json.Unmarshal(body, &point); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&point); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
