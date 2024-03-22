@@ -10,7 +10,8 @@ import (
 
 type Config struct {
 	Server struct {
-		Port string `yaml:"port"`
+		Port       string `yaml:"port"`
+		SecurePort string `yaml:"secure_port"`
 	}
 	Database struct {
 		Host     string `yaml:"host"`
@@ -29,6 +30,8 @@ const (
 	configFile          = "config.yml"
 	databasePasswordEnv = "DATABASE_PASSWORD"
 	QueryParamKey       = "point"
+	CertFile            = "server.crt"
+	KeyFile             = "server.key"
 )
 
 func GetConfig() (Config, error) {

@@ -25,12 +25,14 @@ func (s Server) Run(ctx context.Context, cfg config.Config, cancel context.Cance
 	defer cancel()
 	router := router.MakeRouter(ctx, s.service, cfg)
 	errChan := make(chan error, 1)
+	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 	defer wg.Wait()
 
+	secureServer := &http.Server{Addr: cfg.Server.SecurePort}
 	server := &http.Server{Addr: cfg.Server.Port}
 	http.Handle("/", router)
 	go func() {
@@ -39,14 +41,29 @@ func (s Server) Run(ctx context.Context, cfg config.Config, cancel context.Cance
 			errChan <- err
 		}
 	}()
+	go func() {
+		defer wg.Done()
+		if err := secureServer.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil {
+			errSecChan <- err
+		}
+	}()
 
 	select {
 	case sig := <-sigChan:
 		log.Printf("caught signal: %s\n", sig)
-		if err := server.Shutdown(ctx); err != nil {
+		err := server.Shutdown(ctx)
+		errSec := secureServer.Shutdown(ctx)
+		if err != nil {
 			return err
 		}
+		if errSec != nil {
+			return errSec
+		}
 	case err := <-errChan:
+		secureServer.Shutdown(ctx)
+		return err
+	case err := <-errSecChan:
+		server.Shutdown(ctx)
 		return err
 	}
 
