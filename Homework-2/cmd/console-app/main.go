@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/command"
-	"gitlab.ozon.dev/mer_marat/homework/cmd/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"

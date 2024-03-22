@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitlab.ozon.dev/mer_marat/homework/cmd/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 )
