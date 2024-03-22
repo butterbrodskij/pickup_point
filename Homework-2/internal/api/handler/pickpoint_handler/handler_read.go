@@ -24,6 +24,10 @@ func Read(ctx context.Context, s pickpoint.ServiceRepo, w http.ResponseWriter, r
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		if errors.Is(err, model.ErrorInvalidInput) {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -12,14 +12,14 @@ import (
 func Create(ctx context.Context, s pickpoint.ServiceRepo, w http.ResponseWriter, r *http.Request) {
 	var point model.PickPoint
 	if err := json.NewDecoder(r.Body).Decode(&point); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	pointRepo, err := s.Create(ctx, &point)
+	pointNew, err := s.Create(ctx, &point)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	pointJSON, _ := json.Marshal(pointRepo)
+	pointJSON, _ := json.Marshal(pointNew)
 	w.Write(pointJSON)
 }

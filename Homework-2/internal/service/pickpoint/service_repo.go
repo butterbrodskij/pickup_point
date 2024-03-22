@@ -33,6 +33,9 @@ func (s ServiceRepo) Create(ctx context.Context, point *model.PickPoint) (*model
 }
 
 func (s ServiceRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn.CommandTag, error) {
+	if !validPickPoint(point) {
+		return nil, model.ErrorInvalidInput
+	}
 	return s.repo.Update(ctx, point)
 }
 
@@ -40,6 +43,9 @@ func (s ServiceRepo) Read(ctx context.Context, ids string) (*model.PickPoint, er
 	id, err := strconv.ParseInt(ids, 10, 64)
 	if err != nil {
 		return nil, err
+	}
+	if !validID(id) {
+		return nil, model.ErrorInvalidInput
 	}
 	return s.repo.GetByID(ctx, id)
 }
@@ -49,5 +55,16 @@ func (s ServiceRepo) Delete(ctx context.Context, ids string) (pgconn.CommandTag,
 	if err != nil {
 		return nil, err
 	}
+	if !validID(id) {
+		return nil, model.ErrorInvalidInput
+	}
 	return s.repo.Delete(ctx, id)
+}
+
+func validPickPoint(point *model.PickPoint) bool {
+	return point.ID > 0
+}
+
+func validID(id int64) bool {
+	return id > 0
 }
