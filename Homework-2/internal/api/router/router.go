@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/handler"
-	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 
 	"github.com/gorilla/mux"
 )
 
-func MakeRouter(ctx context.Context, serv server.Server, cfg config.Config) *mux.Router {
+func MakeRouter(ctx context.Context, serv pickpoint.ServiceRepo, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(handler.LogMiddleWare)
 	router.Use(func(h http.Handler) http.Handler {

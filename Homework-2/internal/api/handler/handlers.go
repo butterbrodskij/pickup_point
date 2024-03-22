@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
+	pickpointhandler "gitlab.ozon.dev/mer_marat/homework/internal/api/handler/pickpoint_handler"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
 func AuthMiddleWare(handler http.Handler, cfg config.Config) http.HandlerFunc {
@@ -27,13 +28,13 @@ func LogMiddleWare(handler http.Handler) http.Handler {
 	})
 }
 
-func PickpointHandler(ctx context.Context, serv server.Server) http.HandlerFunc {
+func PickpointHandler(ctx context.Context, serv pickpoint.ServiceRepo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			serv.Create(ctx, w, r)
+			pickpointhandler.Create(ctx, serv, w, r)
 		case http.MethodPut:
-			serv.Update(ctx, w, r)
+			pickpointhandler.Update(ctx, serv, w, r)
 		case http.MethodGet:
 			fallthrough
 		case http.MethodDelete:
@@ -44,13 +45,13 @@ func PickpointHandler(ctx context.Context, serv server.Server) http.HandlerFunc 
 	}
 }
 
-func PickpointKeyHandler(ctx context.Context, serv server.Server) http.HandlerFunc {
+func PickpointKeyHandler(ctx context.Context, serv pickpoint.ServiceRepo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			serv.Read(ctx, w, r)
+			pickpointhandler.Read(ctx, serv, w, r)
 		case http.MethodDelete:
-			serv.Delete(ctx, w, r)
+			pickpointhandler.Delete(ctx, serv, w, r)
 		case http.MethodPost:
 			fallthrough
 		case http.MethodPut:

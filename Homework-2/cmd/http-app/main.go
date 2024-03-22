@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
-	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
@@ -19,7 +17,6 @@ func main() {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	database, err := db.NewDB(ctx, cfg)
 	if err != nil {
@@ -29,10 +26,8 @@ func main() {
 
 	repo := postgres.NewRepo(database)
 	serv := server.NewServer(repo)
-	router := router.MakeRouter(ctx, serv, cfg)
 
-	http.Handle("/", router)
-	if err := http.ListenAndServe(cfg.Server.Port, nil); err != nil {
+	if err := serv.Run(ctx, cfg, cancel); err != nil {
 		log.Fatal(err)
 	}
 }
