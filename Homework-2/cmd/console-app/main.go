@@ -7,7 +7,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/cmd/parsing"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
-	"gitlab.ozon.dev/mer_marat/homework/internal/storage"
+	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
 func main() {

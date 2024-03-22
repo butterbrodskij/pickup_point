@@ -9,7 +9,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
-	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/repository/postgres"
+	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/storage"
+	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
 type storageInterface interface {
