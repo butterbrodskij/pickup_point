@@ -2,49 +2,53 @@ package server
 
 import (
 	"context"
+	"log"
 	"net/http"
-	"strconv"
+	"os"
+	"os/signal"
+	"sync"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
-	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
-
-	"github.com/gorilla/mux"
 )
 
 type Server struct {
-	repo *postgres.PickpointRepo
+	service pickpoint.ServiceRepo
 }
 
-func NewServer(repo *postgres.PickpointRepo) Server {
-	return Server{repo: repo}
+func NewServer(service pickpoint.ServiceRepo) Server {
+	return Server{service: service}
 }
 
 func (s Server) Run(ctx context.Context, cfg config.Config, cancel context.CancelFunc) error {
 	defer cancel()
-	serv := pickpoint.NewServiceRepo(s.repo)
-	router := router.MakeRouter(ctx, serv, cfg)
+	router := router.MakeRouter(ctx, s.service, cfg)
+	errChan := make(chan error, 1)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	defer wg.Wait()
 
+	server := &http.Server{Addr: cfg.Server.Port}
 	http.Handle("/", router)
-	return http.ListenAndServe(cfg.Server.Port, nil)
-}
+	go func() {
+		defer wg.Done()
+		if err := server.ListenAndServe(); err != nil {
+			errChan <- err
+		}
+	}()
 
-func (s Server) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key, ok := vars[config.QueryParamKey]
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
+	select {
+	case sig := <-sigChan:
+		log.Printf("caught signal: %s\n", sig)
+		if err := server.Shutdown(ctx); err != nil {
+			return err
+		}
+	case err := <-errChan:
+		return err
 	}
-	id, err := strconv.ParseInt(key, 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	tag, err := s.repo.Delete(ctx, id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Write(tag)
+
+	return nil
 }

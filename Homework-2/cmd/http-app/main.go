@@ -7,6 +7,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
 
@@ -25,7 +26,8 @@ func main() {
 	defer database.Close()
 
 	repo := postgres.NewRepo(database)
-	serv := server.NewServer(repo)
+	service := pickpoint.NewServiceRepo(repo)
+	serv := server.NewServer(service)
 
 	if err := serv.Run(ctx, cfg, cancel); err != nil {
 		log.Fatal(err)
