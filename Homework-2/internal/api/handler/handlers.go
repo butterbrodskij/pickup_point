@@ -34,6 +34,10 @@ func PickpointHandler(ctx context.Context, serv server.Server) http.HandlerFunc 
 			serv.Create(ctx, w, r)
 		case http.MethodPut:
 			serv.Update(ctx, w, r)
+		case http.MethodGet:
+			fallthrough
+		case http.MethodDelete:
+			fallthrough
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
@@ -47,6 +51,10 @@ func PickpointKeyHandler(ctx context.Context, serv server.Server) http.HandlerFu
 			serv.Read(ctx, w, r)
 		case http.MethodDelete:
 			serv.Delete(ctx, w, r)
+		case http.MethodPost:
+			fallthrough
+		case http.MethodPut:
+			fallthrough
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
