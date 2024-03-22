@@ -19,7 +19,6 @@ func MakeRouter(ctx context.Context, serv server.Server, cfg config.Config) *mux
 		return handler.AuthMiddleWare(h, cfg)
 	})
 	router.HandleFunc("/pickpoint", handler.PickpointHandler(ctx, serv))
-	path := fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey)
-	router.HandleFunc(path, handler.PickpointKeyHandler(ctx, serv))
+	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), handler.PickpointKeyHandler(ctx, serv))
 	return router
 }
