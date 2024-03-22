@@ -2,7 +2,6 @@ package pickpoint
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/jackc/pgconn"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
@@ -39,22 +38,14 @@ func (s ServiceRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn
 	return s.repo.Update(ctx, point)
 }
 
-func (s ServiceRepo) Read(ctx context.Context, ids string) (*model.PickPoint, error) {
-	id, err := strconv.ParseInt(ids, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func (s ServiceRepo) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 	if !validID(id) {
 		return nil, model.ErrorInvalidInput
 	}
 	return s.repo.GetByID(ctx, id)
 }
 
-func (s ServiceRepo) Delete(ctx context.Context, ids string) (pgconn.CommandTag, error) {
-	id, err := strconv.ParseInt(ids, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func (s ServiceRepo) Delete(ctx context.Context, id int64) (pgconn.CommandTag, error) {
 	if !validID(id) {
 		return nil, model.ErrorInvalidInput
 	}
