@@ -10,10 +10,9 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
-func Read(ctx context.Context, s pickpoint.Service) http.HandlerFunc {
+func Read(ctx context.Context, s service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key, ok := vars[config.QueryParamKey]
