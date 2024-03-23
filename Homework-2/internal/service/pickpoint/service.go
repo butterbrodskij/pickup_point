@@ -13,13 +13,6 @@ type storage interface {
 	Delete(context.Context, int64) error
 }
 
-type Service interface {
-	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
-	Read(context.Context, int64) (*model.PickPoint, error)
-	Update(context.Context, *model.PickPoint) error
-	Delete(context.Context, int64) error
-}
-
 type service struct {
 	repo storage
 }

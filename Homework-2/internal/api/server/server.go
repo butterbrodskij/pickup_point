@@ -10,18 +10,25 @@ import (
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-type Server struct {
-	service pickpoint.Service
+type service interface {
+	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
+	Read(context.Context, int64) (*model.PickPoint, error)
+	Update(context.Context, *model.PickPoint) error
+	Delete(context.Context, int64) error
 }
 
-func NewServer(service pickpoint.Service) Server {
-	return Server{service: service}
+type server struct {
+	service service
 }
 
-func (s Server) Run(ctx context.Context, cfg config.Config) error {
+func NewServer(service service) server {
+	return server{service: service}
+}
+
+func (s server) Run(ctx context.Context, cfg config.Config) error {
 	router := router.MakeRouter(s.service, cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)

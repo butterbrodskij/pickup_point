@@ -1,18 +1,26 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 
 	"github.com/gorilla/mux"
 )
 
-func MakeRouter(serv pickpoint.Service, cfg config.Config) *mux.Router {
+type service interface {
+	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
+	Read(context.Context, int64) (*model.PickPoint, error)
+	Update(context.Context, *model.PickPoint) error
+	Delete(context.Context, int64) error
+}
+
+func MakeRouter(serv service, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.LogMiddleWare)
 	router.Use(func(h http.Handler) http.Handler {
