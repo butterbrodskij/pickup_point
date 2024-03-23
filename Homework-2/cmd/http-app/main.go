@@ -18,6 +18,7 @@ func main() {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	database, err := db.NewDB(ctx, cfg)
 	if err != nil {
@@ -29,7 +30,7 @@ func main() {
 	service := pickpoint.NewService(repo)
 	serv := server.NewServer(service)
 
-	if err := serv.Run(ctx, cfg, cancel); err != nil {
+	if err := serv.Run(ctx, cfg); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -11,7 +10,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func Delete(ctx context.Context, s service) http.HandlerFunc {
+func Delete(s service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key, ok := vars[config.QueryParamKey]
@@ -23,7 +22,7 @@ func Delete(ctx context.Context, s service) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		err = s.Delete(ctx, id)
+		err = s.Delete(r.Context(), id)
 		if err != nil {
 			if errors.Is(err, model.ErrorInvalidInput) {
 				w.WriteHeader(http.StatusBadRequest)

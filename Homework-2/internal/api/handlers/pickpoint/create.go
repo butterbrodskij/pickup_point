@@ -1,21 +1,20 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func Create(ctx context.Context, s service) http.HandlerFunc {
+func Create(s service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var point model.PickPoint
 		if err := json.NewDecoder(r.Body).Decode(&point); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		pointNew, err := s.Create(ctx, &point)
+		pointNew, err := s.Create(r.Context(), &point)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

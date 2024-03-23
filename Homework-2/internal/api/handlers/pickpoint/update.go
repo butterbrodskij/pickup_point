@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,14 +8,14 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func Update(ctx context.Context, s service) http.HandlerFunc {
+func Update(s service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var point model.PickPoint
 		if err := json.NewDecoder(r.Body).Decode(&point); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		err := s.Update(ctx, &point)
+		err := s.Update(r.Context(), &point)
 		if err != nil {
 			if errors.Is(err, model.ErrorInvalidInput) {
 				w.WriteHeader(http.StatusBadRequest)

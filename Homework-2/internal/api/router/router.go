@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -13,15 +12,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeRouter(ctx context.Context, serv pickpoint.Service, cfg config.Config) *mux.Router {
+func MakeRouter(serv pickpoint.Service, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.LogMiddleWare)
 	router.Use(func(h http.Handler) http.Handler {
 		return middleware.AuthMiddleWare(h, cfg)
 	})
-	router.HandleFunc("/pickpoint", handler.Create(ctx, serv)).Methods("POST")
-	router.HandleFunc("/pickpoint", handler.Update(ctx, serv)).Methods("PUT")
-	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), handler.Delete(ctx, serv)).Methods("DELETE")
-	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), handler.Read(ctx, serv)).Methods("GET")
+	router.HandleFunc("/pickpoint", handler.Create(serv)).Methods("POST")
+	router.HandleFunc("/pickpoint", handler.Update(serv)).Methods("PUT")
+	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), handler.Delete(serv)).Methods("DELETE")
+	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), handler.Read(serv)).Methods("GET")
 	return router
 }

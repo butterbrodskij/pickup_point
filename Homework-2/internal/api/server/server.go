@@ -21,9 +21,8 @@ func NewServer(service pickpoint.Service) Server {
 	return Server{service: service}
 }
 
-func (s Server) Run(ctx context.Context, cfg config.Config, cancel context.CancelFunc) error {
-	defer cancel()
-	router := router.MakeRouter(ctx, s.service, cfg)
+func (s Server) Run(ctx context.Context, cfg config.Config) error {
+	router := router.MakeRouter(s.service, cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)

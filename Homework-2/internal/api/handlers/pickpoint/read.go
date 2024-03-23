@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func Read(ctx context.Context, s service) http.HandlerFunc {
+func Read(s service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key, ok := vars[config.QueryParamKey]
@@ -24,7 +23,7 @@ func Read(ctx context.Context, s service) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		point, err := s.Read(ctx, id)
+		point, err := s.Read(r.Context(), id)
 		if err != nil {
 			if errors.Is(err, model.ErrorObjectNotFound) {
 				w.WriteHeader(http.StatusNotFound)
