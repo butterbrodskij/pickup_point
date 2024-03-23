@@ -20,15 +20,6 @@ type storageInterface interface {
 	Get(int64) (storage.OrderDTO, bool)
 }
 
-type Service interface {
-	AcceptFromCourier(model.OrderInput) error
-	Remove(int64) error
-	Give([]int64) error
-	List(int64, int, bool) ([]model.Order, error)
-	Return(int64, int64) error
-	ListReturn(int, int) ([]model.Order, error)
-}
-
 type service struct {
 	s storageInterface
 }

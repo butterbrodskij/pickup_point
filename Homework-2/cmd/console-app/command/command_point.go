@@ -12,7 +12,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-type service interface {
+type servicePoint interface {
 	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
 	Read(context.Context, int64) (*model.PickPoint, error)
 }
@@ -20,7 +20,7 @@ type service interface {
 const chanSize = 10
 
 // Implementation of command pickpoints
-func PickPoints(serv service) {
+func PickPoints(serv servicePoint) {
 	var (
 		line, com string
 		id        int64
@@ -86,7 +86,7 @@ func PickPoints(serv service) {
 }
 
 // Reader makes pool of readers
-func Reader(s service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
+func Reader(s servicePoint, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var wgReader sync.WaitGroup
 	wgReader.Add(chanSize)
@@ -122,7 +122,7 @@ func HelpPickPoints() {
 }
 
 // WritePoints writes pick-up points information in storage from channel
-func WritePoints(s service, ctx context.Context, writeChan <-chan model.PickPoint, logChan chan<- string, wg *sync.WaitGroup) {
+func WritePoints(s servicePoint, ctx context.Context, writeChan <-chan model.PickPoint, logChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var status string
 	for {
@@ -147,7 +147,7 @@ func WritePoints(s service, ctx context.Context, writeChan <-chan model.PickPoin
 }
 
 // WritePoints sends pick-up points information to logger from storage by getting id from channel
-func ReadPoints(s service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
+func ReadPoints(s servicePoint, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
 	defer wg.Done()
 	var status string
 	for {
@@ -171,7 +171,7 @@ func ReadPoints(s service, ctx context.Context, readChan <-chan int64, logChan c
 }
 
 // LogPoints prints all logs from writer and reader
-func LogPoints(s service, ctx context.Context, logWriteChan, logReadChan <-chan string, wg *sync.WaitGroup) {
+func LogPoints(_ servicePoint, ctx context.Context, logWriteChan, logReadChan <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {
