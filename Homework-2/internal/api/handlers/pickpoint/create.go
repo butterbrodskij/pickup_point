@@ -9,7 +9,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
-func Create(ctx context.Context, s pickpoint.ServiceRepoInteface) http.HandlerFunc {
+func Create(ctx context.Context, s pickpoint.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var point model.PickPoint
 		if err := json.NewDecoder(r.Body).Decode(&point); err != nil {

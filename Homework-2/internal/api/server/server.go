@@ -14,10 +14,10 @@ import (
 )
 
 type Server struct {
-	service pickpoint.ServiceRepoInteface
+	service pickpoint.Service
 }
 
-func NewServer(service pickpoint.ServiceRepoInteface) Server {
+func NewServer(service pickpoint.Service) Server {
 	return Server{service: service}
 }
 

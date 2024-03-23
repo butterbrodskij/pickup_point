@@ -26,7 +26,7 @@ func main() {
 	defer database.Close()
 
 	repo := postgres.NewRepo(database)
-	service := pickpoint.NewServiceRepo(repo)
+	service := pickpoint.NewService(repo)
 	serv := server.NewServer(service)
 
 	if err := serv.Run(ctx, cfg, cancel); err != nil {

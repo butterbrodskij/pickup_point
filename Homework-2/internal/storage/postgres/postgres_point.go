@@ -7,7 +7,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 
-	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -39,12 +38,26 @@ func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint
 	return &point, nil
 }
 
-func (r *PickpointRepo) Update(ctx context.Context, point *model.PickPoint) (pgconn.CommandTag, error) {
+func (r *PickpointRepo) Update(ctx context.Context, point *model.PickPoint) error {
 	query := "UPDATE pickpoints SET name=$1, address=$2, contacts=$3 WHERE id=$4"
-	return r.db.Exec(ctx, query, point.Name, point.Address, point.Contact, point.ID)
+	tag, err := r.db.Exec(ctx, query, point.Name, point.Address, point.Contact, point.ID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return model.ErrorObjectNotFound
+	}
+	return nil
 }
 
-func (r *PickpointRepo) Delete(ctx context.Context, id int64) (pgconn.CommandTag, error) {
+func (r *PickpointRepo) Delete(ctx context.Context, id int64) error {
 	query := "DELETE FROM pickpoints WHERE id=$1"
-	return r.db.Exec(ctx, query, id)
+	tag, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return model.ErrorObjectNotFound
+	}
+	return nil
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeRouter(ctx context.Context, serv pickpoint.ServiceRepoInteface, cfg config.Config) *mux.Router {
+func MakeRouter(ctx context.Context, serv pickpoint.Service, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.LogMiddleWare)
 	router.Use(func(h http.Handler) http.Handler {

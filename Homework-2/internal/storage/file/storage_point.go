@@ -39,6 +39,32 @@ func NewPoints(storageName string) (StoragePoints, error) {
 	}, nil
 }
 
+func (s *StoragePoints) Delete(_ context.Context, id int64) error {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for i, p := range all {
+		if p.ID == id {
+			all = append(all[:i], all[i+1:]...)
+			return s.writeBytes(all)
+		}
+	}
+	return model.ErrorObjectNotFound
+}
+
+func (s *StoragePoints) Update(_ context.Context, point *model.PickPoint) error {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for i, p := range all {
+		if p.ID == point.ID {
+			all[i] = *point
+			return s.writeBytes(all)
+		}
+	}
+	return model.ErrorObjectNotFound
+}
+
 // Write adds new pick-up point to storage
 func (s *StoragePoints) Add(_ context.Context, point *model.PickPoint) (int64, error) {
 	s.mt.Lock()

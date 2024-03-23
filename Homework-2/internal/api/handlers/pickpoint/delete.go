@@ -12,7 +12,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 )
 
-func Delete(ctx context.Context, s pickpoint.ServiceRepoInteface) http.HandlerFunc {
+func Delete(ctx context.Context, s pickpoint.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key, ok := vars[config.QueryParamKey]
@@ -24,15 +24,19 @@ func Delete(ctx context.Context, s pickpoint.ServiceRepoInteface) http.HandlerFu
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		tag, err := s.Delete(ctx, id)
+		err = s.Delete(ctx, id)
 		if err != nil {
 			if errors.Is(err, model.ErrorInvalidInput) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
+			if errors.Is(err, model.ErrorObjectNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.Write(tag)
+		w.Write(model.MessageSuccess)
 	}
 }

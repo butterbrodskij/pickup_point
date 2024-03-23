@@ -24,8 +24,8 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	servOrders := order.New(&storOrders)
-	servPoints := pickpoint.New(&storPoints)
+	servOrders := order.NewService(&storOrders)
+	servPoints := pickpoint.NewService(&storPoints)
 
 	switch *params.Command {
 	case "":
