@@ -4,18 +4,23 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/service/pickpoint"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
+
+type servicePoint interface {
+	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
+	Read(context.Context, int64) (*model.PickPoint, error)
+}
 
 const chanSize = 10
 
 // Implementation of command pickpoints
-func PickPoints(serv pickpoint.Service) {
+func PickPoints(serv servicePoint) {
 	var (
 		line, com string
 		id        int64
@@ -81,7 +86,7 @@ func PickPoints(serv pickpoint.Service) {
 }
 
 // Reader makes pool of readers
-func Reader(s pickpoint.Service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
+func Reader(s servicePoint, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var wgReader sync.WaitGroup
 	wgReader.Add(chanSize)
@@ -117,7 +122,7 @@ func HelpPickPoints() {
 }
 
 // WritePoints writes pick-up points information in storage from channel
-func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan model.PickPoint, logChan chan<- string, wg *sync.WaitGroup) {
+func WritePoints(s servicePoint, ctx context.Context, writeChan <-chan model.PickPoint, logChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var status string
 	for {
@@ -130,7 +135,7 @@ func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan mode
 		case point := <-writeChan:
 			message := fmt.Sprintf("writer: trying to write new pick-up point %v", point)
 			logChan <- message
-			err := s.Write(point)
+			_, err := s.Create(context.Background(), &point)
 			if err != nil {
 				status = fmt.Sprintf("writer: error while adding point %d: %s", point.ID, err.Error())
 			} else {
@@ -142,7 +147,7 @@ func WritePoints(s pickpoint.Service, ctx context.Context, writeChan <-chan mode
 }
 
 // WritePoints sends pick-up points information to logger from storage by getting id from channel
-func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
+func ReadPoints(s servicePoint, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
 	defer wg.Done()
 	var status string
 	for {
@@ -154,7 +159,7 @@ func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64,
 		case id := <-readChan:
 			message := fmt.Sprintf("reader %d: trying to find info about pick-up point with id %d", serial, id)
 			logChan <- message
-			point, err := s.Get(id)
+			point, err := s.Read(context.Background(), id)
 			if err != nil {
 				status = fmt.Sprintf("reader %d: error while getting point %d: %s", serial, id, err)
 			} else {
@@ -166,7 +171,7 @@ func ReadPoints(s pickpoint.Service, ctx context.Context, readChan <-chan int64,
 }
 
 // LogPoints prints all logs from writer and reader
-func LogPoints(s pickpoint.Service, ctx context.Context, logWriteChan, logReadChan <-chan string, wg *sync.WaitGroup) {
+func LogPoints(_ servicePoint, ctx context.Context, logWriteChan, logReadChan <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {

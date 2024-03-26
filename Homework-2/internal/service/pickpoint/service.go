@@ -1,35 +1,63 @@
 package pickpoint
 
 import (
-	"fmt"
-	"homework2/pup/internal/model"
+	"context"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-type storageInterface interface {
-	Write(model.PickPoint) error
-	Get(int64) (model.PickPoint, bool)
+type storage interface {
+	Add(context.Context, *model.PickPoint) (int64, error)
+	GetByID(context.Context, int64) (*model.PickPoint, error)
+	Update(context.Context, *model.PickPoint) error
+	Delete(context.Context, int64) error
 }
 
-type Service struct {
-	s storageInterface
+type service struct {
+	repo storage
 }
 
 // New returns type Service associated with storage
-func New(stor storageInterface) Service {
-	return Service{s: stor}
+func NewService(stor storage) service {
+	return service{repo: stor}
 }
 
-// Write writes pick-up points information in storage
-func (s Service) Write(point model.PickPoint) error {
-	return s.s.Write(point)
-}
-
-// Get gets pick-up points information from storage by id
-func (s Service) Get(id int64) (model.PickPoint, error) {
-	point, ok := s.s.Get(id)
-	if !ok {
-		return model.PickPoint{}, fmt.Errorf("can not get point %d: not found", id)
-	} else {
-		return point, nil
+// Create writes pick-up points information in storage
+func (s service) Create(ctx context.Context, point *model.PickPoint) (*model.PickPoint, error) {
+	id, err := s.repo.Add(ctx, point)
+	if err != nil {
+		return nil, err
 	}
+	point.ID = id
+	return point, nil
+}
+
+// Read gets pick-up points information from storage by id
+func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
+	if !isValidID(id) {
+		return nil, model.ErrorInvalidInput
+	}
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s service) Update(ctx context.Context, point *model.PickPoint) error {
+	if !isValidPickPoint(point) {
+		return model.ErrorInvalidInput
+	}
+	return s.repo.Update(ctx, point)
+}
+
+func (s service) Delete(ctx context.Context, id int64) error {
+	if !isValidID(id) {
+		return model.ErrorInvalidInput
+	}
+	return s.repo.Delete(ctx, id)
+}
+
+func isValidPickPoint(point *model.PickPoint) bool {
+	return point.ID > 0
+}
+
+func isValidID(id int64) bool {
+	return id > 0
 }

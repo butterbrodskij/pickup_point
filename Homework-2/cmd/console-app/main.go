@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"homework2/pup/cmd/command"
-	"homework2/pup/cmd/parsing"
-	"homework2/pup/internal/service/order"
-	"homework2/pup/internal/service/pickpoint"
-	"homework2/pup/internal/storage"
+
+	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/command"
+	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
+	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
 func main() {
@@ -23,8 +24,8 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	servOrders := order.New(&storOrders)
-	servPoints := pickpoint.New(&storPoints)
+	servOrders := order.NewService(&storOrders)
+	servPoints := pickpoint.NewService(&storPoints)
 
 	switch *params.Command {
 	case "":

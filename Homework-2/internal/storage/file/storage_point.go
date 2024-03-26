@@ -1,11 +1,13 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"homework2/pup/internal/model"
 	"os"
 	"sync"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
 type StoragePoints struct {
@@ -37,31 +39,57 @@ func NewPoints(storageName string) (StoragePoints, error) {
 	}, nil
 }
 
+func (s *StoragePoints) Delete(_ context.Context, id int64) error {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for i, p := range all {
+		if p.ID == id {
+			all = append(all[:i], all[i+1:]...)
+			return s.writeBytes(all)
+		}
+	}
+	return model.ErrorObjectNotFound
+}
+
+func (s *StoragePoints) Update(_ context.Context, point *model.PickPoint) error {
+	s.mt.Lock()
+	defer s.mt.Unlock()
+	all := s.content
+	for i, p := range all {
+		if p.ID == point.ID {
+			all[i] = *point
+			return s.writeBytes(all)
+		}
+	}
+	return model.ErrorObjectNotFound
+}
+
 // Write adds new pick-up point to storage
-func (s *StoragePoints) Write(point model.PickPoint) error {
+func (s *StoragePoints) Add(_ context.Context, point *model.PickPoint) (int64, error) {
 	s.mt.Lock()
 	defer s.mt.Unlock()
 	all := s.content
 	for _, p := range all {
 		if p.ID == point.ID {
-			return errors.New("can not write new pick-up point: trying to add existing point")
+			return 0, errors.New("can not write new pick-up point: trying to add existing point")
 		}
 	}
-	all = append(all, point)
-	return s.writeBytes(all)
+	all = append(all, *point)
+	return point.ID, s.writeBytes(all)
 }
 
 // Get returns pick-up point by its id
-func (s *StoragePoints) Get(id int64) (model.PickPoint, bool) {
+func (s *StoragePoints) GetByID(_ context.Context, id int64) (*model.PickPoint, error) {
 	s.mt.RLock()
 	defer s.mt.RUnlock()
 	all := s.content
 	for _, point := range all {
 		if point.ID == id {
-			return point, true
+			return &point, nil
 		}
 	}
-	return model.PickPoint{}, false
+	return nil, model.ErrorObjectNotFound
 }
 
 // writeBytes writes orders in file in json

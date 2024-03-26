@@ -2,11 +2,20 @@ package command
 
 import (
 	"fmt"
-	"homework2/pup/cmd/parsing"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/service/order"
 	"strconv"
+
+	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
+
+type serviceOrder interface {
+	AcceptFromCourier(model.OrderInput) error
+	Remove(int64) error
+	Give([]int64) error
+	List(int64, int, bool) ([]model.Order, error)
+	Return(int64, int64) error
+	ListReturn(int, int) ([]model.Order, error)
+}
 
 // help prints usage guide
 func Help() {
@@ -41,7 +50,7 @@ func Help() {
 }
 
 // Implementation of command accept
-func Accept(serv order.Service, params parsing.Params) {
+func Accept(serv serviceOrder, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
 		return
@@ -59,7 +68,7 @@ func Accept(serv order.Service, params parsing.Params) {
 }
 
 // Implementation of command remove
-func Remove(serv order.Service, params parsing.Params) {
+func Remove(serv serviceOrder, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
 		fmt.Println("miss required flags")
 		return
@@ -73,7 +82,7 @@ func Remove(serv order.Service, params parsing.Params) {
 }
 
 // Implementation of command give
-func Give(serv order.Service, params parsing.Params) {
+func Give(serv serviceOrder, params parsing.Params) {
 	if len(params.Args) == 0 {
 		fmt.Println("expected at least one argument as order id")
 		return
@@ -96,7 +105,7 @@ func Give(serv order.Service, params parsing.Params) {
 }
 
 // Implementation of command list
-func List(serv order.Service, params parsing.Params) {
+func List(serv serviceOrder, params parsing.Params) {
 	if params.RecipientID == nil {
 		fmt.Println("miss required flags")
 		return
@@ -124,7 +133,7 @@ func List(serv order.Service, params parsing.Params) {
 }
 
 // Implementation of command return
-func Return(serv order.Service, params parsing.Params) {
+func Return(serv serviceOrder, params parsing.Params) {
 	if params.ID == nil || params.RecipientID == nil {
 		fmt.Println("miss required flags")
 		return
@@ -138,7 +147,7 @@ func Return(serv order.Service, params parsing.Params) {
 }
 
 // Implementation of command list-return
-func ListReturn(serv order.Service, params parsing.Params) {
+func ListReturn(serv serviceOrder, params parsing.Params) {
 	var (
 		pageNum, ordersPerPage int
 		err                    error

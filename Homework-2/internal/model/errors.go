@@ -1,0 +1,9 @@
+package model
+
+import "errors"
+
+var (
+	ErrorObjectNotFound     = errors.New("object not found")
+	ErrorInvalidEnvironment = errors.New("invalid environment")
+	ErrorInvalidInput       = errors.New("invalid input")
+)

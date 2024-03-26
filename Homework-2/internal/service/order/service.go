@@ -3,9 +3,10 @@ package order
 import (
 	"errors"
 	"fmt"
-	"homework2/pup/internal/model"
-	"homework2/pup/internal/storage"
 	"time"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
 type storageInterface interface {
@@ -19,12 +20,12 @@ type storageInterface interface {
 	Get(int64) (storage.OrderDTO, bool)
 }
 
-type Service struct {
+type service struct {
 	s storageInterface
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
-func Input2Order(input model.OrderInput) (model.Order, error) {
+func input2Order(input model.OrderInput) (model.Order, error) {
 	if input.ID <= 0 {
 		return model.Order{}, errors.New("id should be positive")
 	}
@@ -46,13 +47,13 @@ func Input2Order(input model.OrderInput) (model.Order, error) {
 }
 
 // New returns type Service associated with storage
-func New(stor storageInterface) Service {
-	return Service{s: stor}
+func NewService(stor storageInterface) service {
+	return service{s: stor}
 }
 
 // Get checks validity of given data and adds new order to storage
-func (s Service) AcceptFromCourier(input model.OrderInput) error {
-	order, err := Input2Order(input)
+func (s service) AcceptFromCourier(input model.OrderInput) error {
+	order, err := input2Order(input)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (s Service) AcceptFromCourier(input model.OrderInput) error {
 }
 
 // Remove checks validity of given id and deletes an order from storage
-func (s Service) Remove(id int64) error {
+func (s service) Remove(id int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
@@ -74,7 +75,7 @@ func (s Service) Remove(id int64) error {
 }
 
 // Give checks validity of given ids and gives orders to recipient
-func (s Service) Give(ids []int64) error {
+func (s service) Give(ids []int64) error {
 	var recipient int64
 
 	for _, id := range ids {
@@ -103,7 +104,7 @@ func (s Service) Give(ids []int64) error {
 }
 
 // List checks validity of given recipient id and n and returns slice of all his orders (last n)
-func (s Service) List(recipient int64, n int, onlyNotGivenOrders bool) ([]model.Order, error) {
+func (s service) List(recipient int64, n int, onlyNotGivenOrders bool) ([]model.Order, error) {
 	if recipient <= 0 {
 		return []model.Order{}, errors.New("recipient id should be positive")
 	}
@@ -130,7 +131,7 @@ func (s Service) List(recipient int64, n int, onlyNotGivenOrders bool) ([]model.
 }
 
 // Return checks validity of given order id and recipient id and gets order back from recipient
-func (s Service) Return(id, recipient int64) error {
+func (s service) Return(id, recipient int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
@@ -157,7 +158,7 @@ func (s Service) Return(id, recipient int64) error {
 }
 
 // ListReturn checks validity of given args and returns k returned orders on nth page
-func (s Service) ListReturn(pageNum, ordersPerPage int) ([]model.Order, error) {
+func (s service) ListReturn(pageNum, ordersPerPage int) ([]model.Order, error) {
 	if pageNum < 0 {
 		return []model.Order{}, errors.New("pageNum should not be negative")
 	}
