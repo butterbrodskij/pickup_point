@@ -96,22 +96,18 @@ func (s service) Give(ids []int64) error {
 
 	for _, id := range ids {
 		order, ok := s.s.GetByID(id)
-		if !ok {
+		switch {
+		case !ok:
 			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
-		}
-		if recipient != 0 && order.RecipientID != recipient {
+		case recipient != 0 && order.RecipientID != recipient:
 			return errors.New("can not give orders: orders belong to different recipients")
-		}
-		if order.IsGiven {
+		case order.IsGiven:
 			return fmt.Errorf("can not give orders: order %d is already given", id)
-		}
-		if order.IsReturned {
+		case order.IsReturned:
 			return fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
-		}
-		if order.ExpireDate.Before(time.Now()) {
+		case order.ExpireDate.Before(time.Now()):
 			return fmt.Errorf("can not give orders: order %d is expired", id)
-		}
-		if recipient == 0 {
+		case recipient == 0:
 			recipient = order.RecipientID
 		}
 	}
