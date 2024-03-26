@@ -155,19 +155,16 @@ func (s service) Return(id, recipient int64) error {
 		return errors.New("recipient id should be positive")
 	}
 	order, ok := s.s.GetByID(id)
-	if !ok {
+	switch {
+	case !ok:
 		return errors.New("order can not be returned: order not found")
-	}
-	if order.RecipientID != recipient {
+	case order.RecipientID != recipient:
 		return errors.New("order can not be returned: order belongs to different recipient")
-	}
-	if order.IsReturned {
+	case order.IsReturned:
 		return errors.New("order can not be returned: order is already returned")
-	}
-	if !order.IsGiven {
+	case !order.IsGiven:
 		return errors.New("order can not be returned: order is not given yet")
-	}
-	if order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
+	case order.GivenTime.AddDate(0, 0, 2).Before(time.Now()):
 		return errors.New("order can not be returned: more than 2 days passed")
 	}
 	return s.s.Return(id)
