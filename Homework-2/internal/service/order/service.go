@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
@@ -29,9 +30,14 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	if input.ID <= 0 {
 		return model.Order{}, errors.New("id should be positive")
 	}
-
 	if input.RecipientID <= 0 {
 		return model.Order{}, errors.New("recipient id should be positive")
+	}
+	if input.Weight <= 0 {
+		return model.Order{}, errors.New("order weight should be positive")
+	}
+	if input.Price <= 0 {
+		return model.Order{}, errors.New("order price should be positive")
 	}
 
 	t, err := time.Parse("2.1.2006", input.ExpireDate)
@@ -42,6 +48,9 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	return model.Order{
 		ID:          input.ID,
 		RecipientID: input.RecipientID,
+		Weight:      input.Weight,
+		Price:       input.Price,
+		Cover:       input.Cover,
 		ExpireDate:  t,
 	}, nil
 }
@@ -60,7 +69,14 @@ func (s service) AcceptFromCourier(input model.OrderInput) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
-	return s.s.AcceptFromCourier(order)
+	covered, err := cover.CoveredOrder(&order)
+	if err != nil {
+		return err
+	}
+	if ok := covered.OrderRequirements(); !ok {
+		return errors.New("order does not meet cover requirements")
+	}
+	return s.s.AcceptFromCourier(*covered.OrderChanges())
 }
 
 // Remove checks validity of given id and deletes an order from storage

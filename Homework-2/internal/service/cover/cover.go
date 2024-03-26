@@ -7,8 +7,8 @@ type Cover interface {
 	OrderChanges() *model.Order
 }
 
-func CoveredOrder(order *model.Order, cov string) (Cover, error) {
-	switch cov {
+func CoveredOrder(order *model.Order) (Cover, error) {
+	switch order.Cover {
 	case "bag":
 		return newBag(order), nil
 	case "box":

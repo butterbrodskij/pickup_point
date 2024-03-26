@@ -20,7 +20,7 @@ type serviceOrder interface {
 // help prints usage guide
 func Help() {
 	fmt.Println(`
-	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return|pickpoints> [-id=<order id>] [-recipient=<recipient id>] [-expire=<expire date>] [-t=<bool>] [<args>]
+	usage: go run ./cmd -command=<help|accept|remove|give|list|return|list-return|pickpoints> [-id=<order id>] [-recipient=<recipient id>] [-weight=<order weight>] [-price=<order price>] [-cover=<order cover>] [-expire=<expire date>] [-t=<bool>] [<args>]
 
 	Command desciption:
 		help: список доступных команд с кратким описанием
@@ -34,7 +34,7 @@ func Help() {
 
 	Needed flags or arguments for each command:
 		help	
-		accept 		 -id -recipient -expire
+		accept 		 -id -recipient -weight -price -cover -expire
 		remove  	 -id
 		give		 args: order ids to give (example: go run ./cmd -command=give 1 2 3 4)
 		list		 -recipient (optional flag -t: boolean value for printing orders located in our point (not already given); optional args: number of orders to list or zero for all)
@@ -51,13 +51,16 @@ func Help() {
 
 // Implementation of command accept
 func Accept(serv serviceOrder, params parsing.Params) {
-	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil {
+	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil || params.Weight == nil || params.Price == nil || params.Cover == nil {
 		fmt.Println("miss required flags")
 		return
 	}
 	err := serv.AcceptFromCourier(model.OrderInput{
 		ID:          *params.ID,
 		RecipientID: *params.RecipientID,
+		Weight:      *params.Weight,
+		Price:       *params.Price,
+		Cover:       *params.Cover,
 		ExpireDate:  *params.ExpireString,
 	})
 	if err != nil {
@@ -128,7 +131,7 @@ func List(serv serviceOrder, params parsing.Params) {
 	}
 	fmt.Printf("found %d orders:\n", len(foundArr))
 	for i, order := range foundArr {
-		fmt.Printf("%d.\tid: %d\texpires: %s\n", i+1, order.ID, order.ExpireDate.Format("01.02.2006"))
+		fmt.Printf("%d.\tid: %d\tprice: %d\texpires: %s\n", i+1, order.ID, order.Price, order.ExpireDate.Format("01.02.2006"))
 	}
 }
 
@@ -181,6 +184,6 @@ func ListReturn(serv serviceOrder, params parsing.Params) {
 	}
 
 	for i, order := range arr {
-		fmt.Printf("%d.\tid: %d\trecipient: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.ExpireDate.Format("01.02.2006"))
+		fmt.Printf("%d.\tid: %d\trecipient: %d\tprice: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.Price, order.ExpireDate.Format("01.02.2006"))
 	}
 }
