@@ -23,7 +23,13 @@ func New(storageName string) (Storage, error) {
 			return Storage{}, err
 		}
 		err = f.Close()
-		return Storage{}, err
+		if err != nil {
+			return Storage{}, err
+		}
+		return Storage{
+			storageName: storageName,
+			content:     []OrderDTO{},
+		}, err
 	} else if err != nil {
 		return Storage{}, err
 	}
@@ -38,7 +44,7 @@ func New(storageName string) (Storage, error) {
 }
 
 // Get returns OrderDTO by its id
-func (s *Storage) Get(id int64) (OrderDTO, bool) {
+func (s *Storage) GetByID(id int64) (OrderDTO, bool) {
 	for _, order := range s.content {
 		if order.ID == id {
 			return order, true
@@ -50,11 +56,7 @@ func (s *Storage) Get(id int64) (OrderDTO, bool) {
 // AcceptFromCourier adds new order to storage
 func (s *Storage) AcceptFromCourier(order model.Order) error {
 	all := s.content
-	newOrder := OrderDTO{
-		ID:          order.ID,
-		RecipientID: order.RecipientID,
-		ExpireDate:  order.ExpireDate,
-	}
+	newOrder := order2DTO(order)
 
 	for _, ord := range all {
 		if ord.ID == newOrder.ID {
@@ -158,11 +160,7 @@ func filterOrders(all []OrderDTO, filter func(OrderDTO) bool) []model.Order {
 	filteredAll := make([]model.Order, 0)
 	for _, order := range all {
 		if filter(order) {
-			filteredAll = append(filteredAll, model.Order{
-				ID:          order.ID,
-				RecipientID: order.RecipientID,
-				ExpireDate:  order.ExpireDate,
-			})
+			filteredAll = append(filteredAll, dto2Order(order))
 		}
 	}
 
@@ -198,4 +196,26 @@ func listAll(storageName string) ([]OrderDTO, error) {
 	}
 
 	return orders, nil
+}
+
+func order2DTO(order model.Order) OrderDTO {
+	return OrderDTO{
+		ID:          order.ID,
+		RecipientID: order.RecipientID,
+		Weight:      order.Weight,
+		Price:       order.Price,
+		Cover:       order.Cover,
+		ExpireDate:  order.ExpireDate,
+	}
+}
+
+func dto2Order(order OrderDTO) model.Order {
+	return model.Order{
+		ID:          order.ID,
+		RecipientID: order.RecipientID,
+		Weight:      order.Weight,
+		Price:       order.Price,
+		Cover:       order.Cover,
+		ExpireDate:  order.ExpireDate,
+	}
 }

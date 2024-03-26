@@ -15,5 +15,6 @@ func (b *film) OrderRequirements() bool {
 }
 
 func (b *film) OrderChanges() *model.Order {
+	b.order.Price += 1
 	return &b.order
 }

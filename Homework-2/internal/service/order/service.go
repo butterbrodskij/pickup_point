@@ -18,7 +18,7 @@ type storageInterface interface {
 	ListNotGiven(int64) ([]model.Order, error)
 	Return(int64) error
 	ListReturn() ([]model.Order, error)
-	Get(int64) (storage.OrderDTO, bool)
+	GetByID(int64) (storage.OrderDTO, bool)
 }
 
 type service struct {
@@ -84,7 +84,7 @@ func (s service) Remove(id int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
-	if order, ok := s.s.Get(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
+	if order, ok := s.s.GetByID(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
 		return errors.New("order can not be removed: trying to remove order that is given or not expired")
 	}
 	return s.s.Remove(id)
@@ -95,7 +95,7 @@ func (s service) Give(ids []int64) error {
 	var recipient int64
 
 	for _, id := range ids {
-		order, ok := s.s.Get(id)
+		order, ok := s.s.GetByID(id)
 		if !ok {
 			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
 		}
@@ -154,7 +154,7 @@ func (s service) Return(id, recipient int64) error {
 	if recipient <= 0 {
 		return errors.New("recipient id should be positive")
 	}
-	order, ok := s.s.Get(id)
+	order, ok := s.s.GetByID(id)
 	if !ok {
 		return errors.New("order can not be returned: order not found")
 	}
