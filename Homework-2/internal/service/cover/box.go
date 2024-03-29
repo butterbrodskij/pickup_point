@@ -3,10 +3,10 @@ package cover
 import "gitlab.ozon.dev/mer_marat/homework/internal/model"
 
 type box struct {
-	order model.Order
+	order *model.Order
 }
 
-func newBox(order model.Order) box {
+func newBox(order *model.Order) box {
 	return box{order: order}
 }
 

@@ -3,10 +3,10 @@ package cover
 import "gitlab.ozon.dev/mer_marat/homework/internal/model"
 
 type film struct {
-	order model.Order
+	order *model.Order
 }
 
-func newFilm(order model.Order) film {
+func newFilm(order *model.Order) film {
 	return film{order: order}
 }
 

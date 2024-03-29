@@ -14,7 +14,7 @@ func NewService() service {
 }
 
 func (s service) ValidateOrder(order model.Order) error {
-	cov := getCover(order)
+	cov := getCover(&order)
 	if cov == nil {
 		return model.ErrorInvalidInput
 	}
@@ -22,14 +22,14 @@ func (s service) ValidateOrder(order model.Order) error {
 }
 
 func (s service) GetPackagingPrice(order model.Order) int64 {
-	cov := getCover(order)
+	cov := getCover(&order)
 	if cov == nil {
 		return order.PriceKopecks
 	}
 	return cov.getPackagingPrice()
 }
 
-func getCover(order model.Order) cover {
+func getCover(order *model.Order) cover {
 	switch order.Cover {
 	case model.BagCover:
 		return newBag(order)
