@@ -14,7 +14,7 @@ func main() {
 	var params parsing.Params
 	parsing.Parse(&params)
 
-	storOrders, err := storage.New("storage.json")
+	storOrders, err := storage.NewOrders("storage_orders.json")
 	if err != nil {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return

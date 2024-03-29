@@ -15,7 +15,7 @@ type Storage struct {
 }
 
 // New returns new storage associated with file storageName
-func New(storageName string) (Storage, error) {
+func NewOrders(storageName string) (Storage, error) {
 	_, err := os.Stat(storageName)
 	if os.IsNotExist(err) {
 		f, err := os.Create(storageName)
