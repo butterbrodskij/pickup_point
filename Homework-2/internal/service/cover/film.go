@@ -6,14 +6,14 @@ type film struct {
 	order model.Order
 }
 
-func newFilm(order *model.Order) *film {
-	return &film{order: *order}
+func newFilm(order model.Order) film {
+	return film{order: order}
 }
 
-func (b *film) validateOrder() error {
+func (b film) validateOrder() error {
 	return nil
 }
 
-func (b *film) getPackagingPrice() int64 {
+func (b film) getPackagingPrice() int64 {
 	return b.order.PriceKopecks + 1*model.KopecksInRuble
 }

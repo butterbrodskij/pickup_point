@@ -6,17 +6,17 @@ type box struct {
 	order model.Order
 }
 
-func newBox(order *model.Order) *box {
-	return &box{order: *order}
+func newBox(order model.Order) box {
+	return box{order: order}
 }
 
-func (b *box) validateOrder() error {
+func (b box) validateOrder() error {
 	if b.order.WeightGrams >= 30*model.GramsInKilo {
 		return model.ErrorExcessWeight
 	}
 	return nil
 }
 
-func (b *box) getPackagingPrice() int64 {
+func (b box) getPackagingPrice() int64 {
 	return b.order.PriceKopecks + 20*model.KopecksInRuble
 }

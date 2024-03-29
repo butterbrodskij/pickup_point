@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
-type coveredOrder interface {
-	ValidateOrder() error
-	GetPackagingPrice() int64
+type coverService interface {
+	ValidateOrder(model.Order) error
+	GetPackagingPrice(model.Order) int64
 }
 
 type storageInterface interface {
@@ -27,7 +26,8 @@ type storageInterface interface {
 }
 
 type service struct {
-	s storageInterface
+	s   storageInterface
+	cov coverService
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
@@ -61,8 +61,8 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 }
 
 // New returns type Service associated with storage
-func NewService(stor storageInterface) service {
-	return service{s: stor}
+func NewService(stor storageInterface, cov coverService) service {
+	return service{s: stor, cov: cov}
 }
 
 // Get checks validity of given data and adds new order to storage
@@ -74,15 +74,10 @@ func (s service) AcceptFromCourier(input model.OrderInput) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
-	var covered coveredOrder
-	covered, err = cover.NewCoveredOrder(&order)
-	if err != nil {
+	if err = s.cov.ValidateOrder(order); err != nil {
 		return err
 	}
-	if err = covered.ValidateOrder(); err != nil {
-		return err
-	}
-	order.PriceKopecks = covered.GetPackagingPrice()
+	order.PriceKopecks = s.cov.GetPackagingPrice(order)
 	return s.s.AcceptFromCourier(order)
 }
 
