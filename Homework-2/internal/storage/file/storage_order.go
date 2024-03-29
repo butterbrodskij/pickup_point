@@ -200,22 +200,22 @@ func listAll(storageName string) ([]OrderDTO, error) {
 
 func order2DTO(order model.Order) OrderDTO {
 	return OrderDTO{
-		ID:          order.ID,
-		RecipientID: order.RecipientID,
-		Weight:      order.Weight,
-		Price:       order.Price,
-		Cover:       order.Cover,
-		ExpireDate:  order.ExpireDate,
+		ID:           order.ID,
+		RecipientID:  order.RecipientID,
+		WeightGrams:  order.WeightGrams,
+		PriceKopecks: order.PriceKopecks,
+		Cover:        order.Cover,
+		ExpireDate:   order.ExpireDate,
 	}
 }
 
 func dto2Order(order OrderDTO) model.Order {
 	return model.Order{
-		ID:          order.ID,
-		RecipientID: order.RecipientID,
-		Weight:      order.Weight,
-		Price:       order.Price,
-		Cover:       order.Cover,
-		ExpireDate:  order.ExpireDate,
+		ID:           order.ID,
+		RecipientID:  order.RecipientID,
+		WeightGrams:  order.WeightGrams,
+		PriceKopecks: order.PriceKopecks,
+		Cover:        order.Cover,
+		ExpireDate:   order.ExpireDate,
 	}
 }

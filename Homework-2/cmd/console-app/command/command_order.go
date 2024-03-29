@@ -49,17 +49,17 @@ func Help() {
 }
 
 func Accept(serv serviceOrder, params parsing.Params) {
-	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil || params.Weight == nil || params.Price == nil || params.Cover == nil {
+	if params.ID == nil || params.RecipientID == nil || params.ExpireString == nil || params.WeightGrams == nil || params.PriceKopecks == nil || params.Cover == nil {
 		fmt.Println("miss required flags")
 		return
 	}
 	err := serv.AcceptFromCourier(model.OrderInput{
-		ID:          *params.ID,
-		RecipientID: *params.RecipientID,
-		Weight:      *params.Weight,
-		Price:       *params.Price,
-		Cover:       *params.Cover,
-		ExpireDate:  *params.ExpireString,
+		ID:           *params.ID,
+		RecipientID:  *params.RecipientID,
+		WeightGrams:  *params.WeightGrams,
+		PriceKopecks: *params.PriceKopecks,
+		Cover:        *params.Cover,
+		ExpireDate:   *params.ExpireString,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -126,7 +126,7 @@ func List(serv serviceOrder, params parsing.Params) {
 	}
 	fmt.Printf("found %d orders:\n", len(foundArr))
 	for i, order := range foundArr {
-		fmt.Printf("%d.\tid: %d\tprice: %d\texpires: %s\n", i+1, order.ID, order.Price, order.ExpireDate.Format("01.02.2006"))
+		fmt.Printf("%d.\tid: %d\tprice: %d\texpires: %s\n", i+1, order.ID, order.PriceKopecks, order.ExpireDate.Format("01.02.2006"))
 	}
 }
 
@@ -177,6 +177,6 @@ func ListReturn(serv serviceOrder, params parsing.Params) {
 	}
 
 	for i, order := range arr {
-		fmt.Printf("%d.\tid: %d\trecipient: %d\tprice: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.Price, order.ExpireDate.Format("01.02.2006"))
+		fmt.Printf("%d.\tid: %d\trecipient: %d\tprice: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.PriceKopecks, order.ExpireDate.Format("01.02.2006"))
 	}
 }

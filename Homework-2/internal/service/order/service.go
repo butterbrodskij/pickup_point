@@ -33,10 +33,10 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	if input.RecipientID <= 0 {
 		return model.Order{}, errors.New("recipient id should be positive")
 	}
-	if input.Weight <= 0 {
+	if input.WeightGrams <= 0 {
 		return model.Order{}, errors.New("order weight should be positive")
 	}
-	if input.Price <= 0 {
+	if input.PriceKopecks <= 0 {
 		return model.Order{}, errors.New("order price should be positive")
 	}
 
@@ -46,12 +46,12 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	}
 
 	return model.Order{
-		ID:          input.ID,
-		RecipientID: input.RecipientID,
-		Weight:      input.Weight,
-		Price:       input.Price,
-		Cover:       input.Cover,
-		ExpireDate:  t,
+		ID:           input.ID,
+		RecipientID:  input.RecipientID,
+		WeightGrams:  input.WeightGrams,
+		PriceKopecks: input.PriceKopecks,
+		Cover:        input.Cover,
+		ExpireDate:   t,
 	}, nil
 }
 

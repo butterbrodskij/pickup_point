@@ -9,11 +9,11 @@ type Cover interface {
 
 func CoveredOrder(order *model.Order) (Cover, error) {
 	switch order.Cover {
-	case "bag":
+	case model.BagCover:
 		return newBag(order), nil
-	case "box":
+	case model.BoxCover:
 		return newBox(order), nil
-	case "film":
+	case model.FilmCover:
 		return newFilm(order), nil
 	default:
 		return nil, model.ErrorInvalidInput
