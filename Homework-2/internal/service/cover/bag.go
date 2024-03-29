@@ -11,10 +11,10 @@ func newBag(order *model.Order) *bag {
 }
 
 func (b *bag) OrderRequirements() bool {
-	return b.order.WeightGrams < 10
+	return b.order.WeightGrams < 10*model.GramsInKilo
 }
 
 func (b *bag) OrderChanges() *model.Order {
-	b.order.PriceKopecks += 5
+	b.order.PriceKopecks += 5 * model.KopecksInRuble
 	return &b.order
 }

@@ -2,7 +2,7 @@ package model
 
 type Cover = string
 
-var (
+const (
 	BoxCover  = "box"
 	BagCover  = "bag"
 	FilmCover = "film"
