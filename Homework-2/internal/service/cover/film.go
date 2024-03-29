@@ -10,11 +10,10 @@ func newFilm(order *model.Order) *film {
 	return &film{order: *order}
 }
 
-func (b *film) OrderRequirements() bool {
-	return true
+func (b *film) validateOrder() error {
+	return nil
 }
 
-func (b *film) OrderChanges() *model.Order {
-	b.order.PriceKopecks += 1 * model.KopecksInRuble
-	return &b.order
+func (b *film) getPackagingPrice() int64 {
+	return b.order.PriceKopecks + 1*model.KopecksInRuble
 }

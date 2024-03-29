@@ -10,11 +10,13 @@ func newBag(order *model.Order) *bag {
 	return &bag{order: *order}
 }
 
-func (b *bag) OrderRequirements() bool {
-	return b.order.WeightGrams < 10*model.GramsInKilo
+func (b *bag) validateOrder() error {
+	if b.order.WeightGrams >= 10*model.GramsInKilo {
+		return model.ErrorExcessWeight
+	}
+	return nil
 }
 
-func (b *bag) OrderChanges() *model.Order {
-	b.order.PriceKopecks += 5 * model.KopecksInRuble
-	return &b.order
+func (b *bag) getPackagingPrice() int64 {
+	return b.order.PriceKopecks + 5*model.KopecksInRuble
 }

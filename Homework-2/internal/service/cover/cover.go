@@ -2,20 +2,32 @@ package cover
 
 import "gitlab.ozon.dev/mer_marat/homework/internal/model"
 
-type Cover interface {
-	OrderRequirements() bool
-	OrderChanges() *model.Order
+type cover interface {
+	validateOrder() error
+	getPackagingPrice() int64
 }
 
-func CoveredOrder(order *model.Order) (Cover, error) {
+type coveredOrder struct {
+	cover
+}
+
+func NewCoveredOrder(order *model.Order) (coveredOrder, error) {
 	switch order.Cover {
 	case model.BagCover:
-		return newBag(order), nil
+		return coveredOrder{newBag(order)}, nil
 	case model.BoxCover:
-		return newBox(order), nil
+		return coveredOrder{newBox(order)}, nil
 	case model.FilmCover:
-		return newFilm(order), nil
+		return coveredOrder{newFilm(order)}, nil
 	default:
-		return nil, model.ErrorInvalidInput
+		return coveredOrder{}, model.ErrorInvalidInput
 	}
+}
+
+func (c coveredOrder) ValidateOrder() error {
+	return c.validateOrder()
+}
+
+func (c coveredOrder) GetPackagingPrice() int64 {
+	return c.getPackagingPrice()
 }

@@ -10,6 +10,11 @@ import (
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
+type coveredOrder interface {
+	ValidateOrder() error
+	GetPackagingPrice() int64
+}
+
 type storageInterface interface {
 	AcceptFromCourier(model.Order) error
 	Remove(int64) error
@@ -69,14 +74,16 @@ func (s service) AcceptFromCourier(input model.OrderInput) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
-	covered, err := cover.CoveredOrder(&order)
+	var covered coveredOrder
+	covered, err = cover.NewCoveredOrder(&order)
 	if err != nil {
 		return err
 	}
-	if ok := covered.OrderRequirements(); !ok {
-		return errors.New("order does not meet cover requirements")
+	if err = covered.ValidateOrder(); err != nil {
+		return err
 	}
-	return s.s.AcceptFromCourier(*covered.OrderChanges())
+	order.PriceKopecks = covered.GetPackagingPrice()
+	return s.s.AcceptFromCourier(order)
 }
 
 // Remove checks validity of given id and deletes an order from storage
