@@ -25,7 +25,13 @@ func NewPoints(storageName string) (StoragePoints, error) {
 			return StoragePoints{}, err
 		}
 		err = f.Close()
-		return StoragePoints{}, err
+		if err != nil {
+			return StoragePoints{}, err
+		}
+		return StoragePoints{
+			storageName: storageName,
+			content:     []model.PickPoint{},
+		}, nil
 	} else if err != nil {
 		return StoragePoints{}, err
 	}

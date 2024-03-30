@@ -19,7 +19,6 @@ type servicePoint interface {
 
 const chanSize = 10
 
-// Implementation of command pickpoints
 func PickPoints(serv servicePoint) {
 	var (
 		line, com string
@@ -98,7 +97,6 @@ func Reader(s servicePoint, ctx context.Context, readChan <-chan int64, logChan 
 	close(logChan)
 }
 
-// HelpPickPoints prints usage guide for pickpoints
 func HelpPickPoints() {
 	fmt.Println(`
 	interactive mode for command pickpoints usage guide:
@@ -146,7 +144,7 @@ func WritePoints(s servicePoint, ctx context.Context, writeChan <-chan model.Pic
 	}
 }
 
-// WritePoints sends pick-up points information to logger from storage by getting id from channel
+// ReadPoints sends pick-up points information to logger from storage by getting id from channel
 func ReadPoints(s servicePoint, ctx context.Context, readChan <-chan int64, logChan chan<- string, wg *sync.WaitGroup, serial int) {
 	defer wg.Done()
 	var status string

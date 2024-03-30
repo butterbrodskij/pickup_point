@@ -9,6 +9,11 @@ import (
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
+type coverService interface {
+	ValidateOrder(model.Order) error
+	GetPackagingPrice(model.Order) int64
+}
+
 type storageInterface interface {
 	AcceptFromCourier(model.Order) error
 	Remove(int64) error
@@ -17,11 +22,12 @@ type storageInterface interface {
 	ListNotGiven(int64) ([]model.Order, error)
 	Return(int64) error
 	ListReturn() ([]model.Order, error)
-	Get(int64) (storage.OrderDTO, bool)
+	GetByID(int64) (storage.OrderDTO, bool)
 }
 
 type service struct {
-	s storageInterface
+	s   storageInterface
+	cov coverService
 }
 
 // Input2Order converts OrderInput to Order and checks validity of fields
@@ -29,9 +35,14 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	if input.ID <= 0 {
 		return model.Order{}, errors.New("id should be positive")
 	}
-
 	if input.RecipientID <= 0 {
 		return model.Order{}, errors.New("recipient id should be positive")
+	}
+	if input.WeightGrams <= 0 {
+		return model.Order{}, errors.New("order weight should be positive")
+	}
+	if input.PriceKopecks <= 0 {
+		return model.Order{}, errors.New("order price should be positive")
 	}
 
 	t, err := time.Parse("2.1.2006", input.ExpireDate)
@@ -40,15 +51,18 @@ func input2Order(input model.OrderInput) (model.Order, error) {
 	}
 
 	return model.Order{
-		ID:          input.ID,
-		RecipientID: input.RecipientID,
-		ExpireDate:  t,
+		ID:           input.ID,
+		RecipientID:  input.RecipientID,
+		WeightGrams:  input.WeightGrams,
+		PriceKopecks: input.PriceKopecks,
+		Cover:        input.Cover,
+		ExpireDate:   t,
 	}, nil
 }
 
 // New returns type Service associated with storage
-func NewService(stor storageInterface) service {
-	return service{s: stor}
+func NewService(stor storageInterface, cov coverService) service {
+	return service{s: stor, cov: cov}
 }
 
 // Get checks validity of given data and adds new order to storage
@@ -60,6 +74,10 @@ func (s service) AcceptFromCourier(input model.OrderInput) error {
 	if order.ExpireDate.Before(time.Now()) {
 		return errors.New("can not get order: trying to get expired order")
 	}
+	if err = s.cov.ValidateOrder(order); err != nil {
+		return err
+	}
+	order.PriceKopecks += s.cov.GetPackagingPrice(order)
 	return s.s.AcceptFromCourier(order)
 }
 
@@ -68,7 +86,7 @@ func (s service) Remove(id int64) error {
 	if id <= 0 {
 		return errors.New("id should be positive")
 	}
-	if order, ok := s.s.Get(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
+	if order, ok := s.s.GetByID(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
 		return errors.New("order can not be removed: trying to remove order that is given or not expired")
 	}
 	return s.s.Remove(id)
@@ -79,23 +97,19 @@ func (s service) Give(ids []int64) error {
 	var recipient int64
 
 	for _, id := range ids {
-		order, ok := s.s.Get(id)
-		if !ok {
+		order, ok := s.s.GetByID(id)
+		switch {
+		case !ok:
 			return fmt.Errorf("can not give orders: order %d is not in the storage", id)
-		}
-		if recipient != 0 && order.RecipientID != recipient {
+		case recipient != 0 && order.RecipientID != recipient:
 			return errors.New("can not give orders: orders belong to different recipients")
-		}
-		if order.IsGiven {
+		case order.IsGiven:
 			return fmt.Errorf("can not give orders: order %d is already given", id)
-		}
-		if order.IsReturned {
+		case order.IsReturned:
 			return fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
-		}
-		if order.ExpireDate.Before(time.Now()) {
+		case order.ExpireDate.Before(time.Now()):
 			return fmt.Errorf("can not give orders: order %d is expired", id)
-		}
-		if recipient == 0 {
+		case recipient == 0:
 			recipient = order.RecipientID
 		}
 	}
@@ -138,20 +152,17 @@ func (s service) Return(id, recipient int64) error {
 	if recipient <= 0 {
 		return errors.New("recipient id should be positive")
 	}
-	order, ok := s.s.Get(id)
-	if !ok {
+	order, ok := s.s.GetByID(id)
+	switch {
+	case !ok:
 		return errors.New("order can not be returned: order not found")
-	}
-	if order.RecipientID != recipient {
+	case order.RecipientID != recipient:
 		return errors.New("order can not be returned: order belongs to different recipient")
-	}
-	if order.IsReturned {
+	case order.IsReturned:
 		return errors.New("order can not be returned: order is already returned")
-	}
-	if !order.IsGiven {
+	case !order.IsGiven:
 		return errors.New("order can not be returned: order is not given yet")
-	}
-	if order.GivenTime.AddDate(0, 0, 2).Before(time.Now()) {
+	case order.GivenTime.AddDate(0, 0, 2).Before(time.Now()):
 		return errors.New("order can not be returned: more than 2 days passed")
 	}
 	return s.s.Return(id)

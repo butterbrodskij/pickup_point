@@ -5,6 +5,7 @@ import (
 
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/command"
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
@@ -14,7 +15,7 @@ func main() {
 	var params parsing.Params
 	parsing.Parse(&params)
 
-	storOrders, err := storage.New("storage.json")
+	storOrders, err := storage.NewOrders("storage_orders.json")
 	if err != nil {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
@@ -24,7 +25,7 @@ func main() {
 		fmt.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	servOrders := order.NewService(&storOrders)
+	servOrders := order.NewService(&storOrders, cover.NewService())
 	servPoints := pickpoint.NewService(&storPoints)
 
 	switch *params.Command {
