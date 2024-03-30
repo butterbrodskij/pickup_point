@@ -15,5 +15,5 @@ func (b film) validateOrder() error {
 }
 
 func (b film) getPackagingPrice() int64 {
-	return b.order.PriceKopecks + 1*model.KopecksInRuble
+	return 1 * model.KopecksInRuble
 }

@@ -77,7 +77,7 @@ func (s service) AcceptFromCourier(input model.OrderInput) error {
 	if err = s.cov.ValidateOrder(order); err != nil {
 		return err
 	}
-	order.PriceKopecks = s.cov.GetPackagingPrice(order)
+	order.PriceKopecks += s.cov.GetPackagingPrice(order)
 	return s.s.AcceptFromCourier(order)
 }
 

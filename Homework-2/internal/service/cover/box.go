@@ -18,5 +18,5 @@ func (b box) validateOrder() error {
 }
 
 func (b box) getPackagingPrice() int64 {
-	return b.order.PriceKopecks + 20*model.KopecksInRuble
+	return 20 * model.KopecksInRuble
 }
