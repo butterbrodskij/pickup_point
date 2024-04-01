@@ -1,5 +1,5 @@
 ifeq ($(POSTGRES_SETUP),)
-	POSTGRES_SETUP := user=postgres password=postgres dbname=postgres port=5432 sslmode=disable
+	POSTGRES_SETUP := user=postgres password=password dbname=postgres host=localhost port=5433 sslmode=disable
 endif
 
 INTERNAL_PKG_PATH=$(CURDIR)/internal/pkg
@@ -16,3 +16,11 @@ migration-up:
 .PHONY: migration-down
 migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" down
+
+.PHONY: docker-compose-up
+docker-compose-up: docker-compose-build
+	docker-compose up
+
+.PHONY: docker-compose-build
+docker-compose-build:
+	docker-compose build
