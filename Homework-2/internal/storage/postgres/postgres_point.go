@@ -5,16 +5,23 @@ import (
 	"errors"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
-type PickpointRepo struct {
-	db *db.Database
+type Database interface {
+	Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error)
+	ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row
 }
 
-func NewRepo(db *db.Database) *PickpointRepo {
+type PickpointRepo struct {
+	db Database
+}
+
+func NewRepo(db Database) *PickpointRepo {
 	return &PickpointRepo{db: db}
 }
 
