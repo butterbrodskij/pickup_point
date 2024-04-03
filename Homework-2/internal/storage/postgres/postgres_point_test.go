@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	mock_repo "gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres/mocks"
 )
 
 func TestAdd(t *testing.T) {
@@ -25,13 +24,11 @@ func TestGetByID(t *testing.T) {
 	)
 	t.Run("smoke test", func(t *testing.T) {
 		t.Parallel()
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		mockDB := mock_repo.NewMockdatabase(ctrl)
-		mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(nil)
-		repo := NewRepo(mockDB)
+		s := setUp(t)
+		defer s.tearDown()
+		s.mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(nil)
 
-		user, err := repo.GetByID(ctx, id)
+		user, err := s.repo.GetByID(ctx, id)
 
 		require.NoError(t, err)
 		assert.Equal(t, int64(0), user.ID)
@@ -40,13 +37,11 @@ func TestGetByID(t *testing.T) {
 		t.Parallel()
 		t.Run("not found", func(t *testing.T) {
 			t.Parallel()
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			mockDB := mock_repo.NewMockdatabase(ctrl)
-			mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(pgx.ErrNoRows)
-			repo := NewRepo(mockDB)
+			s := setUp(t)
+			defer s.tearDown()
+			s.mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(pgx.ErrNoRows)
 
-			user, err := repo.GetByID(ctx, id)
+			user, err := s.repo.GetByID(ctx, id)
 
 			require.EqualError(t, err, "object not found")
 			require.True(t, errors.Is(err, model.ErrorObjectNotFound))
@@ -54,13 +49,11 @@ func TestGetByID(t *testing.T) {
 		})
 		t.Run("internal error", func(t *testing.T) {
 			t.Parallel()
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			mockDB := mock_repo.NewMockdatabase(ctrl)
-			mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(assert.AnError)
-			repo := NewRepo(mockDB)
+			s := setUp(t)
+			defer s.tearDown()
+			s.mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), "SELECT id, name, address, contacts FROM pickpoints WHERE id=$1", gomock.Any()).Return(assert.AnError)
 
-			user, err := repo.GetByID(ctx, id)
+			user, err := s.repo.GetByID(ctx, id)
 
 			require.EqualError(t, err, "assert.AnError general error for testing")
 			assert.Nil(t, user)
