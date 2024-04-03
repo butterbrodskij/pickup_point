@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	pgconn "github.com/jackc/pgconn"
-	v4 "github.com/jackc/pgx/v4"
+	pgx "github.com/jackc/pgx/v4"
 )
 
 // Mockdatabase is a mock of database interface.
@@ -57,14 +57,14 @@ func (mr *MockdatabaseMockRecorder) Exec(ctx, query interface{}, args ...interfa
 }
 
 // ExecQueryRow mocks base method.
-func (m *Mockdatabase) ExecQueryRow(ctx context.Context, query string, args ...interface{}) v4.Row {
+func (m *Mockdatabase) ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, query}
 	for _, a := range args {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ExecQueryRow", varargs...)
-	ret0, _ := ret[0].(v4.Row)
+	ret0, _ := ret[0].(pgx.Row)
 	return ret0
 }
 
