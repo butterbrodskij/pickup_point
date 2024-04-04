@@ -12,3 +12,11 @@ type service interface {
 	Update(context.Context, *model.PickPoint) error
 	Delete(context.Context, int64) error
 }
+
+type handler struct {
+	service
+}
+
+func NewHandler(s service) handler {
+	return handler{service: s}
+}
