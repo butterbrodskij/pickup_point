@@ -44,3 +44,7 @@ func (b *PickpointBuilder) V() model.PickPoint {
 func (b *PickpointBuilder) Valid1() *PickpointBuilder {
 	return b.ID(states.ValidID1).Name(states.ValidName1).Address(states.ValidAddress1).Contact(states.ValidContact1)
 }
+
+func (b *PickpointBuilder) InValid1() *PickpointBuilder {
+	return b.ID(states.InValidID1).Name(states.ValidName1).Address(states.ValidAddress1).Contact(states.ValidContact1)
+}

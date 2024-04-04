@@ -1,6 +1,7 @@
 package states
 
 const (
+	InValidID1    = -1
 	ValidID1      = 100
 	ValidName1    = "Chertanovo"
 	ValidAddress1 = "Chertanovskaya street, 8"
