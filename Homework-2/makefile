@@ -49,3 +49,6 @@ endif
 test: .test
 
 test-gen: .generate-mockgen .test
+
+integration:
+	go test ./tests --tags=integration

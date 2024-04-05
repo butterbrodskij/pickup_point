@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package tests
 
 import (
@@ -24,9 +27,7 @@ func TestCreate(t *testing.T) {
 	t.Run("creating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
-		repo := postgres.NewRepo(db.DB)
-		serv := pickpoint.NewService(repo)
-		handl := handler.NewHandler(serv)
+		handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 		w := httptest.NewRecorder()
@@ -40,9 +41,7 @@ func TestCreate(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			body := `example of bad request`
 			req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 			w := httptest.NewRecorder()
@@ -62,9 +61,7 @@ func TestDelete(t *testing.T) {
 	t.Run("successful deleting pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
-		repo := postgres.NewRepo(db.DB)
-		serv := pickpoint.NewService(repo)
-		handl := handler.NewHandler(serv)
+		handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 		fillDB(fixture.PickPoint().Valid1().P())
 		req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/100", strings.NewReader(""))
 		w := httptest.NewRecorder()
@@ -81,9 +78,7 @@ func TestDelete(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/0", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
@@ -98,9 +93,7 @@ func TestDelete(t *testing.T) {
 		t.Run("not found", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/1", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
@@ -122,9 +115,7 @@ func TestRead(t *testing.T) {
 	t.Run("successful reading pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
-		repo := postgres.NewRepo(db.DB)
-		serv := pickpoint.NewService(repo)
-		handl := handler.NewHandler(serv)
+		handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 		fillDB(fixture.PickPoint().Valid1().P())
 		req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/100", strings.NewReader(""))
 		w := httptest.NewRecorder()
@@ -141,9 +132,7 @@ func TestRead(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/0", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
@@ -158,9 +147,7 @@ func TestRead(t *testing.T) {
 		t.Run("not found", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/1", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
@@ -182,9 +169,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("successful updating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
-		repo := postgres.NewRepo(db.DB)
-		serv := pickpoint.NewService(repo)
-		handl := handler.NewHandler(serv)
+		handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 		fillDB(fixture.PickPoint().Valid1().P())
 		body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
@@ -199,9 +184,7 @@ func TestUpdate(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			body := `example of bad request`
 			req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 			w := httptest.NewRecorder()
@@ -214,9 +197,7 @@ func TestUpdate(t *testing.T) {
 		t.Run("not found", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			repo := postgres.NewRepo(db.DB)
-			serv := pickpoint.NewService(repo)
-			handl := handler.NewHandler(serv)
+			handl := handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB)))
 			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 			w := httptest.NewRecorder()
