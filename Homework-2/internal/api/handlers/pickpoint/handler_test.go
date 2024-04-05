@@ -24,7 +24,7 @@ func TestCreate(t *testing.T) {
 		t.Parallel()
 		s := setUp(t)
 		defer s.tearDown()
-		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 8", "contacts":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 		w := httptest.NewRecorder()
 		s.mockServ.EXPECT().Create(gomock.Any(), gomock.Any()).Return(fixture.PickPoint().Valid1().P(), nil)

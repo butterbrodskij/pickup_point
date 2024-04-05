@@ -1,0 +1,16 @@
+# Server configuration
+server:
+  port: ":9000"
+  secure_port: ":9001"
+
+# Database credentials
+database:
+  host: "localhost"
+  port: 5433
+  user: "postgres"
+  dbname: "postgres"
+
+# Users data
+users:
+  - login: "admin"
+    password: "password"
