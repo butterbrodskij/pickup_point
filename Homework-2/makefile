@@ -2,6 +2,10 @@ ifeq ($(POSTGRES_SETUP),)
 	POSTGRES_SETUP := user=postgres password=password dbname=postgres host=localhost port=5433 sslmode=disable
 endif
 
+ifeq ($(POSTGRES_SETUP_TEST),)
+	POSTGRES_SETUP_TEST := user=postgres password=password dbname=postgres host=localhost port=5434 sslmode=disable
+endif
+
 INTERNAL_PKG_PATH=$(CURDIR)/internal/pkg
 MOCKGEN_TAG=1.2.0
 MIGRATION_FOLDER=$(INTERNAL_PKG_PATH)/db/migrations
@@ -13,10 +17,12 @@ migration-create:
 .PHONY: migration-up
 migration-up:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" up
+	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_TEST)" up
 
 .PHONY: migration-down
 migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" down
+	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_TEST)" down
 
 .PHONY: docker-compose-up
 docker-compose-up: docker-compose-build

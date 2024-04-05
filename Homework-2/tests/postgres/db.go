@@ -33,12 +33,12 @@ func NewTDB(cfg config.Config) *TDB {
 
 func (d *TDB) SetUp(t *testing.T, tableName ...string) {
 	t.Helper()
-	//d.DB.BeginTX()
 	d.truncateTable(context.Background(), tableName...)
 }
 
-func (d *TDB) TearDown() {
-	//d.DB.RollBack()
+func (d *TDB) TearDown(t *testing.T, tableName ...string) {
+	t.Helper()
+	d.truncateTable(context.Background(), tableName...)
 }
 
 func (d *TDB) truncateTable(ctx context.Context, tableName ...string) {
