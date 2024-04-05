@@ -1,7 +1,6 @@
-## Домашнее задание №4
-### Архитектура решения 
-- UML Диаграмма пакетов
-![Diagram](images/diagram.png)
-### Ссылки
-- [Documentation](https://www.omg.org/spec/UML/2.5.1/PDF)
-- [Short guide](https://www.lucidchart.com/pages/uml-package-diagram)
+## Домашнее задание №5
+### Быстрый запуск
+- Запуск докера: make docker-compose-up
+- Накат миграции: make migration-up
+- Юнит-тесты: make test
+- Интеграционные тесты: make integration
