@@ -38,7 +38,7 @@ endif
 
 .test:
 	$(info Running tests...)
-	go test ./...
+	go test ./internal/...
 
 test: .test
 
