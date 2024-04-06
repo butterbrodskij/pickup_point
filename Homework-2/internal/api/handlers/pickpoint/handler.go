@@ -18,6 +18,6 @@ type handler struct {
 	service
 }
 
-func NewHandler(s service) handler {
-	return handler{service: s}
+func NewHandler(s service) *handler {
+	return &handler{service: s}
 }

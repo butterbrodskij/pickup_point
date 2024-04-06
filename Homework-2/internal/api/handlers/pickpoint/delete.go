@@ -10,7 +10,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func (h handler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key, ok := vars[config.QueryParamKey]
 	if !ok {

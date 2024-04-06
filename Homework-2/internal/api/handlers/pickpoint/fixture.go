@@ -9,7 +9,7 @@ import (
 
 type pointHandlerFixture struct {
 	ctrl     *gomock.Controller
-	handl    handler
+	handl    *handler
 	mockServ *mock_handler.Mockservice
 }
 
