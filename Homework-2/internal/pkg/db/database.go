@@ -21,11 +21,6 @@ func (db Database) Close() {
 	db.cluster.Close()
 }
 
-func (db Database) BeginTX(ctx context.Context, options *pgx.TxOptions) (pgx.Tx, error) {
-	return db.cluster.BeginTx(ctx, *options)
-
-}
-
 func (db Database) Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
 	return pgxscan.Get(ctx, db.cluster, dest, query, args...)
 }
