@@ -7,7 +7,7 @@ ifeq ($(POSTGRES_SETUP_TEST),)
 endif
 
 INTERNAL_PKG_PATH=$(CURDIR)/internal/pkg
-MOCKGEN_TAG=1.2.0
+MOCKGEN_TAG=v1.6.0
 MIGRATION_FOLDER=$(INTERNAL_PKG_PATH)/db/migrations
 
 .PHONY: migration-create
