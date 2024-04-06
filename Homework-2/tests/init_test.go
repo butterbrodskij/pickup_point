@@ -8,11 +8,13 @@ import (
 )
 
 var (
-	db *postgres_test.TDB
+	db  *postgres_test.TDB
+	cfg config.Config
 )
 
 func init() {
-	cfg, err := config.GetConfig()
+	var err error
+	cfg, err = config.GetConfig()
 	if err != nil {
 		panic(err)
 	}
