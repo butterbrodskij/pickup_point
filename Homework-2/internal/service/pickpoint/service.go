@@ -1,4 +1,4 @@
-//go:generate mockgen -source=./service.go -destination=./mocks/service.go -package=mock_service
+//go:generate mockgen -source=./service.go -destination=./service_mocks_test.go -package=pickpoint
 package pickpoint
 
 import (
