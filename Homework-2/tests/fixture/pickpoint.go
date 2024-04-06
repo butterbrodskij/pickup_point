@@ -2,7 +2,6 @@ package fixture
 
 import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/tests/states"
 )
 
 type PickpointBuilder struct {
@@ -42,13 +41,13 @@ func (b *PickpointBuilder) V() model.PickPoint {
 }
 
 func (b *PickpointBuilder) ValidInput1() *PickpointBuilder {
-	return b.Name(states.ValidName1).Address(states.ValidAddress1).Contact(states.ValidContact1)
+	return b.Name(ValidName1).Address(ValidAddress1).Contact(ValidContact1)
 }
 
 func (b *PickpointBuilder) Valid1() *PickpointBuilder {
-	return b.ID(states.ValidID1).Name(states.ValidName1).Address(states.ValidAddress1).Contact(states.ValidContact1)
+	return b.ID(ValidID1).Name(ValidName1).Address(ValidAddress1).Contact(ValidContact1)
 }
 
 func (b *PickpointBuilder) InValid1() *PickpointBuilder {
-	return b.ID(states.InValidID1).Name(states.ValidName1).Address(states.ValidAddress1).Contact(states.ValidContact1)
+	return b.ID(InValidID1).Name(ValidName1).Address(ValidAddress1).Contact(ValidContact1)
 }

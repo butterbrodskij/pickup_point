@@ -1,4 +1,4 @@
-package states
+package fixture
 
 const (
 	InValidID1    = -1
