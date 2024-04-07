@@ -8,7 +8,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
-func (h handler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 	var point model.PickPoint
 	if err := json.NewDecoder(r.Body).Decode(&point); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
