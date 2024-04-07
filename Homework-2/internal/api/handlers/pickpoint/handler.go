@@ -1,3 +1,4 @@
+//go:generate mockgen -source=./handler.go -destination=./handler_mocks_test.go -package=handler
 package handler
 
 import (
@@ -11,4 +12,12 @@ type service interface {
 	Read(context.Context, int64) (*model.PickPoint, error)
 	Update(context.Context, *model.PickPoint) error
 	Delete(context.Context, int64) error
+}
+
+type handler struct {
+	service
+}
+
+func NewHandler(s service) *handler {
+	return &handler{service: s}
 }

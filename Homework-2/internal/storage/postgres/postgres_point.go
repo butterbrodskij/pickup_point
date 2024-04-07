@@ -1,3 +1,4 @@
+//go:generate mockgen -source=./postgres_point.go -destination=./postgres_point_mocks_test.go -package=postgres
 package postgres
 
 import (
@@ -5,16 +6,23 @@ import (
 	"errors"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
-type PickpointRepo struct {
-	db *db.Database
+type database interface {
+	Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error)
+	ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row
 }
 
-func NewRepo(db *db.Database) *PickpointRepo {
+type PickpointRepo struct {
+	db database
+}
+
+func NewRepo(db database) *PickpointRepo {
 	return &PickpointRepo{db: db}
 }
 

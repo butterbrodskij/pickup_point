@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"sync"
 
+	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
@@ -29,7 +30,7 @@ func NewServer(service service) server {
 }
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
-	router := router.MakeRouter(s.service, cfg)
+	router := router.MakeRouter(handler.NewHandler(s.service), cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)
