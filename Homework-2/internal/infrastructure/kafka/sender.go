@@ -3,17 +3,12 @@ package kafka
 import (
 	"encoding/json"
 	"io"
-	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/IBM/sarama"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
-
-type requestMessage struct {
-	CaughtTime time.Time
-	Request    *http.Request
-}
 
 type requestKafkaMessage struct {
 	CaughtTime time.Time `json:"time"`
@@ -39,7 +34,7 @@ func NewKafkaSender(producer producer, topic string) *KafkaSender {
 	}
 }
 
-func (s *KafkaSender) SendMessage(message requestMessage) error {
+func (s *KafkaSender) SendMessage(message model.RequestMessage) error {
 	kafkaMsg, err := s.buildMessage(message)
 	if err != nil {
 		return err
@@ -52,7 +47,7 @@ func (s *KafkaSender) SendMessage(message requestMessage) error {
 	return nil
 }
 
-func (s *KafkaSender) buildMessage(message requestMessage) (*sarama.ProducerMessage, error) {
+func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.ProducerMessage, error) {
 	msg, err := json.Marshal(convert2KafkaMessage(message))
 
 	if err != nil {
@@ -73,7 +68,7 @@ func (s *KafkaSender) buildMessage(message requestMessage) (*sarama.ProducerMess
 	}, nil
 }
 
-func convert2KafkaMessage(msg requestMessage) requestKafkaMessage {
+func convert2KafkaMessage(msg model.RequestMessage) requestKafkaMessage {
 	reqBytes, _ := io.ReadAll(msg.Request.Body)
 	reqString := string(reqBytes)
 

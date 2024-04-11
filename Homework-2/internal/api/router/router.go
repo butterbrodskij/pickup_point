@@ -2,10 +2,12 @@ package router
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/infrastructure/kafka"
 
 	"github.com/gorilla/mux"
 )
@@ -19,7 +21,16 @@ type handler interface {
 
 func MakeRouter(h handler, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
-	router.Use(middleware.LogMiddleWare)
+	producer, err := kafka.NewProducer(cfg.Brokers)
+	if err != nil {
+		router.Use(middleware.LogMiddleWare)
+	} else {
+		sender := kafka.NewKafkaSender(producer, "logs")
+		log.Println("Uses Kafka")
+		router.Use(func(h http.Handler) http.Handler {
+			return middleware.LogKafkaMiddleWare(h, sender)
+		})
+	}
 	router.Use(func(h http.Handler) http.Handler {
 		return middleware.AuthMiddleWare(h, cfg)
 	})

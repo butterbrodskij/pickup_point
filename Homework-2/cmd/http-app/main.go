@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
