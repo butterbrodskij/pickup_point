@@ -52,10 +52,6 @@ func (k *Producer) SendSyncMessage(message *sarama.ProducerMessage) (partition i
 	return k.syncProducer.SendMessage(message)
 }
 
-func (k *Producer) SendSyncMessages(messages []*sarama.ProducerMessage) error {
-	return k.syncProducer.SendMessages(messages)
-}
-
 func (k *Producer) Close() error {
 	err := k.syncProducer.Close()
 	if err != nil {
