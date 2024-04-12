@@ -61,7 +61,7 @@ func (r *KafkaGroupReceiver) Subscribe(topic string) error {
 		defer r.wg.Done()
 		for {
 			if err := r.client.Consume(r.ctx, []string{topic}, r.consumer); err != nil {
-				log.Panicf("Error from consumer: %v", err)
+				log.Printf("Error from consumer: %v", err)
 			}
 			if r.ctx.Err() != nil {
 				return

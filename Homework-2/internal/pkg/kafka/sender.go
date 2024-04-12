@@ -1,3 +1,4 @@
+//go:generate mockgen -source=./sender.go -destination=./sender_mocks_test.go -package=kafka
 package kafka
 
 import (
@@ -37,7 +38,11 @@ func (s *KafkaSender) SendMessage(message model.RequestMessage) error {
 }
 
 func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.ProducerMessage, error) {
-	msg, err := json.Marshal(convert2KafkaMessage(message))
+	kafkaMsg, err := convert2KafkaMessage(message)
+	if err != nil {
+		return nil, err
+	}
+	msg, err := json.Marshal(kafkaMsg)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +60,17 @@ func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.Produc
 	}, nil
 }
 
-func convert2KafkaMessage(msg model.RequestMessage) model.LogMessage {
-	reqBytes, _ := io.ReadAll(msg.Request.Body)
+func convert2KafkaMessage(msg model.RequestMessage) (model.LogMessage, error) {
+	if msg.Request == nil {
+		return model.LogMessage{}, model.ErrorEmptyRequest
+	}
+	if msg.Request.Body == nil {
+		return model.LogMessage{}, model.ErrorEmptyBodyRequest
+	}
+	reqBytes, err := io.ReadAll(msg.Request.Body)
+	if err != nil {
+		return model.LogMessage{}, err
+	}
 	reqString := string(reqBytes)
 
 	login, _, _ := msg.Request.BasicAuth()
@@ -68,5 +82,5 @@ func convert2KafkaMessage(msg model.RequestMessage) model.LogMessage {
 		Url:        msg.Request.URL,
 		Body:       reqString,
 		Login:      login,
-	}
+	}, nil
 }
