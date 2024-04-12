@@ -24,14 +24,7 @@ func AuthMiddleWare(handler http.Handler, cfg config.Config) http.HandlerFunc {
 	}
 }
 
-func LogMiddleWare(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("got request with method %s\n", r.Method)
-		handler.ServeHTTP(w, r)
-	})
-}
-
-func LogKafkaMiddleWare(handler http.Handler, sender sender) http.HandlerFunc {
+func LogMiddleWare(handler http.Handler, sender sender) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := sender.SendMessage(model.RequestMessage{
 			CaughtTime: time.Now(),
