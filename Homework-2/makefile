@@ -60,3 +60,11 @@ create-topics:
 .PHONY: delete-topics
 delete-topics:
 	kaf topic delete logs
+
+.PHONY: create-test-topics
+create-test-topics:
+	kaf topic create test-logs -p 3 -r 3
+
+.PHONY: delete-test-topics
+delete-test-topics:
+	kaf topic delete test-logs

@@ -58,6 +58,7 @@ func main() {
 	}()
 
 	serv := server.NewServer(service, producer)
+	log.Println("Ready to run")
 
 	if err := serv.Run(ctx, cfg); err != nil {
 		log.Fatal(err)
