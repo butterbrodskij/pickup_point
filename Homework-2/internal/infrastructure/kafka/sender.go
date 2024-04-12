@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/url"
@@ -39,21 +40,17 @@ func (s *KafkaSender) SendMessage(message model.RequestMessage) error {
 	if err != nil {
 		return err
 	}
-
 	if _, _, err = s.producer.SendSyncMessage(kafkaMsg); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.ProducerMessage, error) {
 	msg, err := json.Marshal(convert2KafkaMessage(message))
-
 	if err != nil {
 		return nil, err
 	}
-
 	return &sarama.ProducerMessage{
 		Topic:     s.topic,
 		Value:     sarama.ByteEncoder(msg),
@@ -73,6 +70,7 @@ func convert2KafkaMessage(msg model.RequestMessage) requestKafkaMessage {
 	reqString := string(reqBytes)
 
 	login, _, _ := msg.Request.BasicAuth()
+	msg.Request.Body = io.NopCloser(bytes.NewBuffer(reqBytes))
 
 	return requestKafkaMessage{
 		CaughtTime: msg.CaughtTime,
