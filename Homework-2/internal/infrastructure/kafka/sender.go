@@ -4,20 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"net/url"
-	"time"
 
 	"github.com/IBM/sarama"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
-
-type requestKafkaMessage struct {
-	CaughtTime time.Time `json:"time"`
-	Method     string    `json:"method"`
-	Url        *url.URL  `json:"url"`
-	Body       string    `json:"body"`
-	Login      string    `json:"login"`
-}
 
 type producer interface {
 	SendSyncMessage(message *sarama.ProducerMessage) (partition int32, offset int64, err error)
@@ -65,14 +55,14 @@ func (s *KafkaSender) buildMessage(message model.RequestMessage) (*sarama.Produc
 	}, nil
 }
 
-func convert2KafkaMessage(msg model.RequestMessage) requestKafkaMessage {
+func convert2KafkaMessage(msg model.RequestMessage) model.LogMessage {
 	reqBytes, _ := io.ReadAll(msg.Request.Body)
 	reqString := string(reqBytes)
 
 	login, _, _ := msg.Request.BasicAuth()
 	msg.Request.Body = io.NopCloser(bytes.NewBuffer(reqBytes))
 
-	return requestKafkaMessage{
+	return model.LogMessage{
 		CaughtTime: msg.CaughtTime,
 		Method:     msg.Request.Method,
 		Url:        msg.Request.URL,

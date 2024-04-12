@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/IBM/sarama"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/infrastructure/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
@@ -35,11 +35,8 @@ func main() {
 
 	consumer, err := kafka.NewConsumer(cfg.Brokers)
 	if err == nil {
-		receiver := kafka.NewReceiver(consumer, map[string]kafka.HandleFunc{
-			"logs": func(message *sarama.ConsumerMessage) {
-				log.Println(message)
-			},
-		})
+		logger := logger.NewLogger()
+		receiver := kafka.NewReceiver(consumer, logger)
 		err = receiver.Subscribe("logs")
 		if err != nil {
 			log.Println("Kafka Subscription Failed")
