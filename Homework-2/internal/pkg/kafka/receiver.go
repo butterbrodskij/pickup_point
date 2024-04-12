@@ -4,19 +4,19 @@ import (
 	"github.com/IBM/sarama"
 )
 
-type handler interface {
+type Handler interface {
 	Handle(message *sarama.ConsumerMessage)
 }
 
 type KafkaReceiver struct {
 	consumer *Consumer
-	handler
+	Handler
 }
 
-func NewReceiver(consumer *Consumer, handler handler) *KafkaReceiver {
+func NewReceiver(consumer *Consumer, handler Handler) *KafkaReceiver {
 	return &KafkaReceiver{
 		consumer: consumer,
-		handler:  handler,
+		Handler:  handler,
 	}
 }
 

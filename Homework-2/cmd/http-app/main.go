@@ -8,6 +8,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
@@ -30,10 +31,21 @@ func main() {
 	repo := postgres.NewRepo(database)
 	service := pickpoint.NewService(repo)
 
-	consumer, err := kafka.NewConsumer(cfg.Kafka.Brokers)
+	logger := logger.NewLogger()
+	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: logger}, cfg.Kafka.Topic)
+	receiver, err := kafka.NewReceiverGroup(consumer, cfg.Kafka.Brokers)
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = receiver.Subscribe(cfg.Kafka.Topic)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := receiver.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {
@@ -45,7 +57,7 @@ func main() {
 		}
 	}()
 
-	serv := server.NewServer(service, consumer, producer)
+	serv := server.NewServer(service, producer)
 
 	if err := serv.Run(ctx, cfg); err != nil {
 		log.Fatal(err)

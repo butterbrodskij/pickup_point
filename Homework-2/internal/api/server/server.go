@@ -15,7 +15,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 )
 
 type service interface {
@@ -31,25 +30,17 @@ type producer interface {
 
 type server struct {
 	service
-	consumer *kafka.Consumer
 	producer
 }
 
-func NewServer(service service, consumer *kafka.Consumer, producer producer) server {
+func NewServer(service service, producer producer) server {
 	return server{
 		service:  service,
-		consumer: consumer,
 		producer: producer,
 	}
 }
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
-	logger := logger.NewLogger()
-	receiver := kafka.NewReceiver(s.consumer, logger)
-	err := receiver.Subscribe(cfg.Kafka.Topic)
-	if err != nil {
-		return err
-	}
 	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
 	handler := handler.NewHandler(s.service)
 	middleware := middleware.NewMiddleware(cfg, sender)
