@@ -10,6 +10,7 @@ import (
 
 	"github.com/IBM/sarama"
 	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
@@ -50,10 +51,10 @@ func (s server) Run(ctx context.Context, cfg config.Config) error {
 		return err
 	}
 	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
-
 	handler := handler.NewHandler(s.service)
+	middleware := middleware.NewMiddleware(cfg, sender)
 
-	router := router.MakeRouter(handler, sender, cfg)
+	router := router.MakeRouter(handler, middleware, cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)

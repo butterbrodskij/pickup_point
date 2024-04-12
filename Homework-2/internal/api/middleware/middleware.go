@@ -13,20 +13,32 @@ type sender interface {
 	SendMessage(message model.RequestMessage) error
 }
 
-func AuthMiddleWare(handler http.Handler, cfg config.Config) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type Middleware struct {
+	cfg config.Config
+	sender
+}
+
+func NewMiddleware(cfg config.Config, sender sender) *Middleware {
+	return &Middleware{
+		cfg:    cfg,
+		sender: sender,
+	}
+}
+
+func (m *Middleware) AuthMiddleWare(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		login, password, ok := r.BasicAuth()
-		if !ok || !isValidUser(login, password, cfg) {
+		if !ok || !isValidUser(login, password, m.cfg) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		handler.ServeHTTP(w, r)
-	}
+	})
 }
 
-func LogMiddleWare(handler http.Handler, sender sender) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := sender.SendMessage(model.RequestMessage{
+func (m *Middleware) LogMiddleWare(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := m.SendMessage(model.RequestMessage{
 			CaughtTime: time.Now(),
 			Request:    r,
 		})
@@ -35,7 +47,7 @@ func LogMiddleWare(handler http.Handler, sender sender) http.HandlerFunc {
 			return
 		}
 		handler.ServeHTTP(w, r)
-	}
+	})
 }
 
 func isValidUser(login, password string, cfg config.Config) bool {
