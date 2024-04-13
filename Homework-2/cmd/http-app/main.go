@@ -31,8 +31,8 @@ func main() {
 	repo := postgres.NewRepo(database)
 	service := pickpoint.NewService(repo)
 
-	logger := logger.NewLogger()
-	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: logger}, cfg.Kafka.Topic)
+	handler := logger.NewHandler()
+	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)
 	receiver, err := kafka.NewReceiverGroup(consumer, cfg.Kafka.Brokers)
 	if err != nil {
 		log.Fatal(err)

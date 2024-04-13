@@ -11,7 +11,7 @@ import (
 type Logger struct {
 }
 
-func NewLogger() *Logger {
+func NewHandler() *Logger {
 	return &Logger{}
 }
 
