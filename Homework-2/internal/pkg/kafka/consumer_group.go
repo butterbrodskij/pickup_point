@@ -1,8 +1,14 @@
 package kafka
 
 import (
+	"context"
+
 	"github.com/IBM/sarama"
 )
+
+type Handler interface {
+	Handle(ctx context.Context, session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage)
+}
 
 type ConsumerGroup struct {
 	ready    chan bool
@@ -37,7 +43,7 @@ func (consumer *ConsumerGroup) ConsumeClaim(session sarama.ConsumerGroupSession,
 		select {
 		case message := <-claim.Messages():
 			if handler, ok := consumer.handlers[message.Topic]; ok {
-				handler.Handle(message)
+				handler.Handle(context.Background(), session, message)
 			}
 			session.MarkMessage(message, "")
 		case <-session.Context().Done():

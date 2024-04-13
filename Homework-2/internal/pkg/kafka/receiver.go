@@ -1,12 +1,10 @@
 package kafka
 
 import (
+	"context"
+
 	"github.com/IBM/sarama"
 )
-
-type Handler interface {
-	Handle(message *sarama.ConsumerMessage)
-}
 
 type KafkaReceiver struct {
 	consumer *Consumer
@@ -38,7 +36,7 @@ func (r *KafkaReceiver) Subscribe(topic string) error {
 
 		go func(pc sarama.PartitionConsumer) {
 			for message := range pc.Messages() {
-				r.Handle(message)
+				r.Handle(context.Background(), nil, message)
 			}
 		}(pc)
 	}

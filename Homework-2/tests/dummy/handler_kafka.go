@@ -1,6 +1,7 @@
 package dummy
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -24,7 +25,7 @@ func (l *Handler) Wait() <-chan struct{} {
 	return l.wait
 }
 
-func (l *Handler) Handle(message *sarama.ConsumerMessage) {
+func (l *Handler) Handle(_ context.Context, _ sarama.ConsumerGroupSession, message *sarama.ConsumerMessage) {
 	logMsg, err := consumerMessage2LogMessage(message)
 	if err != nil {
 		l.Err = err

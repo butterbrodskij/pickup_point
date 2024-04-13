@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 
@@ -15,7 +16,7 @@ func NewHandler() *Logger {
 	return &Logger{}
 }
 
-func (l *Logger) Handle(message *sarama.ConsumerMessage) {
+func (l *Logger) Handle(_ context.Context, _ sarama.ConsumerGroupSession, message *sarama.ConsumerMessage) {
 	logMsg, err := consumerMessage2LogMessage(message)
 	if err != nil {
 		log.Println(model.ErrorInvalidKafkaMessage)
