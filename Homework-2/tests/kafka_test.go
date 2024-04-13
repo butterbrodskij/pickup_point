@@ -22,7 +22,7 @@ func TestKafka(t *testing.T) {
 		ctx               = context.Background()
 		handl             = dummy.NewHandler()
 		consumer          = kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handl}, cfg.Kafka.Topic)
-		receiver, errRec  = kafka.NewReceiverGroup(consumer, cfg.Kafka.Brokers)
+		receiver, errRec  = kafka.NewReceiverGroup(ctx, consumer, cfg.Kafka.Brokers)
 		producer, errProd = kafka.NewProducer(cfg.Kafka.Brokers)
 		sender            = kafka.NewKafkaSender(producer, cfg.Kafka.Topic)
 		authMiddleware    = middleware.NewAuthMiddleware(cfg)

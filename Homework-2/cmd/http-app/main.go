@@ -33,7 +33,7 @@ func main() {
 
 	handler := logger.NewHandler()
 	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)
-	receiver, err := kafka.NewReceiverGroup(consumer, cfg.Kafka.Brokers)
+	receiver, err := kafka.NewReceiverGroup(ctx, consumer, cfg.Kafka.Brokers)
 	if err != nil {
 		log.Fatal(err)
 	}

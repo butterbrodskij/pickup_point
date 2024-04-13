@@ -17,7 +17,7 @@ type KafkaGroupReceiver struct {
 	cancel   context.CancelFunc
 }
 
-func NewReceiverGroup(consumer *ConsumerGroup, brokers []string) (*KafkaGroupReceiver, error) {
+func NewReceiverGroup(ctxParent context.Context, consumer *ConsumerGroup, brokers []string) (*KafkaGroupReceiver, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.MaxVersion
 
@@ -37,7 +37,7 @@ func NewReceiverGroup(consumer *ConsumerGroup, brokers []string) (*KafkaGroupRec
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctxParent)
 
 	return &KafkaGroupReceiver{
 		consumer: consumer,
