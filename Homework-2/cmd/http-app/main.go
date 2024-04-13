@@ -37,7 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = receiver.Subscribe(cfg.Kafka.Topic)
+	err = receiver.Subscribe([]string{cfg.Kafka.Topic})
 	if err != nil {
 		log.Fatal(err)
 	}

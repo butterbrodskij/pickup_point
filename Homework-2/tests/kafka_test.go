@@ -31,7 +31,7 @@ func TestKafka(t *testing.T) {
 	)
 	require.NoError(t, errRec)
 	require.NoError(t, errProd)
-	err := receiver.Subscribe(cfg.Kafka.Topic)
+	err := receiver.Subscribe([]string{cfg.Kafka.Topic})
 	require.NoError(t, err)
 	defer receiver.Close()
 	type args struct {

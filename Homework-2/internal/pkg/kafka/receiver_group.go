@@ -55,12 +55,12 @@ func (r *KafkaGroupReceiver) Close() error {
 	return r.client.Close()
 }
 
-func (r *KafkaGroupReceiver) Subscribe(topic string) error {
+func (r *KafkaGroupReceiver) Subscribe(topics []string) error {
 	r.wg.Add(1)
 	go func() {
 		defer r.wg.Done()
 		for {
-			if err := r.client.Consume(r.ctx, []string{topic}, r.consumer); err != nil {
+			if err := r.client.Consume(r.ctx, topics, r.consumer); err != nil {
 				log.Printf("Error from consumer: %v", err)
 			}
 			if r.ctx.Err() != nil {
