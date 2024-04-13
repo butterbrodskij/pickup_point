@@ -43,9 +43,10 @@ func NewServer(service service, producer producer) server {
 func (s server) Run(ctx context.Context, cfg config.Config) error {
 	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
 	handler := handler.NewHandler(s.service)
-	middleware := middleware.NewMiddleware(cfg, sender)
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
+	logMiddleware := middleware.NewLogMiddleware(sender)
 
-	router := router.MakeRouter(handler, middleware, cfg)
+	router := router.MakeRouter(handler, authMiddleware, logMiddleware, cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)

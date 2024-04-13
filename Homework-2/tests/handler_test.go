@@ -23,9 +23,10 @@ import (
 
 func TestCreate(t *testing.T) {
 	var (
-		ctx        = context.Background()
-		middleware = middleware.NewMiddleware(cfg, dummy.NewDummySender())
-		router     = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), middleware, cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("creating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -85,9 +86,10 @@ func TestCreate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	var (
-		ctx        = context.Background()
-		middleware = middleware.NewMiddleware(cfg, dummy.NewDummySender())
-		router     = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), middleware, cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful deleting pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -132,9 +134,10 @@ func TestDelete(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	var (
-		ctx        = context.Background()
-		middleware = middleware.NewMiddleware(cfg, dummy.NewDummySender())
-		router     = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), middleware, cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful reading pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -179,9 +182,10 @@ func TestRead(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	var (
-		ctx        = context.Background()
-		middleware = middleware.NewMiddleware(cfg, dummy.NewDummySender())
-		router     = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), middleware, cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful updating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")

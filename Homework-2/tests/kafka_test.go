@@ -11,12 +11,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
-	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 	"gitlab.ozon.dev/mer_marat/homework/tests/dummy"
 )
 
@@ -28,8 +25,9 @@ func TestKafka(t *testing.T) {
 		receiver, errRec  = kafka.NewReceiverGroup(consumer, cfg.Kafka.Brokers)
 		producer, errProd = kafka.NewProducer(cfg.Kafka.Brokers)
 		sender            = kafka.NewKafkaSender(producer, cfg.Kafka.Topic)
-		middleware        = middleware.NewMiddleware(cfg, sender)
-		router            = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), middleware, cfg)
+		authMiddleware    = middleware.NewAuthMiddleware(cfg)
+		logMiddleware     = middleware.NewLogMiddleware(sender)
+		router            = router.MakeRouter(dummy.NewHandlerApi(), authMiddleware, logMiddleware, cfg)
 	)
 	require.NoError(t, errRec)
 	require.NoError(t, errProd)
