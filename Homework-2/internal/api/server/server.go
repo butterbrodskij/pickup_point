@@ -8,10 +8,13 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/IBM/sarama"
 	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 )
 
 type service interface {
@@ -21,16 +24,29 @@ type service interface {
 	Delete(context.Context, int64) error
 }
 
-type server struct {
-	service service
+type producer interface {
+	SendSyncMessage(message *sarama.ProducerMessage) (partition int32, offset int64, err error)
 }
 
-func NewServer(service service) server {
-	return server{service: service}
+type server struct {
+	service
+	producer
+}
+
+func NewServer(service service, producer producer) server {
+	return server{
+		service:  service,
+		producer: producer,
+	}
 }
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
-	router := router.MakeRouter(handler.NewHandler(s.service), cfg)
+	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
+	handler := handler.NewHandler(s.service)
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
+	logMiddleware := middleware.NewLogMiddleware(sender)
+
+	router := router.MakeRouter(handler, authMiddleware, logMiddleware, cfg)
 	errChan := make(chan error, 1)
 	errSecChan := make(chan error, 1)
 	sigChan := make(chan os.Signal, 1)

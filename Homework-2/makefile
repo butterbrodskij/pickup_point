@@ -52,3 +52,19 @@ test-gen: .generate-mockgen .test
 
 integration:
 	go test ./tests --tags=integration
+
+.PHONY: create-topics
+create-topics:
+	kaf topic create logs -p 3 -r 3
+
+.PHONY: delete-topics
+delete-topics:
+	kaf topic delete logs
+
+.PHONY: create-test-topics
+create-test-topics:
+	kaf topic create test-logs -p 3 -r 3
+
+.PHONY: delete-test-topics
+delete-test-topics:
+	kaf topic delete test-logs

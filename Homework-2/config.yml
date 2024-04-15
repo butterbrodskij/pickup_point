@@ -14,3 +14,11 @@ database:
 users:
   - login: "admin"
     password: "password"
+
+# Kafka info
+kafka:
+  brokers:
+    - "127.0.0.1:9091"
+    - "127.0.0.1:9092"
+    - "127.0.0.1:9093"
+  topic: "logs"

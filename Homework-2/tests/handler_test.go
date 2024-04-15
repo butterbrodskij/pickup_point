@@ -12,17 +12,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
+	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
+	"gitlab.ozon.dev/mer_marat/homework/tests/dummy"
 	"gitlab.ozon.dev/mer_marat/homework/tests/fixture"
 )
 
 func TestCreate(t *testing.T) {
 	var (
-		ctx    = context.Background()
-		router = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("creating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -82,8 +86,10 @@ func TestCreate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	var (
-		ctx    = context.Background()
-		router = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful deleting pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -128,8 +134,10 @@ func TestDelete(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	var (
-		ctx    = context.Background()
-		router = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful reading pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -174,8 +182,10 @@ func TestRead(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	var (
-		ctx    = context.Background()
-		router = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), cfg)
+		ctx            = context.Background()
+		authMiddleware = middleware.NewAuthMiddleware(cfg)
+		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
+		router         = router.MakeRouter(handler.NewHandler(pickpoint.NewService(postgres.NewRepo(db.DB))), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful updating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")

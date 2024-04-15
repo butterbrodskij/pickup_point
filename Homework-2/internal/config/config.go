@@ -24,6 +24,10 @@ type Config struct {
 		Login    string `yaml:"login"`
 		Password string `yaml:"password"`
 	}
+	Kafka struct {
+		Brokers []string `yaml:"brokers,omitempty"`
+		Topic   string   `yaml:"topic"`
+	}
 }
 
 const (

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 
 	"github.com/gorilla/mux"
@@ -17,12 +16,18 @@ type handler interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-func MakeRouter(h handler, cfg config.Config) *mux.Router {
+type authMiddleware interface {
+	AuthMiddleWare(handler http.Handler) http.Handler
+}
+
+type logMiddleware interface {
+	LogMiddleWare(handler http.Handler) http.Handler
+}
+
+func MakeRouter(h handler, authMiddleware authMiddleware, logMiddleware logMiddleware, cfg config.Config) *mux.Router {
 	router := mux.NewRouter()
-	router.Use(middleware.LogMiddleWare)
-	router.Use(func(h http.Handler) http.Handler {
-		return middleware.AuthMiddleWare(h, cfg)
-	})
+	router.Use(logMiddleware.LogMiddleWare)
+	router.Use(authMiddleware.AuthMiddleWare)
 	router.HandleFunc("/pickpoint", h.Create).Methods("POST")
 	router.HandleFunc("/pickpoint", h.Update).Methods("PUT")
 	router.HandleFunc(fmt.Sprintf("/pickpoint/{%s:[0-9]+}", config.QueryParamKey), h.Delete).Methods("DELETE")
