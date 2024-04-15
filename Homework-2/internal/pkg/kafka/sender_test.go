@@ -21,11 +21,10 @@ func TestSendMessage(t *testing.T) {
 		producer func(m *Mockproducer)
 	}
 	testCases := []struct {
-		name        string
-		args        args
-		fields      fields
-		expectError bool
-		wantError   string
+		name      string
+		args      args
+		fields    fields
+		wantError assert.ErrorAssertionFunc
 	}{
 		{
 			name: "success",
@@ -38,8 +37,7 @@ func TestSendMessage(t *testing.T) {
 					m.EXPECT().SendSyncMessage(gomock.Any()).Return(int32(0), int64(0), nil)
 				},
 			},
-			expectError: false,
-			wantError:   "",
+			wantError: assert.NoError,
 		},
 		{
 			name: "empty request",
@@ -50,8 +48,9 @@ func TestSendMessage(t *testing.T) {
 			fields: fields{
 				producer: func(m *Mockproducer) {},
 			},
-			expectError: true,
-			wantError:   "empty request",
+			wantError: func(tt assert.TestingT, err error, i ...interface{}) bool {
+				return assert.EqualError(t, err, "empty request")
+			},
 		},
 		{
 			name: "empty body request",
@@ -62,8 +61,9 @@ func TestSendMessage(t *testing.T) {
 			fields: fields{
 				producer: func(m *Mockproducer) {},
 			},
-			expectError: true,
-			wantError:   "empty body request",
+			wantError: func(tt assert.TestingT, err error, i ...interface{}) bool {
+				return assert.EqualError(t, err, "empty body request")
+			},
 		},
 		{
 			name: "error",
@@ -76,12 +76,12 @@ func TestSendMessage(t *testing.T) {
 					m.EXPECT().SendSyncMessage(gomock.Any()).Return(int32(0), int64(0), assert.AnError)
 				},
 			},
-			expectError: true,
-			wantError:   "assert.AnError general error for testing",
+			wantError: func(tt assert.TestingT, err error, i ...interface{}) bool {
+				return assert.EqualError(t, err, "assert.AnError general error for testing")
+			},
 		},
 	}
 	for _, tt := range testCases {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			s := setUp(t, tt.args.topic)
@@ -90,10 +90,8 @@ func TestSendMessage(t *testing.T) {
 
 			err := s.sender.SendMessage(tt.args.msg)
 
-			if tt.expectError {
-				assert.EqualError(t, err, tt.wantError)
-			} else {
-				assert.NoError(t, err)
+			if tt.wantError(t, err, "SendMessage") {
+				return
 			}
 		})
 	}

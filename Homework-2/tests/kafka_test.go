@@ -42,11 +42,10 @@ func TestKafka(t *testing.T) {
 		url      string
 	}
 	testCases := []struct {
-		name        string
-		args        args
-		expectError bool
-		wantError   string
-		wantBody    string
+		name      string
+		args      args
+		wantError assert.ErrorAssertionFunc
+		wantBody  string
 	}{
 		{
 			name: "success",
@@ -57,9 +56,8 @@ func TestKafka(t *testing.T) {
 				method:   "POST",
 				url:      "/pickpoint",
 			},
-			expectError: false,
-			wantError:   "",
-			wantBody:    "New Request:\n\tMethod: POST\tPath: /pickpoint\tlogin: admin\tBody: {\"name\":\"Chertanovo\", \"address\":\"Chertanovskaya street, 13\", \"contacts\":\"+7(999)888-77-66\"}",
+			wantError: assert.NoError,
+			wantBody:  "New Request:\n\tMethod: POST\tPath: /pickpoint\tlogin: admin\tBody: {\"name\":\"Chertanovo\", \"address\":\"Chertanovskaya street, 13\", \"contacts\":\"+7(999)888-77-66\"}",
 		},
 		{
 			name: "bad request handling",
@@ -70,9 +68,8 @@ func TestKafka(t *testing.T) {
 				method:   "POST",
 				url:      "/pickpoint",
 			},
-			expectError: false,
-			wantError:   "",
-			wantBody:    "New Request:\n\tMethod: POST\tPath: /pickpoint\tlogin: admin\tBody: bad request",
+			wantError: assert.NoError,
+			wantBody:  "New Request:\n\tMethod: POST\tPath: /pickpoint\tlogin: admin\tBody: bad request",
 		},
 		{
 			name: "another example",
@@ -83,9 +80,8 @@ func TestKafka(t *testing.T) {
 				method:   "GET",
 				url:      "/pickpoint/10",
 			},
-			expectError: false,
-			wantError:   "",
-			wantBody:    "New Request:\n\tMethod: GET\tPath: /pickpoint/10\tlogin: pirate\tBody: body",
+			wantError: assert.NoError,
+			wantBody:  "New Request:\n\tMethod: GET\tPath: /pickpoint/10\tlogin: pirate\tBody: body",
 		},
 	}
 	for _, tt := range testCases {
@@ -99,10 +95,8 @@ func TestKafka(t *testing.T) {
 			router.ServeHTTP(w, req)
 			<-handl.Wait() // wait for handler to handle message
 
-			if tt.expectError {
-				require.EqualError(t, err, tt.wantError)
-			} else {
-				require.NoError(t, handl.Err)
+			if tt.wantError(t, err, "Handle") {
+				return
 			}
 			assert.Equal(t, tt.wantBody, handl.Result)
 		})
