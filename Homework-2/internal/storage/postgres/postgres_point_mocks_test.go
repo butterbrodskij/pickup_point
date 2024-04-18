@@ -36,6 +36,21 @@ func (m *Mockdatabase) EXPECT() *MockdatabaseMockRecorder {
 	return m.recorder
 }
 
+// BeginTx mocks base method.
+func (m *Mockdatabase) BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BeginTx", ctx, opt)
+	ret0, _ := ret[0].(pgx.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BeginTx indicates an expected call of BeginTx.
+func (mr *MockdatabaseMockRecorder) BeginTx(ctx, opt interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*Mockdatabase)(nil).BeginTx), ctx, opt)
+}
+
 // Exec mocks base method.
 func (m *Mockdatabase) Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
 	m.ctrl.T.Helper()

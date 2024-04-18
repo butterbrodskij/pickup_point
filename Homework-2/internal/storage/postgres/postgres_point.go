@@ -16,6 +16,7 @@ type database interface {
 	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error)
 	ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row
+	BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, error)
 }
 
 type PickpointRepo struct {
@@ -27,10 +28,18 @@ func NewRepo(db database) *PickpointRepo {
 }
 
 func (r *PickpointRepo) Add(ctx context.Context, point *model.PickPoint) (int64, error) {
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback(ctx)
 	var id int64
 	query := "INSERT INTO pickpoints(name, address, contacts) VALUES ($1, $2, $3) RETURNING id;"
-	err := r.db.ExecQueryRow(ctx, query, point.Name, point.Address, point.Contact).Scan(&id)
-	return id, err
+	err = r.db.ExecQueryRow(ctx, query, point.Name, point.Address, point.Contact).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, tx.Commit(ctx)
 }
 
 func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint, error) {
@@ -47,6 +56,11 @@ func (r *PickpointRepo) GetByID(ctx context.Context, id int64) (*model.PickPoint
 }
 
 func (r *PickpointRepo) Update(ctx context.Context, point *model.PickPoint) error {
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 	query := "UPDATE pickpoints SET name=$1, address=$2, contacts=$3 WHERE id=$4"
 	tag, err := r.db.Exec(ctx, query, point.Name, point.Address, point.Contact, point.ID)
 	if err != nil {
@@ -55,10 +69,15 @@ func (r *PickpointRepo) Update(ctx context.Context, point *model.PickPoint) erro
 	if tag.RowsAffected() == 0 {
 		return model.ErrorObjectNotFound
 	}
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *PickpointRepo) Delete(ctx context.Context, id int64) error {
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 	query := "DELETE FROM pickpoints WHERE id=$1"
 	tag, err := r.db.Exec(ctx, query, id)
 	if err != nil {
@@ -67,5 +86,5 @@ func (r *PickpointRepo) Delete(ctx context.Context, id int64) error {
 	if tag.RowsAffected() == 0 {
 		return model.ErrorObjectNotFound
 	}
-	return nil
+	return tx.Commit(ctx)
 }
