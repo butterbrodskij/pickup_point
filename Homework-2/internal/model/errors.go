@@ -10,4 +10,5 @@ var (
 	ErrorInvalidKafkaMessage = errors.New("invalid kafka message")
 	ErrorEmptyRequest        = errors.New("empty request")
 	ErrorEmptyBodyRequest    = errors.New("empty body request")
+	ErrorCacheMissed         = errors.New("cache missed")
 )
