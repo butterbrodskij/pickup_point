@@ -5,6 +5,7 @@ import (
 
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/command"
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
+	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
@@ -26,7 +27,8 @@ func main() {
 		return
 	}
 	servOrders := order.NewService(&storOrders, cover.NewService())
-	servPoints := pickpoint.NewService(&storPoints)
+	cache := inmemorycache.NewInMemoryCache()
+	servPoints := pickpoint.NewService(&storPoints, cache)
 
 	switch *params.Command {
 	case "":

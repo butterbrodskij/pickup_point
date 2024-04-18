@@ -7,6 +7,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
+	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
@@ -29,7 +30,9 @@ func main() {
 	defer database.Close()
 
 	repo := postgres.NewRepo(database)
-	service := pickpoint.NewService(repo)
+	cache := inmemorycache.NewInMemoryCache()
+	defer cache.Close()
+	service := pickpoint.NewService(repo, cache)
 
 	handler := logger.NewHandler()
 	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)

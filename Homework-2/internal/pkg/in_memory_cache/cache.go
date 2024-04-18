@@ -1,6 +1,7 @@
 package inmemorycache
 
 import (
+	"log"
 	"sync"
 	"time"
 
@@ -41,14 +42,13 @@ func (c *InMemoryCache) Close() {
 	c.wg.Wait()
 }
 
-func (c *InMemoryCache) SetPickPoint(id int64, point model.PickPoint) error {
+func (c *InMemoryCache) SetPickPoint(id int64, point model.PickPoint) {
 	c.mx.Lock()
 	defer c.mx.Unlock()
 	c.pickPoints[id] = cacheModel{
 		point,
 		time.Now(),
 	}
-	return nil
 }
 
 func (c *InMemoryCache) GetPickPoint(id int64) (model.PickPoint, error) {
@@ -58,14 +58,14 @@ func (c *InMemoryCache) GetPickPoint(id int64) (model.PickPoint, error) {
 	if !ok {
 		return model.PickPoint{}, model.ErrorCacheMissed
 	}
+	log.Println("Popal")
 	return pointCache.PickPoint, nil
 }
 
-func (c *InMemoryCache) DeletePickPoint(id int64) error {
+func (c *InMemoryCache) DeletePickPoint(id int64) {
 	c.mx.Lock()
 	defer c.mx.Unlock()
 	delete(c.pickPoints, id)
-	return nil
 }
 
 func (c *InMemoryCache) DeleteExpired() {
