@@ -29,6 +29,7 @@ func TestDelete(t *testing.T) {
 		w := httptest.NewRecorder()
 		m := mux.NewRouter()
 		s.mockServ.EXPECT().Delete(gomock.Any(), id).Return(nil)
+		s.mockCache.EXPECT().Delete(gomock.Any(), "1").Return(nil)
 		m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Delete)
 		m.ServeHTTP(w, req)
 

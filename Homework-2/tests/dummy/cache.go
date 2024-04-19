@@ -18,3 +18,6 @@ func (c *Cache) GetPickPoint(id int64) (model.PickPoint, error) {
 
 func (c *Cache) DeletePickPoint(id int64) {
 }
+
+func (c *Cache) UpdatePickPoint(id int64, point model.PickPoint) {
+}

@@ -26,6 +26,7 @@ func TestUpdate(t *testing.T) {
 		req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 		w := httptest.NewRecorder()
 		s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
+		s.mockCache.EXPECT().Delete(gomock.Any(), "100").Return(nil)
 
 		s.handl.Update(w, req)
 

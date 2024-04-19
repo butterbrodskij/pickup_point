@@ -154,3 +154,15 @@ func (mr *MockcacheMockRecorder) SetPickPoint(id, point interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPickPoint", reflect.TypeOf((*Mockcache)(nil).SetPickPoint), id, point)
 }
+
+// UpdatePickPoint mocks base method.
+func (m *Mockcache) UpdatePickPoint(id int64, point model.PickPoint) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "UpdatePickPoint", id, point)
+}
+
+// UpdatePickPoint indicates an expected call of UpdatePickPoint.
+func (mr *MockcacheMockRecorder) UpdatePickPoint(id, point interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePickPoint", reflect.TypeOf((*Mockcache)(nil).UpdatePickPoint), id, point)
+}

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -33,6 +34,10 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+	err = h.cache.Delete(r.Context(), key)
+	if err != nil {
+		log.Printf("cache delete failed: %s", err)
 	}
 	w.Write(model.MessageSuccess)
 }

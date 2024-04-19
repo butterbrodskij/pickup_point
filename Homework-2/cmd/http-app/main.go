@@ -9,6 +9,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/redis"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
@@ -28,6 +29,11 @@ func main() {
 		log.Fatal(err)
 	}
 	defer database.Close()
+
+	redis := redis.NewRedisDB(cfg)
+	if err := redis.Ping(ctx); err != nil {
+		log.Fatal(err)
+	}
 
 	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
@@ -60,7 +66,7 @@ func main() {
 		}
 	}()
 
-	serv := server.NewServer(service, producer)
+	serv := server.NewServer(service, producer, redis)
 	log.Println("Ready to run")
 
 	if err := serv.Run(ctx, cfg); err != nil {

@@ -50,6 +50,19 @@ func (c *InMemoryCache) SetPickPoint(id int64, point model.PickPoint) {
 	}
 }
 
+func (c *InMemoryCache) UpdatePickPoint(id int64, point model.PickPoint) {
+	c.mx.Lock()
+	defer c.mx.Unlock()
+	_, ok := c.pickPoints[id]
+	if !ok {
+		c.SetPickPoint(id, point)
+	}
+	c.pickPoints[id] = cacheModel{
+		point,
+		time.Now(),
+	}
+}
+
 func (c *InMemoryCache) GetPickPoint(id int64) (model.PickPoint, error) {
 	c.mx.RLock()
 	defer c.mx.RUnlock()

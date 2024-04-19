@@ -22,3 +22,9 @@ kafka:
     - "127.0.0.1:9092"
     - "127.0.0.1:9093"
   topic: "logs"
+
+# Redis credentials
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0

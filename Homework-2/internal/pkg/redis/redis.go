@@ -32,3 +32,7 @@ func (r *Redis) Get(ctx context.Context, key string) (string, error) {
 func (r *Redis) Delete(ctx context.Context, key ...string) error {
 	return r.client.Pipeline().Del(ctx, key...).Err()
 }
+
+func (r *Redis) Ping(ctx context.Context) error {
+	return r.client.Ping(ctx).Err()
+}

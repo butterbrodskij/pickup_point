@@ -70,6 +70,7 @@ func TestRead(t *testing.T) {
 		defer s.tearDown()
 		point := fixture.PickPoint().Valid1()
 		s.mockCache.EXPECT().GetPickPoint(id).Return(point.V(), nil)
+		s.mockCache.EXPECT().UpdatePickPoint(gomock.Any(), gomock.Any()).Return()
 
 		result, err := s.serv.Read(ctx, id)
 

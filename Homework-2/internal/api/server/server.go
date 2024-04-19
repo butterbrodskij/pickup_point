@@ -28,21 +28,29 @@ type producer interface {
 	SendSyncMessage(message *sarama.ProducerMessage) (partition int32, offset int64, err error)
 }
 
+type cache interface {
+	Set(ctx context.Context, key string, value interface{}) error
+	Get(ctx context.Context, key string) (string, error)
+	Delete(ctx context.Context, key ...string) error
+}
+
 type server struct {
 	service
 	producer
+	cache
 }
 
-func NewServer(service service, producer producer) server {
+func NewServer(service service, producer producer, cache cache) server {
 	return server{
 		service:  service,
 		producer: producer,
+		cache:    cache,
 	}
 }
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
 	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
-	handler := handler.NewHandler(s.service)
+	handler := handler.NewHandler(s.service, s.cache)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 	logMiddleware := middleware.NewLogMiddleware(sender)
 

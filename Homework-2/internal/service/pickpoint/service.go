@@ -18,6 +18,7 @@ type cache interface {
 	SetPickPoint(id int64, point model.PickPoint)
 	GetPickPoint(id int64) (model.PickPoint, error)
 	DeletePickPoint(id int64)
+	UpdatePickPoint(id int64, point model.PickPoint)
 }
 
 type service struct {
@@ -50,6 +51,7 @@ func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 	}
 	point, err := s.cache.GetPickPoint(id)
 	if err == nil {
+		s.cache.UpdatePickPoint(id, point)
 		return &point, nil
 	}
 	pPoint, err := s.repo.GetByID(ctx, id)
