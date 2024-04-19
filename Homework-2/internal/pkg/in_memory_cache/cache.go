@@ -1,7 +1,6 @@
 package inmemorycache
 
 import (
-	"log"
 	"sync"
 	"time"
 
@@ -58,7 +57,6 @@ func (c *InMemoryCache) GetPickPoint(id int64) (model.PickPoint, error) {
 	if !ok {
 		return model.PickPoint{}, model.ErrorCacheMissed
 	}
-	log.Println("Popal")
 	return pointCache.PickPoint, nil
 }
 
