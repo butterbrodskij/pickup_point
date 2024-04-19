@@ -1,6 +1,10 @@
 package dummy
 
-import "gitlab.ozon.dev/mer_marat/homework/internal/model"
+import (
+	"context"
+
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+)
 
 type Cache struct {
 }
@@ -20,4 +24,16 @@ func (c *Cache) DeletePickPoint(id int64) {
 }
 
 func (c *Cache) UpdatePickPoint(id int64, point model.PickPoint) {
+}
+
+func (c *Cache) Set(ctx context.Context, key string, value interface{}) error {
+	return nil
+}
+
+func (c *Cache) Get(ctx context.Context, key string) (string, error) {
+	return "", model.ErrorCacheMissed
+}
+
+func (c *Cache) Delete(ctx context.Context, key ...string) error {
+	return nil
 }
