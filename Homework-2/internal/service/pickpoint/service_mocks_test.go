@@ -116,53 +116,49 @@ func (m *Mockcache) EXPECT() *MockcacheMockRecorder {
 	return m.recorder
 }
 
-// DeletePickPoint mocks base method.
-func (m *Mockcache) DeletePickPoint(id int64) {
+// Delete mocks base method.
+func (m *Mockcache) Delete(ctx context.Context, keys ...string) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeletePickPoint", id)
+	varargs := []interface{}{ctx}
+	for _, a := range keys {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Delete", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// DeletePickPoint indicates an expected call of DeletePickPoint.
-func (mr *MockcacheMockRecorder) DeletePickPoint(id interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockcacheMockRecorder) Delete(ctx interface{}, keys ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePickPoint", reflect.TypeOf((*Mockcache)(nil).DeletePickPoint), id)
+	varargs := append([]interface{}{ctx}, keys...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Mockcache)(nil).Delete), varargs...)
 }
 
-// GetPickPoint mocks base method.
-func (m *Mockcache) GetPickPoint(id int64) (model.PickPoint, error) {
+// Get mocks base method.
+func (m *Mockcache) Get(ctx context.Context, key string, value interface{}) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPickPoint", id)
-	ret0, _ := ret[0].(model.PickPoint)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Get", ctx, key, value)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// GetPickPoint indicates an expected call of GetPickPoint.
-func (mr *MockcacheMockRecorder) GetPickPoint(id interface{}) *gomock.Call {
+// Get indicates an expected call of Get.
+func (mr *MockcacheMockRecorder) Get(ctx, key, value interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPickPoint", reflect.TypeOf((*Mockcache)(nil).GetPickPoint), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*Mockcache)(nil).Get), ctx, key, value)
 }
 
-// SetPickPoint mocks base method.
-func (m *Mockcache) SetPickPoint(id int64, point model.PickPoint) {
+// Set mocks base method.
+func (m *Mockcache) Set(ctx context.Context, key string, value interface{}) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetPickPoint", id, point)
+	ret := m.ctrl.Call(m, "Set", ctx, key, value)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// SetPickPoint indicates an expected call of SetPickPoint.
-func (mr *MockcacheMockRecorder) SetPickPoint(id, point interface{}) *gomock.Call {
+// Set indicates an expected call of Set.
+func (mr *MockcacheMockRecorder) Set(ctx, key, value interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPickPoint", reflect.TypeOf((*Mockcache)(nil).SetPickPoint), id, point)
-}
-
-// UpdatePickPoint mocks base method.
-func (m *Mockcache) UpdatePickPoint(id int64, point model.PickPoint) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "UpdatePickPoint", id, point)
-}
-
-// UpdatePickPoint indicates an expected call of UpdatePickPoint.
-func (mr *MockcacheMockRecorder) UpdatePickPoint(id, point interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePickPoint", reflect.TypeOf((*Mockcache)(nil).UpdatePickPoint), id, point)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*Mockcache)(nil).Set), ctx, key, value)
 }

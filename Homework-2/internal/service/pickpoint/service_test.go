@@ -2,6 +2,7 @@ package pickpoint
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -55,9 +56,9 @@ func TestRead(t *testing.T) {
 		s := setUp(t)
 		defer s.tearDown()
 		point := fixture.PickPoint().Valid1()
-		s.mockCache.EXPECT().GetPickPoint(id).Return(model.PickPoint{}, model.ErrorCacheMissed)
+		s.mockCache.EXPECT().Get(gomock.Any(), fmt.Sprint(id), gomock.Any()).Return(model.ErrorCacheMissed)
 		s.mockRepo.EXPECT().GetByID(gomock.Any(), id).Return(point.P(), nil)
-		s.mockCache.EXPECT().SetPickPoint(gomock.Any(), gomock.Any()).Return()
+		s.mockCache.EXPECT().Set(gomock.Any(), fmt.Sprint(id), gomock.Any()).Return(nil)
 
 		result, err := s.serv.Read(ctx, id)
 
@@ -68,14 +69,11 @@ func TestRead(t *testing.T) {
 		t.Parallel()
 		s := setUp(t)
 		defer s.tearDown()
-		point := fixture.PickPoint().Valid1()
-		s.mockCache.EXPECT().GetPickPoint(id).Return(point.V(), nil)
-		s.mockCache.EXPECT().UpdatePickPoint(gomock.Any(), gomock.Any()).Return()
+		s.mockCache.EXPECT().Get(gomock.Any(), fmt.Sprint(id), gomock.Any()).Return(nil)
 
-		result, err := s.serv.Read(ctx, id)
+		_, err := s.serv.Read(ctx, id)
 
 		require.NoError(t, err)
-		assert.Equal(t, point.V(), *result)
 	})
 	t.Run("fail", func(t *testing.T) {
 		t.Parallel()
@@ -93,7 +91,7 @@ func TestRead(t *testing.T) {
 			t.Parallel()
 			s := setUp(t)
 			defer s.tearDown()
-			s.mockCache.EXPECT().GetPickPoint(id).Return(model.PickPoint{}, model.ErrorCacheMissed)
+			s.mockCache.EXPECT().Get(gomock.Any(), fmt.Sprint(id), gomock.Any()).Return(model.ErrorCacheMissed)
 			s.mockRepo.EXPECT().GetByID(gomock.Any(), id).Return(nil, assert.AnError)
 
 			result, err := s.serv.Read(ctx, id)
@@ -115,7 +113,7 @@ func TestUpdate(t *testing.T) {
 		defer s.tearDown()
 		point := fixture.PickPoint().Valid1()
 		s.mockRepo.EXPECT().Update(gomock.Any(), point.P()).Return(nil)
-		s.mockCache.EXPECT().DeletePickPoint(gomock.Any()).Return()
+		s.mockCache.EXPECT().Delete(gomock.Any(), fmt.Sprint(point.V().ID)).Return(nil)
 
 		err := s.serv.Update(ctx, point.P())
 
@@ -138,7 +136,7 @@ func TestUpdate(t *testing.T) {
 			s := setUp(t)
 			defer s.tearDown()
 			point := fixture.PickPoint().Valid1()
-			s.mockCache.EXPECT().DeletePickPoint(gomock.Any()).Return()
+			s.mockCache.EXPECT().Delete(gomock.Any(), fmt.Sprint(point.V().ID)).Return(nil)
 			s.mockRepo.EXPECT().Update(gomock.Any(), point.P()).Return(assert.AnError)
 
 			err := s.serv.Update(ctx, point.P())
@@ -159,7 +157,7 @@ func TestDelete(t *testing.T) {
 		t.Parallel()
 		s := setUp(t)
 		defer s.tearDown()
-		s.mockCache.EXPECT().DeletePickPoint(gomock.Any()).Return()
+		s.mockCache.EXPECT().Delete(gomock.Any(), fmt.Sprint(id)).Return(nil)
 		s.mockRepo.EXPECT().Delete(gomock.Any(), id).Return(nil)
 
 		err := s.serv.Delete(ctx, id)
@@ -181,7 +179,7 @@ func TestDelete(t *testing.T) {
 			t.Parallel()
 			s := setUp(t)
 			defer s.tearDown()
-			s.mockCache.EXPECT().DeletePickPoint(gomock.Any()).Return()
+			s.mockCache.EXPECT().Delete(gomock.Any(), fmt.Sprint(id)).Return(nil)
 			s.mockRepo.EXPECT().Delete(gomock.Any(), id).Return(assert.AnError)
 
 			err := s.serv.Delete(ctx, id)

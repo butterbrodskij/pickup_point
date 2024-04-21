@@ -61,7 +61,7 @@ func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 	}
 	err = s.cache.Set(ctx, fmt.Sprint(id), *pPoint)
 	if err != nil {
-		log.Println(err)
+		log.Printf("cache set failed: %s", err)
 	}
 	return pPoint, nil
 }
@@ -70,7 +70,10 @@ func (s service) Update(ctx context.Context, point *model.PickPoint) error {
 	if !isValidPickPoint(point) {
 		return model.ErrorInvalidInput
 	}
-	s.cache.Delete(ctx, fmt.Sprint(point.ID))
+	err := s.cache.Delete(ctx, fmt.Sprint(point.ID))
+	if err != nil {
+		return err
+	}
 	return s.repo.Update(ctx, point)
 }
 
@@ -78,7 +81,10 @@ func (s service) Delete(ctx context.Context, id int64) error {
 	if !isValidID(id) {
 		return model.ErrorInvalidInput
 	}
-	s.cache.Delete(ctx, fmt.Sprint(id))
+	err := s.cache.Delete(ctx, fmt.Sprint(id))
+	if err != nil {
+		return err
+	}
 	return s.repo.Delete(ctx, id)
 }
 

@@ -7,22 +7,19 @@ import (
 )
 
 type pointHandlerFixture struct {
-	ctrl      *gomock.Controller
-	handl     *handler
-	mockServ  *Mockservice
-	mockCache *Mockcache
+	ctrl     *gomock.Controller
+	handl    *handler
+	mockServ *Mockservice
 }
 
 func setUp(t *testing.T) pointHandlerFixture {
 	ctrl := gomock.NewController(t)
 	mockServ := NewMockservice(ctrl)
-	mockCache := NewMockcache(ctrl)
-	handl := NewHandler(mockServ, mockCache)
+	handl := NewHandler(mockServ)
 	return pointHandlerFixture{
-		ctrl:      ctrl,
-		handl:     handl,
-		mockServ:  mockServ,
-		mockCache: mockCache,
+		ctrl:     ctrl,
+		handl:    handl,
+		mockServ: mockServ,
 	}
 }
 

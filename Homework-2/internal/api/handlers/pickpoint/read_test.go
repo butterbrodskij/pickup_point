@@ -30,24 +30,6 @@ func TestRead(t *testing.T) {
 		w := httptest.NewRecorder()
 		m := mux.NewRouter()
 		s.mockServ.EXPECT().Read(gomock.Any(), id).Return(fixture.PickPoint().Valid1().P(), nil)
-		s.mockCache.EXPECT().Get(gomock.Any(), "100").Return("", model.ErrorCacheMissed)
-		s.mockCache.EXPECT().Set(gomock.Any(), "100", gomock.Any()).Return(nil)
-		m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
-		m.ServeHTTP(w, req)
-
-		s.handl.Read(w, req)
-
-		require.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, w.Body.String(), `{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contacts":"+7(999)888-77-66"}`)
-	})
-	t.Run("cache test", func(t *testing.T) {
-		t.Parallel()
-		s := setUp(t)
-		defer s.tearDown()
-		req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/100", strings.NewReader(""))
-		w := httptest.NewRecorder()
-		m := mux.NewRouter()
-		s.mockCache.EXPECT().Get(gomock.Any(), "100").Return(`{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contacts":"+7(999)888-77-66"}`, nil)
 		m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 		m.ServeHTTP(w, req)
 
@@ -66,7 +48,6 @@ func TestRead(t *testing.T) {
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
 			s.mockServ.EXPECT().Read(gomock.Any(), invalidID).Return(nil, model.ErrorInvalidInput)
-			s.mockCache.EXPECT().Get(gomock.Any(), "0").Return("", model.ErrorCacheMissed)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 
@@ -83,7 +64,6 @@ func TestRead(t *testing.T) {
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
 			s.mockServ.EXPECT().Read(gomock.Any(), id).Return(nil, model.ErrorObjectNotFound)
-			s.mockCache.EXPECT().Get(gomock.Any(), "100").Return("", model.ErrorCacheMissed)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 
@@ -100,7 +80,6 @@ func TestRead(t *testing.T) {
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
 			s.mockServ.EXPECT().Read(gomock.Any(), id).Return(nil, assert.AnError)
-			s.mockCache.EXPECT().Get(gomock.Any(), "100").Return("", model.ErrorCacheMissed)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 
