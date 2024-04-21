@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
+	queryengine "gitlab.ozon.dev/mer_marat/homework/internal/pkg/query_engine"
 )
 
 type keyType string
@@ -19,21 +20,17 @@ type database interface {
 	BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, error)
 }
 
-type QueryEngineProvider interface {
-	GetQueryEngine(ctx context.Context) QueryEngine
-}
-
-type TransactionManager struct {
+type Transactor struct {
 	pool database
 }
 
-func NewTransactor(pool database) *TransactionManager {
-	return &TransactionManager{
+func NewTransactor(pool database) *Transactor {
+	return &Transactor{
 		pool: pool,
 	}
 }
 
-func (t *TransactionManager) RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error {
+func (t *Transactor) RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error {
 	tx, err := t.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel:   pgx.Serializable,
 		AccessMode: pgx.ReadWrite,
@@ -42,14 +39,14 @@ func (t *TransactionManager) RunSerializable(ctx context.Context, f func(ctxTX c
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if err := f(context.WithValue(ctx, key, NewQueryEngineTx(tx))); err != nil {
+	if err := f(context.WithValue(ctx, key, queryengine.NewQueryEngineTx(tx))); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
 }
 
-func (t *TransactionManager) GetQueryEngine(ctx context.Context) QueryEngine {
-	tx, ok := ctx.Value(key).(QueryEngine)
+func (t *Transactor) GetQueryEngine(ctx context.Context) queryengine.QueryEngine {
+	tx, ok := ctx.Value(key).(queryengine.QueryEngine)
 	if ok {
 		return tx
 	}

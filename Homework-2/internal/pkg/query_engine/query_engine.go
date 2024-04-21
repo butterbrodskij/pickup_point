@@ -1,4 +1,4 @@
-package transactor
+package queryengine
 
 import (
 	"context"
