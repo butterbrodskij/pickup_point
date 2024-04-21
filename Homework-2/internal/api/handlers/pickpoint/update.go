@@ -3,8 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
@@ -28,10 +26,6 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	}
-	err = h.cache.Delete(r.Context(), fmt.Sprint(point.ID))
-	if err != nil {
-		log.Printf("cache delete failed: %s", err)
 	}
 	w.Write(model.MessageSuccess)
 }

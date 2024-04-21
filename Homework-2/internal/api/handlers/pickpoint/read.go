@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -23,11 +22,6 @@ func (h *handler) Read(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	body, err := h.cache.Get(r.Context(), key)
-	if err == nil {
-		w.Write([]byte(body))
-		return
-	}
 	point, err := h.service.Read(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, model.ErrorObjectNotFound) {
@@ -42,9 +36,5 @@ func (h *handler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pointJSON, _ := json.Marshal(point)
-	err = h.cache.Set(r.Context(), key, string(pointJSON))
-	if err != nil {
-		log.Printf("cache set failed: %s", err)
-	}
 	w.Write(pointJSON)
 }

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -18,19 +19,27 @@ func NewRedis(opt *redis.Options) *Redis {
 }
 
 func (r *Redis) Set(ctx context.Context, key string, value interface{}) error {
-	return r.client.Set(ctx, key, value, time.Minute).Err()
+	bytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return r.client.Set(ctx, key, bytes, time.Minute).Err()
 }
 
-func (r *Redis) Get(ctx context.Context, key string) (string, error) {
+func (r *Redis) Get(ctx context.Context, key string, value interface{}) error {
 	res := r.client.Get(ctx, key)
 	if res.Err() != nil {
-		return "", res.Err()
+		return res.Err()
 	}
-	return res.Result()
+	data, err := res.Bytes()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, value)
 }
 
-func (r *Redis) Delete(ctx context.Context, key ...string) error {
-	return r.client.Pipeline().Del(ctx, key...).Err()
+func (r *Redis) Delete(ctx context.Context, keys ...string) error {
+	return r.client.Pipeline().Del(ctx, keys...).Err()
 }
 
 func (r *Redis) Ping(ctx context.Context) error {

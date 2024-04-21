@@ -11,4 +11,5 @@ var (
 	ErrorEmptyRequest        = errors.New("empty request")
 	ErrorEmptyBodyRequest    = errors.New("empty body request")
 	ErrorCacheMissed         = errors.New("cache missed")
+	ErrorNilPointer          = errors.New("nil pointer dereference")
 )

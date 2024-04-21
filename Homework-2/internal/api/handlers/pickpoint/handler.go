@@ -14,20 +14,12 @@ type service interface {
 	Delete(context.Context, int64) error
 }
 
-type cache interface {
-	Set(ctx context.Context, key string, value interface{}) error
-	Get(ctx context.Context, key string) (string, error)
-	Delete(ctx context.Context, key ...string) error
-}
-
 type handler struct {
 	service
-	cache
 }
 
-func NewHandler(s service, cache cache) *handler {
+func NewHandler(s service) *handler {
 	return &handler{
 		service: s,
-		cache:   cache,
 	}
 }

@@ -1,6 +1,8 @@
 package inmemorycache
 
 import (
+	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -8,12 +10,12 @@ import (
 )
 
 type cacheModel struct {
-	model.PickPoint
+	str []byte
 	time.Time
 }
 
 type InMemoryCache struct {
-	pickPoints map[int64]cacheModel
+	pickPoints map[string]cacheModel
 	mx         sync.RWMutex
 	ttl        time.Duration
 	ticker     *ticker
@@ -22,7 +24,7 @@ type InMemoryCache struct {
 
 func NewInMemoryCache() *InMemoryCache {
 	cache := &InMemoryCache{
-		pickPoints: make(map[int64]cacheModel),
+		pickPoints: make(map[string]cacheModel),
 		mx:         sync.RWMutex{},
 		ttl:        time.Minute,
 		ticker:     newTicker(time.Minute),
@@ -41,42 +43,49 @@ func (c *InMemoryCache) Close() {
 	c.wg.Wait()
 }
 
-func (c *InMemoryCache) SetPickPoint(id int64, point model.PickPoint) {
+func (c *InMemoryCache) Set(_ context.Context, key string, value interface{}) error {
 	c.mx.Lock()
 	defer c.mx.Unlock()
-	c.pickPoints[id] = cacheModel{
-		point,
+	bytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	c.pickPoints[key] = cacheModel{
+		bytes,
 		time.Now(),
 	}
+	return nil
 }
 
-func (c *InMemoryCache) UpdatePickPoint(id int64, point model.PickPoint) {
-	c.mx.Lock()
-	defer c.mx.Unlock()
-	_, ok := c.pickPoints[id]
-	if !ok {
-		c.SetPickPoint(id, point)
-	}
-	c.pickPoints[id] = cacheModel{
-		point,
+func (c *InMemoryCache) updateUnsafe(_ context.Context, key string, value []byte) error {
+	c.pickPoints[key] = cacheModel{
+		value,
 		time.Now(),
 	}
+	return nil
 }
 
-func (c *InMemoryCache) GetPickPoint(id int64) (model.PickPoint, error) {
+func (c *InMemoryCache) Get(ctx context.Context, key string, value interface{}) error {
 	c.mx.RLock()
 	defer c.mx.RUnlock()
-	pointCache, ok := c.pickPoints[id]
+	el, ok := c.pickPoints[key]
 	if !ok {
-		return model.PickPoint{}, model.ErrorCacheMissed
+		return model.ErrorCacheMissed
 	}
-	return pointCache.PickPoint, nil
+	err := json.Unmarshal(el.str, value)
+	if err != nil {
+		return err
+	}
+	return c.updateUnsafe(ctx, key, el.str)
 }
 
-func (c *InMemoryCache) DeletePickPoint(id int64) {
+func (c *InMemoryCache) Delete(_ context.Context, keys ...string) error {
 	c.mx.Lock()
 	defer c.mx.Unlock()
-	delete(c.pickPoints, id)
+	for _, key := range keys {
+		delete(c.pickPoints, key)
+	}
+	return nil
 }
 
 func (c *InMemoryCache) DeleteExpired() {
@@ -91,4 +100,8 @@ func (c *InMemoryCache) DeleteExpired() {
 
 func (c *InMemoryCache) expired(el cacheModel) bool {
 	return time.Since(el.Time) > c.ttl
+}
+
+func (r *InMemoryCache) Ping(ctx context.Context) error {
+	return nil
 }

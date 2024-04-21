@@ -3,6 +3,8 @@ package pickpoint
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
@@ -15,10 +17,9 @@ type storage interface {
 }
 
 type cache interface {
-	SetPickPoint(id int64, point model.PickPoint)
-	GetPickPoint(id int64) (model.PickPoint, error)
-	DeletePickPoint(id int64)
-	UpdatePickPoint(id int64, point model.PickPoint)
+	Set(ctx context.Context, key string, value interface{}) error
+	Get(ctx context.Context, key string, value interface{}) error
+	Delete(ctx context.Context, keys ...string) error
 }
 
 type service struct {
@@ -49,24 +50,27 @@ func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 	if !isValidID(id) {
 		return nil, model.ErrorInvalidInput
 	}
-	point, err := s.cache.GetPickPoint(id)
+	point := new(model.PickPoint)
+	err := s.cache.Get(ctx, fmt.Sprint(id), point)
 	if err == nil {
-		s.cache.UpdatePickPoint(id, point)
-		return &point, nil
+		return point, nil
 	}
 	pPoint, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	s.cache.SetPickPoint(id, *pPoint)
-	return pPoint, err
+	err = s.cache.Set(ctx, fmt.Sprint(id), *pPoint)
+	if err != nil {
+		log.Println(err)
+	}
+	return pPoint, nil
 }
 
 func (s service) Update(ctx context.Context, point *model.PickPoint) error {
 	if !isValidPickPoint(point) {
 		return model.ErrorInvalidInput
 	}
-	s.cache.DeletePickPoint(point.ID)
+	s.cache.Delete(ctx, fmt.Sprint(point.ID))
 	return s.repo.Update(ctx, point)
 }
 
@@ -74,7 +78,7 @@ func (s service) Delete(ctx context.Context, id int64) error {
 	if !isValidID(id) {
 		return model.ErrorInvalidInput
 	}
-	s.cache.DeletePickPoint(id)
+	s.cache.Delete(ctx, fmt.Sprint(id))
 	return s.repo.Delete(ctx, id)
 }
 

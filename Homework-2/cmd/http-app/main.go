@@ -38,6 +38,7 @@ func main() {
 	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
 	defer cache.Close()
+	//service := pickpoint.NewService(repo, redis)
 	service := pickpoint.NewService(repo, cache)
 
 	handler := logger.NewHandler()
@@ -66,7 +67,7 @@ func main() {
 		}
 	}()
 
-	serv := server.NewServer(service, producer, redis)
+	serv := server.NewServer(service, producer)
 	log.Println("Ready to run")
 
 	if err := serv.Run(ctx, cfg); err != nil {
