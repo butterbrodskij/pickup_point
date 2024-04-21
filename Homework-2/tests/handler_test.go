@@ -27,7 +27,7 @@ func TestCreate(t *testing.T) {
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
 		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache())
-		router         = router.MakeRouter(handler.NewHandler(service, dummy.NewCache()), authMiddleware, logMiddleware, cfg)
+		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("creating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -91,7 +91,7 @@ func TestDelete(t *testing.T) {
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
 		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache())
-		router         = router.MakeRouter(handler.NewHandler(service, dummy.NewCache()), authMiddleware, logMiddleware, cfg)
+		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful deleting pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -140,7 +140,7 @@ func TestRead(t *testing.T) {
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
 		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache())
-		router         = router.MakeRouter(handler.NewHandler(service, dummy.NewCache()), authMiddleware, logMiddleware, cfg)
+		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful reading pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
@@ -189,7 +189,7 @@ func TestUpdate(t *testing.T) {
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
 		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache())
-		router         = router.MakeRouter(handler.NewHandler(service, dummy.NewCache()), authMiddleware, logMiddleware, cfg)
+		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful updating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
