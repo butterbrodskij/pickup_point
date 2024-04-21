@@ -4,7 +4,6 @@ package pickpoint
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
@@ -22,16 +21,22 @@ type cache interface {
 	Delete(ctx context.Context, keys ...string) error
 }
 
+type transactor interface {
+	RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error
+}
+
 type service struct {
-	repo  storage
-	cache cache
+	repo       storage
+	cache      cache
+	transactor transactor
 }
 
 // New returns type Service associated with storage
-func NewService(stor storage, cache cache) service {
+func NewService(stor storage, cache cache, transactor transactor) service {
 	return service{
-		repo:  stor,
-		cache: cache,
+		repo:       stor,
+		cache:      cache,
+		transactor: transactor,
 	}
 }
 
@@ -55,13 +60,15 @@ func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 	if err == nil {
 		return point, nil
 	}
-	pPoint, err := s.repo.GetByID(ctx, id)
-	if err != nil {
+	var pPoint *model.PickPoint
+	if err := s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+		pPoint, err = s.repo.GetByID(ctx, id)
+		if err != nil {
+			return err
+		}
+		return s.cache.Set(ctx, fmt.Sprint(id), *pPoint)
+	}); err != nil {
 		return nil, err
-	}
-	err = s.cache.Set(ctx, fmt.Sprint(id), *pPoint)
-	if err != nil {
-		log.Printf("cache set failed: %s", err)
 	}
 	return pPoint, nil
 }
@@ -70,22 +77,26 @@ func (s service) Update(ctx context.Context, point *model.PickPoint) error {
 	if !isValidPickPoint(point) {
 		return model.ErrorInvalidInput
 	}
-	err := s.cache.Delete(ctx, fmt.Sprint(point.ID))
-	if err != nil {
-		return err
-	}
-	return s.repo.Update(ctx, point)
+	return s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+		err := s.repo.Update(ctx, point)
+		if err != nil {
+			return err
+		}
+		return s.cache.Delete(ctx, fmt.Sprint(point.ID))
+	})
 }
 
 func (s service) Delete(ctx context.Context, id int64) error {
 	if !isValidID(id) {
 		return model.ErrorInvalidInput
 	}
-	err := s.cache.Delete(ctx, fmt.Sprint(id))
-	if err != nil {
-		return err
-	}
-	return s.repo.Delete(ctx, id)
+	return s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+		err := s.repo.Delete(ctx, id)
+		if err != nil {
+			return err
+		}
+		return s.cache.Delete(ctx, fmt.Sprint(id))
+	})
 }
 
 func isValidPickPoint(point *model.PickPoint) bool {

@@ -21,6 +21,10 @@ func (db Database) Close() {
 	db.cluster.Close()
 }
 
+func (db Database) Pool() *pgxpool.Pool {
+	return db.cluster
+}
+
 func (db Database) BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, error) {
 	return db.cluster.BeginTx(ctx, opt)
 }
