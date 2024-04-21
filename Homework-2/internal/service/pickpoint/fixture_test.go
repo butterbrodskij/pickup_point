@@ -11,18 +11,21 @@ type pointServiceFixture struct {
 	serv      service
 	mockCache *Mockcache
 	mockRepo  *Mockstorage
+	mockTrans *Mocktransactor
 }
 
 func setUp(t *testing.T) pointServiceFixture {
 	ctrl := gomock.NewController(t)
 	mockRepo := NewMockstorage(ctrl)
 	mockCache := NewMockcache(ctrl)
-	serv := NewService(mockRepo, mockCache)
+	mockTrans := NewMocktransactor(ctrl)
+	serv := NewService(mockRepo, mockCache, mockTrans)
 	return pointServiceFixture{
 		ctrl:      ctrl,
 		serv:      serv,
 		mockCache: mockCache,
 		mockRepo:  mockRepo,
+		mockTrans: mockTrans,
 	}
 }
 

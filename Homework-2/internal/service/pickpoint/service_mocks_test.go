@@ -162,3 +162,40 @@ func (mr *MockcacheMockRecorder) Set(ctx, key, value interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*Mockcache)(nil).Set), ctx, key, value)
 }
+
+// Mocktransactor is a mock of transactor interface.
+type Mocktransactor struct {
+	ctrl     *gomock.Controller
+	recorder *MocktransactorMockRecorder
+}
+
+// MocktransactorMockRecorder is the mock recorder for Mocktransactor.
+type MocktransactorMockRecorder struct {
+	mock *Mocktransactor
+}
+
+// NewMocktransactor creates a new mock instance.
+func NewMocktransactor(ctrl *gomock.Controller) *Mocktransactor {
+	mock := &Mocktransactor{ctrl: ctrl}
+	mock.recorder = &MocktransactorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *Mocktransactor) EXPECT() *MocktransactorMockRecorder {
+	return m.recorder
+}
+
+// RunSerializable mocks base method.
+func (m *Mocktransactor) RunSerializable(ctx context.Context, f func(context.Context) error) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunSerializable", ctx, f)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunSerializable indicates an expected call of RunSerializable.
+func (mr *MocktransactorMockRecorder) RunSerializable(ctx, f interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSerializable", reflect.TypeOf((*Mocktransactor)(nil).RunSerializable), ctx, f)
+}
