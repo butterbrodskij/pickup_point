@@ -27,7 +27,7 @@ func NewInMemoryCache() *InMemoryCache {
 		pickPoints: make(map[string]cacheModel),
 		mx:         sync.RWMutex{},
 		ttl:        time.Minute,
-		ticker:     newTicker(time.Minute),
+		ticker:     newTicker(time.Second * 5),
 		wg:         &sync.WaitGroup{},
 	}
 	cache.wg.Add(1)
