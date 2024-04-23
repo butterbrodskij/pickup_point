@@ -15,7 +15,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/transactor"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 	"gitlab.ozon.dev/mer_marat/homework/tests/dummy"
@@ -27,8 +26,7 @@ func TestCreate(t *testing.T) {
 		ctx            = context.Background()
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
-		transactor     = transactor.NewTransactor(db.DB)
-		service        = pickpoint.NewService(postgres.NewRepo(transactor), dummy.NewCache(), transactor)
+		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache(), db.DB)
 		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("creating pickpoint", func(t *testing.T) {
@@ -92,8 +90,7 @@ func TestDelete(t *testing.T) {
 		ctx            = context.Background()
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
-		transactor     = transactor.NewTransactor(db.DB)
-		service        = pickpoint.NewService(postgres.NewRepo(transactor), dummy.NewCache(), transactor)
+		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache(), db.DB)
 		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful deleting pickpoint", func(t *testing.T) {
@@ -142,8 +139,7 @@ func TestRead(t *testing.T) {
 		ctx            = context.Background()
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
-		transactor     = transactor.NewTransactor(db.DB)
-		service        = pickpoint.NewService(postgres.NewRepo(transactor), dummy.NewCache(), transactor)
+		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache(), db.DB)
 		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful reading pickpoint", func(t *testing.T) {
@@ -192,8 +188,7 @@ func TestUpdate(t *testing.T) {
 		ctx            = context.Background()
 		authMiddleware = middleware.NewAuthMiddleware(cfg)
 		logMiddleware  = middleware.NewLogMiddleware(dummy.NewDummySender())
-		transactor     = transactor.NewTransactor(db.DB)
-		service        = pickpoint.NewService(postgres.NewRepo(transactor), dummy.NewCache(), transactor)
+		service        = pickpoint.NewService(postgres.NewRepo(db.DB), dummy.NewCache(), db.DB)
 		router         = router.MakeRouter(handler.NewHandler(service), authMiddleware, logMiddleware, cfg)
 	)
 	t.Run("successful updating pickpoint", func(t *testing.T) {

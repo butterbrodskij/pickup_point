@@ -17,6 +17,7 @@ type database interface {
 	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error)
 	ExecQueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row
+	RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error
 	BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, error)
 }
 

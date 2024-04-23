@@ -10,7 +10,6 @@ import (
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/redis"
-	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/transactor"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
@@ -36,12 +35,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	transactor := transactor.NewTransactor(database)
-	repo := postgres.NewRepo(transactor)
+	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
 	defer cache.Close()
-	//service := pickpoint.NewService(repo, redis, transactor)
-	service := pickpoint.NewService(repo, cache, transactor)
+	//service := pickpoint.NewService(repo, redis, database)
+	service := pickpoint.NewService(repo, cache, database)
 
 	handler := logger.NewHandler()
 	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)
