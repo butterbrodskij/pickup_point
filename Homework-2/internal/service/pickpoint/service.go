@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v4"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
@@ -22,7 +23,7 @@ type cache interface {
 }
 
 type transactor interface {
-	RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error
+	RunSerializable(ctx context.Context, role pgx.TxAccessMode, f func(ctxTX context.Context) error) error
 }
 
 type service struct {
@@ -61,7 +62,7 @@ func (s service) Read(ctx context.Context, id int64) (*model.PickPoint, error) {
 		return point, nil
 	}
 	var pPoint *model.PickPoint
-	if err := s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+	if err := s.transactor.RunSerializable(ctx, pgx.ReadOnly, func(ctxTX context.Context) error {
 		pPoint, err = s.repo.GetByID(ctx, id)
 		if err != nil {
 			return err
@@ -77,7 +78,7 @@ func (s service) Update(ctx context.Context, point *model.PickPoint) error {
 	if !isValidPickPoint(point) {
 		return model.ErrorInvalidInput
 	}
-	return s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+	return s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
 		err := s.repo.Update(ctx, point)
 		if err != nil {
 			return err
@@ -90,7 +91,7 @@ func (s service) Delete(ctx context.Context, id int64) error {
 	if !isValidID(id) {
 		return model.ErrorInvalidInput
 	}
-	return s.transactor.RunSerializable(ctx, func(ctxTX context.Context) error {
+	return s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
 		err := s.repo.Delete(ctx, id)
 		if err != nil {
 			return err

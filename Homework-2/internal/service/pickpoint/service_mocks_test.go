@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	pgx "github.com/jackc/pgx/v4"
 	model "gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
@@ -187,15 +188,15 @@ func (m *Mocktransactor) EXPECT() *MocktransactorMockRecorder {
 }
 
 // RunSerializable mocks base method.
-func (m *Mocktransactor) RunSerializable(ctx context.Context, f func(context.Context) error) error {
+func (m *Mocktransactor) RunSerializable(ctx context.Context, role pgx.TxAccessMode, f func(context.Context) error) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunSerializable", ctx, f)
+	ret := m.ctrl.Call(m, "RunSerializable", ctx, role, f)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RunSerializable indicates an expected call of RunSerializable.
-func (mr *MocktransactorMockRecorder) RunSerializable(ctx, f interface{}) *gomock.Call {
+func (mr *MocktransactorMockRecorder) RunSerializable(ctx, role, f interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSerializable", reflect.TypeOf((*Mocktransactor)(nil).RunSerializable), ctx, f)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSerializable", reflect.TypeOf((*Mocktransactor)(nil).RunSerializable), ctx, role, f)
 }

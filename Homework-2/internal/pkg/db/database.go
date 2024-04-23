@@ -34,13 +34,13 @@ func (db Database) BeginTx(ctx context.Context, opt pgx.TxOptions) (pgx.Tx, erro
 	return db.cluster.BeginTx(ctx, opt)
 }
 
-func (db Database) RunSerializable(ctx context.Context, f func(ctxTX context.Context) error) error {
+func (db Database) RunSerializable(ctx context.Context, role pgx.TxAccessMode, f func(ctxTX context.Context) error) error {
 	tx, ok := ctx.Value(key).(pgx.Tx)
 	if !ok {
 		var err error
 		tx, err = db.BeginTx(ctx, pgx.TxOptions{
 			IsoLevel:   pgx.Serializable,
-			AccessMode: pgx.ReadWrite,
+			AccessMode: role,
 		})
 		if err != nil {
 			return err
