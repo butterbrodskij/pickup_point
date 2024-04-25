@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pickpoints;
+option go_package = "./;pb";
+
+import "google/protobuf/empty.proto";
+
+service PickPoints {
+    rpc Read(IdRequest) returns (PickPointResponse) {}
+    rpc Create(PickPointRequest) returns (PickPointResponse) {}
+    rpc Update(PickPointRequest) returns (google.protobuf.Empty) {}
+    rpc Delete(IdRequest) returns (google.protobuf.Empty) {}
+}
+
+message PickPoint {
+    int64 id = 1;
+    string name = 2;
+    string address = 3;
+    string contact = 4;
+}
+
+message PickPointRequest {
+    PickPoint pickPoint = 1;
+}
+
+message PickPointResponse {
+    PickPoint pickPoint = 1;
+}
+
+message IdRequest {
+    int64 id = 1;
+}
