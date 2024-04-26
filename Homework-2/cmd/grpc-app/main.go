@@ -25,10 +25,15 @@ var (
 		Name: "pickpoint_grpc",
 		Help: "Number of requests handled",
 	})
+
+	givenOrdersCounter = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "given_orders",
+		Help: "Number of given orders",
+	})
 )
 
 func init() {
-	reg.MustRegister(pickpointCounter)
+	reg.MustRegister(pickpointCounter, givenOrdersCounter)
 }
 
 func main() {
@@ -73,8 +78,10 @@ func main() {
 		return
 	}
 	servOrders := order.NewService(&storOrders, cover.NewService())
+	servOrders.AddGivenOrdersMetrics(givenOrdersCounter)
 
-	serv := server.NewServer(service, servOrders, producer, reg)
+	serv := server.NewServer(service, producer, reg)
+	serv.AddOrderService(servOrders)
 	log.Println("Ready to run")
 
 	if err := serv.RunGRPC(ctx, cfg); err != nil {

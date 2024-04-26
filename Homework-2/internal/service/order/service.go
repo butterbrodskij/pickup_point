@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
@@ -31,8 +32,9 @@ type storageInterface interface {
 
 type service struct {
 	order_pb.UnimplementedOrdersServer
-	s   storageInterface
-	cov coverService
+	s                  storageInterface
+	cov                coverService
+	givenOrdersCounter prometheus.Gauge
 }
 
 func pb2Order(input *order_pb.OrderInput) (model.Order, error) {
@@ -82,6 +84,10 @@ func order2PbSlice(input []model.Order) []*order_pb.Order {
 // New returns type Service associated with storage
 func NewService(stor storageInterface, cov coverService) service {
 	return service{s: stor, cov: cov}
+}
+
+func (s *service) AddGivenOrdersMetrics(metrics prometheus.Gauge) {
+	s.givenOrdersCounter = metrics
 }
 
 // Get checks validity of given data and adds new order to storage
@@ -134,8 +140,15 @@ func (s service) Give(ctx context.Context, idsRequest *order_pb.Ids) (*emptypb.E
 			recipient = order.RecipientID
 		}
 	}
+	err := s.s.Give(ids)
+	if err != nil {
+		return nil, err
+	}
+	if s.givenOrdersCounter != nil {
+		s.givenOrdersCounter.Add(float64(len(ids)))
+	}
 
-	return nil, s.s.Give(ids)
+	return nil, nil
 }
 
 // List checks validity of given recipient id and n and returns slice of all his orders (last n)
@@ -190,7 +203,15 @@ func (s service) Return(ctx context.Context, returnRequest *order_pb.ReturnReque
 	case order.GivenTime.AddDate(0, 0, 2).Before(time.Now()):
 		return nil, errors.New("order can not be returned: more than 2 days passed")
 	}
-	return nil, s.s.Return(id)
+	err := s.s.Return(id)
+	if err != nil {
+		return nil, err
+	}
+	if s.givenOrdersCounter != nil {
+		s.givenOrdersCounter.Sub(1)
+	}
+
+	return nil, nil
 }
 
 // ListReturn checks validity of given args and returns k returned orders on nth page

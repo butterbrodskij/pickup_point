@@ -9,7 +9,7 @@ import "google/api/annotations.proto";
 service PickPoints {
     rpc Read(IdRequest) returns (PickPoint) {
         option (google.api.http) = {
-            get: "/v1/pickpoint/{id}"
+            get: "/v1/pickpoint/{id}" // in developing
         };
     }
     rpc Create(PickPoint) returns (PickPoint) {}
