@@ -27,13 +27,25 @@ var (
 	})
 
 	givenOrdersCounter = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "given_orders",
+		Name: "given_orders_grpc",
 		Help: "Number of given orders",
+	})
+
+	requestPickpointMetrics = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "pickpoint",
+		Subsystem: "grpc",
+		Name:      "request",
+		Help:      "Requests handling histogram",
+	})
+
+	failedOrderCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "failed_orders_grpc",
+		Help: "Number of failed requests to order service",
 	})
 )
 
 func init() {
-	reg.MustRegister(pickpointCounter, givenOrdersCounter)
+	reg.MustRegister(pickpointCounter, givenOrdersCounter, requestPickpointMetrics, failedOrderCounter)
 }
 
 func main() {
@@ -62,6 +74,7 @@ func main() {
 	//service := pickpoint.NewService(repo, redis, database)
 	service := pickpoint.NewService(repo, cache, database)
 	service.AddCounterMetric(pickpointCounter)
+	service.AddRequestHistogram(requestPickpointMetrics)
 
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {
@@ -79,7 +92,8 @@ func main() {
 		return
 	}
 	servOrders := order.NewService(&storOrders, cover.NewService())
-	servOrders.AddGivenOrdersMetrics(givenOrdersCounter)
+	servOrders.AddGivenOrdersGauge(givenOrdersCounter)
+	servOrders.AddFailedRequestsCounter(failedOrderCounter)
 
 	serv := server.NewServer(service, producer, reg)
 	serv.AddOrderService(servOrders)

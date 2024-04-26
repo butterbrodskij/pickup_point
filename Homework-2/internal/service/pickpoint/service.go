@@ -4,6 +4,7 @@ package pickpoint
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/prometheus/client_golang/prometheus"
@@ -31,10 +32,11 @@ type transactor interface {
 
 type service struct {
 	pickpoint_pb.UnimplementedPickPointsServer
-	repo       storage
-	cache      cache
-	transactor transactor
-	counter    prometheus.Counter
+	repo            storage
+	cache           cache
+	transactor      transactor
+	counter         prometheus.Counter
+	requestHandling prometheus.Histogram
 }
 
 // New returns type Service associated with storage
@@ -44,6 +46,10 @@ func NewService(stor storage, cache cache, transactor transactor) service {
 		cache:      cache,
 		transactor: transactor,
 	}
+}
+
+func (s *service) AddRequestHistogram(hist prometheus.Histogram) {
+	s.requestHandling = hist
 }
 
 func (s *service) AddCounterMetric(counter prometheus.Counter) {
@@ -69,6 +75,12 @@ func model2Pb(point *model.PickPoint) *pickpoint_pb.PickPoint {
 }
 
 func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*pickpoint_pb.PickPoint, error) {
+	start := time.Now()
+	defer func() {
+		if s.requestHandling != nil {
+			s.requestHandling.Observe(time.Since(start).Seconds())
+		}
+	}()
 	defer func() {
 		if s.counter != nil {
 			s.counter.Add(1)
@@ -97,6 +109,12 @@ func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*
 }
 
 func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pickpoint_pb.PickPoint, error) {
+	start := time.Now()
+	defer func() {
+		if s.requestHandling != nil {
+			s.requestHandling.Observe(time.Since(start).Seconds())
+		}
+	}()
 	defer func() {
 		if s.counter != nil {
 			s.counter.Add(1)
@@ -111,6 +129,12 @@ func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pi
 }
 
 func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (*emptypb.Empty, error) {
+	start := time.Now()
+	defer func() {
+		if s.requestHandling != nil {
+			s.requestHandling.Observe(time.Since(start).Seconds())
+		}
+	}()
 	defer func() {
 		if s.counter != nil {
 			s.counter.Add(1)
@@ -130,6 +154,12 @@ func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (*em
 }
 
 func (s service) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*emptypb.Empty, error) {
+	start := time.Now()
+	defer func() {
+		if s.requestHandling != nil {
+			s.requestHandling.Observe(time.Since(start).Seconds())
+		}
+	}()
 	defer func() {
 		if s.counter != nil {
 			s.counter.Add(1)

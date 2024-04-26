@@ -35,6 +35,7 @@ type service struct {
 	s                  storageInterface
 	cov                coverService
 	givenOrdersCounter prometheus.Gauge
+	failedCounter      prometheus.Counter
 }
 
 func pb2Order(input *order_pb.OrderInput) (model.Order, error) {
@@ -86,36 +87,59 @@ func NewService(stor storageInterface, cov coverService) service {
 	return service{s: stor, cov: cov}
 }
 
-func (s *service) AddGivenOrdersMetrics(metrics prometheus.Gauge) {
+func (s *service) AddGivenOrdersGauge(metrics prometheus.Gauge) {
 	s.givenOrdersCounter = metrics
+}
+
+func (s *service) AddFailedRequestsCounter(counter prometheus.Counter) {
+	s.failedCounter = counter
+}
+
+func (s *service) incFailedOrdersCounter() {
+	if s.failedCounter != nil {
+		s.failedCounter.Inc()
+	}
 }
 
 // Get checks validity of given data and adds new order to storage
 func (s service) AcceptFromCourier(ctx context.Context, in *order_pb.OrderInput) (*emptypb.Empty, error) {
 	order, err := pb2Order(in)
 	if err != nil {
+		s.incFailedOrdersCounter()
 		return nil, err
 	}
 	if order.ExpireDate.Before(time.Now()) {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("can not get order: trying to get expired order")
 	}
 	if err = s.cov.ValidateOrder(order); err != nil {
+		s.incFailedOrdersCounter()
 		return nil, err
 	}
 	order.PriceKopecks += s.cov.GetPackagingPrice(order)
-	return nil, s.s.AcceptFromCourier(order)
+	if err = s.s.AcceptFromCourier(order); err != nil {
+		s.incFailedOrdersCounter()
+		return nil, err
+	}
+	return nil, nil
 }
 
 // Remove checks validity of given id and deletes an order from storage
 func (s service) Remove(ctx context.Context, idRequest *order_pb.IdRequest) (*emptypb.Empty, error) {
 	id := idRequest.Id
 	if id <= 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("id should be positive")
 	}
 	if order, ok := s.s.GetByID(id); ok && order.ExpireDate.After(time.Now()) || order.IsGiven {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be removed: trying to remove order that is given or not expired")
 	}
-	return nil, s.s.Remove(id)
+	if err := s.s.Remove(id); err != nil {
+		s.incFailedOrdersCounter()
+		return nil, err
+	}
+	return nil, nil
 }
 
 // Give checks validity of given ids and gives orders to recipient
@@ -127,14 +151,19 @@ func (s service) Give(ctx context.Context, idsRequest *order_pb.Ids) (*emptypb.E
 		order, ok := s.s.GetByID(id)
 		switch {
 		case !ok:
+			s.incFailedOrdersCounter()
 			return nil, fmt.Errorf("can not give orders: order %d is not in the storage", id)
 		case recipient != 0 && order.RecipientID != recipient:
+			s.incFailedOrdersCounter()
 			return nil, errors.New("can not give orders: orders belong to different recipients")
 		case order.IsGiven:
+			s.incFailedOrdersCounter()
 			return nil, fmt.Errorf("can not give orders: order %d is already given", id)
 		case order.IsReturned:
+			s.incFailedOrdersCounter()
 			return nil, fmt.Errorf("can not give orders: order %d is already returned by recipient", id)
 		case order.ExpireDate.Before(time.Now()):
+			s.incFailedOrdersCounter()
 			return nil, fmt.Errorf("can not give orders: order %d is expired", id)
 		case recipient == 0:
 			recipient = order.RecipientID
@@ -142,6 +171,7 @@ func (s service) Give(ctx context.Context, idsRequest *order_pb.Ids) (*emptypb.E
 	}
 	err := s.s.Give(ids)
 	if err != nil {
+		s.incFailedOrdersCounter()
 		return nil, err
 	}
 	if s.givenOrdersCounter != nil {
@@ -156,9 +186,11 @@ func (s service) List(ctx context.Context, req *order_pb.ListRequest) (*order_pb
 	recipient := req.Recipient
 	n := int(req.N)
 	if recipient <= 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("recipient id should be positive")
 	}
 	if n < 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("n should not be negative")
 	}
 	var (
@@ -171,13 +203,14 @@ func (s service) List(ctx context.Context, req *order_pb.ListRequest) (*order_pb
 		all, err = s.s.ListNotGiven(recipient)
 	}
 	if err != nil {
+		s.incFailedOrdersCounter()
 		return nil, err
 	}
 	if n == 0 || len(all) <= n {
 		return &order_pb.OrderList{Orders: order2PbSlice(all)}, nil
 	}
 
-	return &order_pb.OrderList{Orders: order2PbSlice(all[len(all)-n:])}, err
+	return &order_pb.OrderList{Orders: order2PbSlice(all[len(all)-n:])}, nil
 }
 
 // Return checks validity of given order id and recipient id and gets order back from recipient
@@ -185,26 +218,34 @@ func (s service) Return(ctx context.Context, returnRequest *order_pb.ReturnReque
 	id := returnRequest.Id
 	recipient := returnRequest.Recipient
 	if id <= 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("id should be positive")
 	}
 	if recipient <= 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("recipient id should be positive")
 	}
 	order, ok := s.s.GetByID(id)
 	switch {
 	case !ok:
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be returned: order not found")
 	case order.RecipientID != recipient:
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be returned: order belongs to different recipient")
 	case order.IsReturned:
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be returned: order is already returned")
 	case !order.IsGiven:
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be returned: order is not given yet")
 	case order.GivenTime.AddDate(0, 0, 2).Before(time.Now()):
+		s.incFailedOrdersCounter()
 		return nil, errors.New("order can not be returned: more than 2 days passed")
 	}
 	err := s.s.Return(id)
 	if err != nil {
+		s.incFailedOrdersCounter()
 		return nil, err
 	}
 	if s.givenOrdersCounter != nil {
@@ -219,18 +260,25 @@ func (s service) ListReturn(ctx context.Context, request *order_pb.ListReturnReq
 	pageNum := int(request.PageNum)
 	ordersPerPage := int(request.OrdersPerPage)
 	if pageNum < 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("pageNum should not be negative")
 	}
 	if ordersPerPage <= 0 {
+		s.incFailedOrdersCounter()
 		return nil, errors.New("ordersPerPage should be positive")
 	}
 	all, err := s.s.ListReturn()
-	if err != nil || pageNum == 0 {
-		return &order_pb.OrderList{Orders: order2PbSlice(all)}, err
+	if err != nil {
+		s.incFailedOrdersCounter()
+		return nil, err
+	}
+	if pageNum == 0 {
+		return &order_pb.OrderList{Orders: order2PbSlice(all)}, nil
 	}
 	firstPos := (pageNum - 1) * ordersPerPage
 	if len(all) == 0 || len(all) <= firstPos {
-		return &order_pb.OrderList{Orders: order2PbSlice(all)}, errors.New("empty list")
+		s.incFailedOrdersCounter()
+		return nil, errors.New("empty list")
 	}
 	newLen := ordersPerPage
 	if len(all) < pageNum*ordersPerPage {
