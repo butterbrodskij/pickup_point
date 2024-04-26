@@ -18,9 +18,7 @@ import (
 func TestRead(t *testing.T) {
 	t.Parallel()
 	var (
-		ctx       = context.Background()
-		id        = int64(100)
-		invalidID = int64(0)
+		ctx = context.Background()
 	)
 	t.Run("smoke test", func(t *testing.T) {
 		t.Parallel()
@@ -29,14 +27,14 @@ func TestRead(t *testing.T) {
 		req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/100", strings.NewReader(""))
 		w := httptest.NewRecorder()
 		m := mux.NewRouter()
-		s.mockServ.EXPECT().Read(gomock.Any(), id).Return(fixture.PickPoint().Valid1().P(), nil)
+		s.mockServ.EXPECT().Read(gomock.Any(), gomock.Any()).Return(model2Pb(fixture.PickPoint().Valid1().P()), nil)
 		m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 		m.ServeHTTP(w, req)
 
 		s.handl.Read(w, req)
 
 		require.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, w.Body.String(), `{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contacts":"+7(999)888-77-66"}`)
+		assert.Equal(t, w.Body.String(), `{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contact":"+7(999)888-77-66"}`)
 	})
 	t.Run("fail", func(t *testing.T) {
 		t.Parallel()
@@ -47,7 +45,7 @@ func TestRead(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/0", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Read(gomock.Any(), invalidID).Return(nil, model.ErrorInvalidInput)
+			s.mockServ.EXPECT().Read(gomock.Any(), gomock.Any()).Return(nil, model.ErrorInvalidInput)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 
@@ -63,7 +61,7 @@ func TestRead(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/100", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Read(gomock.Any(), id).Return(nil, model.ErrorObjectNotFound)
+			s.mockServ.EXPECT().Read(gomock.Any(), gomock.Any()).Return(nil, model.ErrorObjectNotFound)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 
@@ -79,7 +77,7 @@ func TestRead(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "GET", "/pickpoint/100", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Read(gomock.Any(), id).Return(nil, assert.AnError)
+			s.mockServ.EXPECT().Read(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Read)
 			m.ServeHTTP(w, req)
 

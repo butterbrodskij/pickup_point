@@ -4,14 +4,15 @@ package handler
 import (
 	"context"
 
-	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type service interface {
-	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
-	Read(context.Context, int64) (*model.PickPoint, error)
-	Update(context.Context, *model.PickPoint) error
-	Delete(context.Context, int64) error
+	Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pickpoint_pb.PickPoint, error)
+	Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*pickpoint_pb.PickPoint, error)
+	Update(ctx context.Context, point *pickpoint_pb.PickPoint) (*emptypb.Empty, error)
+	Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*emptypb.Empty, error)
 }
 
 type handler struct {

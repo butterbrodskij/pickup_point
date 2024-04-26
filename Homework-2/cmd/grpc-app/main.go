@@ -60,7 +60,8 @@ func main() {
 	cache := inmemorycache.NewInMemoryCache()
 	defer cache.Close()
 	//service := pickpoint.NewService(repo, redis, database)
-	service := pickpoint.NewService(repo, cache, database, pickpointCounter)
+	service := pickpoint.NewService(repo, cache, database)
+	service.AddCounterMetric(pickpointCounter)
 
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {

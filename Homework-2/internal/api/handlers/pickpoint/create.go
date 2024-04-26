@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
 )
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,12 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	pointNew, err := h.service.Create(r.Context(), &point)
+	pointNew, err := h.service.Create(r.Context(), &pickpoint_pb.PickPoint{
+		Id:      point.ID,
+		Name:    point.Name,
+		Address: point.Address,
+		Contact: point.Contact,
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

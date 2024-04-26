@@ -11,6 +11,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/prometheus/client_golang/prometheus"
+	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/router"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
@@ -18,7 +19,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
 	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
-	"gitlab.ozon.dev/mer_marat/homework/tests/dummy"
 	"google.golang.org/grpc"
 )
 
@@ -47,8 +47,7 @@ func (s *server) AddOrderService(service_order order_pb.OrdersServer) {
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
 	sender := kafka.NewKafkaSender(s.producer, cfg.Kafka.Topic)
-	//handler := handler.NewHandler(s.service)
-	handler := dummy.NewHandlerApi()
+	handler := handler.NewHandler(s.service_pickpoint)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 	logMiddleware := middleware.NewLogMiddleware(sender)
 
@@ -114,7 +113,9 @@ func (s server) RunGRPC(ctx context.Context, cfg config.Config) error {
 
 	grpcServer := grpc.NewServer()
 	pickpoint_pb.RegisterPickPointsServer(grpcServer, s.service_pickpoint)
-	order_pb.RegisterOrdersServer(grpcServer, s.service_order)
+	if s.service_order != nil {
+		order_pb.RegisterOrdersServer(grpcServer, s.service_order)
+	}
 
 	go func() {
 		if err := metrics.Listen(":9095", s.reg); err != nil {

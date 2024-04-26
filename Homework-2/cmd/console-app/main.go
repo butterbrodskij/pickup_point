@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/command"
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
@@ -13,19 +12,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
-
-var (
-	reg = prometheus.NewRegistry()
-
-	pickpointCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "pickpoint_cli",
-		Help: "Number of requests handled",
-	})
-)
-
-func init() {
-	reg.MustRegister(pickpointCounter)
-}
 
 func main() {
 	var params parsing.Params
@@ -43,7 +29,7 @@ func main() {
 	}
 	servOrders := order.NewService(&storOrders, cover.NewService())
 	cache := inmemorycache.NewInMemoryCache()
-	servPoints := pickpoint.NewService(&storPoints, cache, transactor.NewDummyTransactor(), pickpointCounter)
+	servPoints := pickpoint.NewService(&storPoints, cache, transactor.NewDummyTransactor())
 
 	switch *params.Command {
 	case "":

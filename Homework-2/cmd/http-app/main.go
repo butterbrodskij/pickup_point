@@ -53,7 +53,8 @@ func main() {
 	cache := inmemorycache.NewInMemoryCache()
 	defer cache.Close()
 	//service := pickpoint.NewService(repo, redis, database)
-	service := pickpoint.NewService(repo, cache, database, pickpointCounter)
+	service := pickpoint.NewService(repo, cache, database)
+	service.AddCounterMetric(pickpointCounter)
 
 	handler := logger.NewHandler()
 	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)

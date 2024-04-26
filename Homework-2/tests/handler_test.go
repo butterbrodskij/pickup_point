@@ -32,7 +32,7 @@ func TestCreate(t *testing.T) {
 	t.Run("creating pickpoint", func(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
-		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 		req.SetBasicAuth("admin", "password")
 		w := httptest.NewRecorder()
@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		require.Equal(t, w.Code, http.StatusOK)
-		assert.Equal(t, w.Body.String(), `{"id":1,"name":"Chertanovo","address":"Chertanovskaya street, 13","contacts":"+7(999)888-77-66"}`)
+		assert.Equal(t, w.Body.String(), `{"id":1,"name":"Chertanovo","address":"Chertanovskaya street, 13","contact":"+7(999)888-77-66"}`)
 	})
 	t.Run("fail", func(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 		t.Run("unauthorized request", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+			body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 			req.SetBasicAuth("admin", "wrong_password")
 			w := httptest.NewRecorder()
@@ -72,7 +72,7 @@ func TestCreate(t *testing.T) {
 		t.Run("page not found", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+			body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "POST", "/wrong_pickpoint", strings.NewReader(body))
 			req.SetBasicAuth("admin", "wrong_password")
 			w := httptest.NewRecorder()
@@ -153,7 +153,7 @@ func TestRead(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		require.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, w.Body.String(), `{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contacts":"+7(999)888-77-66"}`)
+		assert.Equal(t, w.Body.String(), `{"id":100,"name":"Chertanovo","address":"Chertanovskaya street, 8","contact":"+7(999)888-77-66"}`)
 	})
 	t.Run("fail", func(t *testing.T) {
 		t.Run("bad request", func(t *testing.T) {
@@ -195,7 +195,7 @@ func TestUpdate(t *testing.T) {
 		db.SetUp(t, "pickpoints")
 		defer db.TearDown(t, "pickpoints")
 		fillDB(fixture.PickPoint().Valid1().P())
-		body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+		body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 		req.SetBasicAuth("admin", "password")
 		w := httptest.NewRecorder()
@@ -222,7 +222,7 @@ func TestUpdate(t *testing.T) {
 		t.Run("not found", func(t *testing.T) {
 			db.SetUp(t, "pickpoints")
 			defer db.TearDown(t, "pickpoints")
-			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
+			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 			req.SetBasicAuth("admin", "password")
 			w := httptest.NewRecorder()

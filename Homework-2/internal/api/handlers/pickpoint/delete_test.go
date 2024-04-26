@@ -17,9 +17,7 @@ import (
 func TestDelete(t *testing.T) {
 	t.Parallel()
 	var (
-		ctx       = context.Background()
-		id        = int64(1)
-		invalidID = int64(0)
+		ctx = context.Background()
 	)
 	t.Run("delete writes success message", func(t *testing.T) {
 		t.Parallel()
@@ -28,7 +26,7 @@ func TestDelete(t *testing.T) {
 		req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/1", strings.NewReader(""))
 		w := httptest.NewRecorder()
 		m := mux.NewRouter()
-		s.mockServ.EXPECT().Delete(gomock.Any(), id).Return(nil)
+		s.mockServ.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(nil, nil)
 		m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Delete)
 		m.ServeHTTP(w, req)
 
@@ -46,7 +44,7 @@ func TestDelete(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/0", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Delete(gomock.Any(), invalidID).Return(model.ErrorInvalidInput)
+			s.mockServ.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(nil, model.ErrorInvalidInput)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Delete)
 			m.ServeHTTP(w, req)
 
@@ -62,7 +60,7 @@ func TestDelete(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/1", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Delete(gomock.Any(), id).Return(model.ErrorObjectNotFound)
+			s.mockServ.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(nil, model.ErrorObjectNotFound)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Delete)
 			m.ServeHTTP(w, req)
 
@@ -78,7 +76,7 @@ func TestDelete(t *testing.T) {
 			req, _ := http.NewRequestWithContext(ctx, "DELETE", "/pickpoint/1", strings.NewReader(""))
 			w := httptest.NewRecorder()
 			m := mux.NewRouter()
-			s.mockServ.EXPECT().Delete(gomock.Any(), id).Return(assert.AnError)
+			s.mockServ.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			m.HandleFunc("/pickpoint/{point:[0-9]+}", s.handl.Delete)
 			m.ServeHTTP(w, req)
 

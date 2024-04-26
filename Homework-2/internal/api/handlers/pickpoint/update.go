@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
 )
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +15,12 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err := h.service.Update(r.Context(), &point)
+	_, err := h.service.Update(r.Context(), &pickpoint_pb.PickPoint{
+		Id:      point.ID,
+		Name:    point.Name,
+		Address: point.Address,
+		Contact: point.Contact,
+	})
 	if err != nil {
 		if errors.Is(err, model.ErrorInvalidInput) {
 			w.WriteHeader(http.StatusBadRequest)

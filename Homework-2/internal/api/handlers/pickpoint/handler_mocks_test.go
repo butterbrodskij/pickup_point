@@ -9,7 +9,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	model "gitlab.ozon.dev/mer_marat/homework/internal/model"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Mockservice is a mock of service interface.
@@ -36,59 +37,61 @@ func (m *Mockservice) EXPECT() *MockserviceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *Mockservice) Create(arg0 context.Context, arg1 *model.PickPoint) (*model.PickPoint, error) {
+func (m *Mockservice) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pickpoint_pb.PickPoint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
-	ret0, _ := ret[0].(*model.PickPoint)
+	ret := m.ctrl.Call(m, "Create", ctx, point)
+	ret0, _ := ret[0].(*pickpoint_pb.PickPoint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockserviceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockserviceMockRecorder) Create(ctx, point interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*Mockservice)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*Mockservice)(nil).Create), ctx, point)
 }
 
 // Delete mocks base method.
-func (m *Mockservice) Delete(arg0 context.Context, arg1 int64) error {
+func (m *Mockservice) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*emptypb.Empty, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Delete", ctx, idRequest)
+	ret0, _ := ret[0].(*emptypb.Empty)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockserviceMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockserviceMockRecorder) Delete(ctx, idRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Mockservice)(nil).Delete), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Mockservice)(nil).Delete), ctx, idRequest)
 }
 
 // Read mocks base method.
-func (m *Mockservice) Read(arg0 context.Context, arg1 int64) (*model.PickPoint, error) {
+func (m *Mockservice) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*pickpoint_pb.PickPoint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Read", arg0, arg1)
-	ret0, _ := ret[0].(*model.PickPoint)
+	ret := m.ctrl.Call(m, "Read", ctx, idRequest)
+	ret0, _ := ret[0].(*pickpoint_pb.PickPoint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Read indicates an expected call of Read.
-func (mr *MockserviceMockRecorder) Read(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockserviceMockRecorder) Read(ctx, idRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Read", reflect.TypeOf((*Mockservice)(nil).Read), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Read", reflect.TypeOf((*Mockservice)(nil).Read), ctx, idRequest)
 }
 
 // Update mocks base method.
-func (m *Mockservice) Update(arg0 context.Context, arg1 *model.PickPoint) error {
+func (m *Mockservice) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (*emptypb.Empty, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Update", ctx, point)
+	ret0, _ := ret[0].(*emptypb.Empty)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockserviceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockserviceMockRecorder) Update(ctx, point interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*Mockservice)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*Mockservice)(nil).Update), ctx, point)
 }
