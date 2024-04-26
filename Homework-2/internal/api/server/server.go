@@ -117,11 +117,36 @@ func (s server) RunGRPC(ctx context.Context, cfg config.Config) error {
 		order_pb.RegisterOrdersServer(grpcServer, s.service_order)
 	}
 
+	errChan := make(chan error, 1)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	defer wg.Wait()
+
 	go func() {
 		if err := metrics.Listen(":9095", s.reg); err != nil {
 			log.Printf("metrics handling failed: %s", err)
 		}
 	}()
 
-	return grpcServer.Serve(lis)
+	go func() {
+		defer wg.Done()
+		if err := grpcServer.Serve(lis); err != nil {
+			errChan <- err
+		}
+	}()
+
+	select {
+	case sig := <-sigChan:
+		log.Printf("caught signal: %s\n", sig)
+		err := lis.Close()
+		if err != nil {
+			return err
+		}
+	case err := <-errChan:
+		return err
+	}
+
+	return nil
 }
