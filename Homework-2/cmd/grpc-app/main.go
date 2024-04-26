@@ -11,7 +11,10 @@ import (
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/redis"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
+	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
+	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
 
@@ -19,8 +22,8 @@ var (
 	reg = prometheus.NewRegistry()
 
 	pickpointCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "pickpoint",
-		Help: "Number of RPCs handled",
+		Name: "pickpoint_grpc",
+		Help: "Number of requests handled",
 	})
 )
 
@@ -64,7 +67,14 @@ func main() {
 		}
 	}()
 
-	serv := server.NewServer(service, producer, reg)
+	storOrders, err := storage.NewOrders("storage_orders.json")
+	if err != nil {
+		log.Printf("can not connect to storage: %s\n", err)
+		return
+	}
+	servOrders := order.NewService(&storOrders, cover.NewService())
+
+	serv := server.NewServer(service, servOrders, producer, reg)
 	log.Println("Ready to run")
 
 	if err := serv.RunGRPC(ctx, cfg); err != nil {

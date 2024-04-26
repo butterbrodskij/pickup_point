@@ -16,7 +16,8 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/metrics"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb"
+	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/tests/dummy"
 	"google.golang.org/grpc"
 )
@@ -35,16 +36,18 @@ type producer interface {
 }
 
 type server struct {
-	service pickpoint_pb.PickPointsServer
+	service_pickpoint pickpoint_pb.PickPointsServer
+	service_order     order_pb.OrdersServer
 	producer
 	reg prometheus.Gatherer
 }
 
-func NewServer(service pickpoint_pb.PickPointsServer, producer producer, reg prometheus.Gatherer) server {
+func NewServer(service_pickpoint pickpoint_pb.PickPointsServer, service_order order_pb.OrdersServer, producer producer, reg prometheus.Gatherer) server {
 	return server{
-		service:  service,
-		producer: producer,
-		reg:      reg,
+		service_pickpoint: service_pickpoint,
+		service_order:     service_order,
+		producer:          producer,
+		reg:               reg,
 	}
 }
 
@@ -63,6 +66,12 @@ func (s server) Run(ctx context.Context, cfg config.Config) error {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	defer wg.Wait()
+
+	go func() {
+		if err := metrics.Listen(":9095", s.reg); err != nil {
+			log.Printf("metrics handling failed: %s", err)
+		}
+	}()
 
 	secureServer := &http.Server{Addr: cfg.Server.SecurePort}
 	server := &http.Server{Addr: cfg.Server.Port}
@@ -110,7 +119,8 @@ func (s server) RunGRPC(ctx context.Context, cfg config.Config) error {
 	defer lis.Close()
 
 	grpcServer := grpc.NewServer()
-	pickpoint_pb.RegisterPickPointsServer(grpcServer, s.service)
+	pickpoint_pb.RegisterPickPointsServer(grpcServer, s.service_pickpoint)
+	order_pb.RegisterOrdersServer(grpcServer, s.service_order)
 
 	go func() {
 		if err := metrics.Listen(":9095", s.reg); err != nil {

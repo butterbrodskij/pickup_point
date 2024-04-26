@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v5.26.1
-// source: api.proto
+// source: pickpoint.proto
 
 package pickpoint_pb
 
@@ -217,5 +217,5 @@ var PickPoints_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api.proto",
+	Metadata: "pickpoint.proto",
 }
