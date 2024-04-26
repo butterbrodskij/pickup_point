@@ -1,14 +1,19 @@
 syntax = "proto3";
 
 package pickpoints;
-option go_package = "./;pb";
+option go_package = "./;pickpoint_pb";
 
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
 
 service PickPoints {
-    rpc Read(IdRequest) returns (PickPointResponse) {}
-    rpc Create(PickPointRequest) returns (PickPointResponse) {}
-    rpc Update(PickPointRequest) returns (google.protobuf.Empty) {}
+    rpc Read(IdRequest) returns (PickPoint) {
+        option (google.api.http) = {
+            get: "/v1/pickpoint/{id}"
+        };
+    }
+    rpc Create(PickPoint) returns (PickPoint) {}
+    rpc Update(PickPoint) returns (google.protobuf.Empty) {}
     rpc Delete(IdRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -17,14 +22,6 @@ message PickPoint {
     string name = 2;
     string address = 3;
     string contact = 4;
-}
-
-message PickPointRequest {
-    PickPoint pickPoint = 1;
-}
-
-message PickPointResponse {
-    PickPoint pickPoint = 1;
 }
 
 message IdRequest {

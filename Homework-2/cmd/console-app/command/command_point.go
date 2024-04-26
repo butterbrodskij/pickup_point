@@ -10,11 +10,12 @@ import (
 	"syscall"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb"
 )
 
 type servicePoint interface {
-	Create(context.Context, *model.PickPoint) (*model.PickPoint, error)
-	Read(context.Context, int64) (*model.PickPoint, error)
+	Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pickpoint_pb.PickPoint, error)
+	Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*pickpoint_pb.PickPoint, error)
 }
 
 const chanSize = 10
@@ -133,7 +134,7 @@ func WritePoints(s servicePoint, ctx context.Context, writeChan <-chan model.Pic
 		case point := <-writeChan:
 			message := fmt.Sprintf("writer: trying to write new pick-up point %v", point)
 			logChan <- message
-			_, err := s.Create(context.Background(), &point)
+			_, err := s.Create(context.Background(), model2Pb(&point))
 			if err != nil {
 				status = fmt.Sprintf("writer: error while adding point %d: %s", point.ID, err.Error())
 			} else {
@@ -157,11 +158,11 @@ func ReadPoints(s servicePoint, ctx context.Context, readChan <-chan int64, logC
 		case id := <-readChan:
 			message := fmt.Sprintf("reader %d: trying to find info about pick-up point with id %d", serial, id)
 			logChan <- message
-			point, err := s.Read(context.Background(), id)
+			point, err := s.Read(context.Background(), &pickpoint_pb.IdRequest{Id: id})
 			if err != nil {
 				status = fmt.Sprintf("reader %d: error while getting point %d: %s", serial, id, err)
 			} else {
-				status = fmt.Sprintf("reader %d: found pick-up point:\n\tid: %d\tname: %s\taddress: %s\tcontacts: %s", serial, point.ID, point.Name, point.Address, point.Contact)
+				status = fmt.Sprintf("reader %d: found pick-up point:\n\tid: %d\tname: %s\taddress: %s\tcontacts: %s", serial, point.Id, point.Name, point.Address, point.Contact)
 			}
 			logChan <- status
 		}
@@ -187,5 +188,14 @@ func LogPoints(_ servicePoint, ctx context.Context, logWriteChan, logReadChan <-
 		case s := <-logReadChan:
 			fmt.Println(s)
 		}
+	}
+}
+
+func model2Pb(point *model.PickPoint) *pickpoint_pb.PickPoint {
+	return &pickpoint_pb.PickPoint{
+		Id:      point.ID,
+		Name:    point.Name,
+		Address: point.Address,
+		Contact: point.Contact,
 	}
 }

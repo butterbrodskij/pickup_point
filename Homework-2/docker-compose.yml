@@ -86,3 +86,10 @@ services:
     environment:
       - REDIS_PASSWORD=password
       - REDIS_DATABASES=1
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090

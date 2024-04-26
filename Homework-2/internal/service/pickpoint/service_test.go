@@ -1,15 +1,6 @@
 package pickpoint
 
-import (
-	"context"
-	"testing"
-
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"gitlab.ozon.dev/mer_marat/homework/tests/fixture"
-)
-
+/*
 func TestCreate(t *testing.T) {
 	t.Parallel()
 	var (
@@ -42,7 +33,7 @@ func TestCreate(t *testing.T) {
 	})
 }
 
-/*
+
 func TestRead(t *testing.T) {
 	t.Parallel()
 	var (

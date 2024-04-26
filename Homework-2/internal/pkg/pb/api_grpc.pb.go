@@ -4,7 +4,7 @@
 // - protoc             v5.26.1
 // source: api.proto
 
-package pb
+package pickpoint_pb
 
 import (
 	context "context"
@@ -30,9 +30,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PickPointsClient interface {
-	Read(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*PickPointResponse, error)
-	Create(ctx context.Context, in *PickPointRequest, opts ...grpc.CallOption) (*PickPointResponse, error)
-	Update(ctx context.Context, in *PickPointRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Read(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*PickPoint, error)
+	Create(ctx context.Context, in *PickPoint, opts ...grpc.CallOption) (*PickPoint, error)
+	Update(ctx context.Context, in *PickPoint, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Delete(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -44,8 +44,8 @@ func NewPickPointsClient(cc grpc.ClientConnInterface) PickPointsClient {
 	return &pickPointsClient{cc}
 }
 
-func (c *pickPointsClient) Read(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*PickPointResponse, error) {
-	out := new(PickPointResponse)
+func (c *pickPointsClient) Read(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*PickPoint, error) {
+	out := new(PickPoint)
 	err := c.cc.Invoke(ctx, PickPoints_Read_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,8 +53,8 @@ func (c *pickPointsClient) Read(ctx context.Context, in *IdRequest, opts ...grpc
 	return out, nil
 }
 
-func (c *pickPointsClient) Create(ctx context.Context, in *PickPointRequest, opts ...grpc.CallOption) (*PickPointResponse, error) {
-	out := new(PickPointResponse)
+func (c *pickPointsClient) Create(ctx context.Context, in *PickPoint, opts ...grpc.CallOption) (*PickPoint, error) {
+	out := new(PickPoint)
 	err := c.cc.Invoke(ctx, PickPoints_Create_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (c *pickPointsClient) Create(ctx context.Context, in *PickPointRequest, opt
 	return out, nil
 }
 
-func (c *pickPointsClient) Update(ctx context.Context, in *PickPointRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *pickPointsClient) Update(ctx context.Context, in *PickPoint, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, PickPoints_Update_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -84,9 +84,9 @@ func (c *pickPointsClient) Delete(ctx context.Context, in *IdRequest, opts ...gr
 // All implementations must embed UnimplementedPickPointsServer
 // for forward compatibility
 type PickPointsServer interface {
-	Read(context.Context, *IdRequest) (*PickPointResponse, error)
-	Create(context.Context, *PickPointRequest) (*PickPointResponse, error)
-	Update(context.Context, *PickPointRequest) (*emptypb.Empty, error)
+	Read(context.Context, *IdRequest) (*PickPoint, error)
+	Create(context.Context, *PickPoint) (*PickPoint, error)
+	Update(context.Context, *PickPoint) (*emptypb.Empty, error)
 	Delete(context.Context, *IdRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPickPointsServer()
 }
@@ -95,13 +95,13 @@ type PickPointsServer interface {
 type UnimplementedPickPointsServer struct {
 }
 
-func (UnimplementedPickPointsServer) Read(context.Context, *IdRequest) (*PickPointResponse, error) {
+func (UnimplementedPickPointsServer) Read(context.Context, *IdRequest) (*PickPoint, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedPickPointsServer) Create(context.Context, *PickPointRequest) (*PickPointResponse, error) {
+func (UnimplementedPickPointsServer) Create(context.Context, *PickPoint) (*PickPoint, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedPickPointsServer) Update(context.Context, *PickPointRequest) (*emptypb.Empty, error) {
+func (UnimplementedPickPointsServer) Update(context.Context, *PickPoint) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedPickPointsServer) Delete(context.Context, *IdRequest) (*emptypb.Empty, error) {
@@ -139,7 +139,7 @@ func _PickPoints_Read_Handler(srv interface{}, ctx context.Context, dec func(int
 }
 
 func _PickPoints_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PickPointRequest)
+	in := new(PickPoint)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -151,13 +151,13 @@ func _PickPoints_Create_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: PickPoints_Create_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PickPointsServer).Create(ctx, req.(*PickPointRequest))
+		return srv.(PickPointsServer).Create(ctx, req.(*PickPoint))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PickPoints_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PickPointRequest)
+	in := new(PickPoint)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func _PickPoints_Update_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: PickPoints_Update_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PickPointsServer).Update(ctx, req.(*PickPointRequest))
+		return srv.(PickPointsServer).Update(ctx, req.(*PickPoint))
 	}
 	return interceptor(ctx, in, info, handler)
 }

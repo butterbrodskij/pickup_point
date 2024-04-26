@@ -11,7 +11,6 @@ import (
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/redis"
-	"gitlab.ozon.dev/mer_marat/homework/internal/service/logger"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
@@ -21,7 +20,7 @@ var (
 
 	pickpointCounter = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "pickpoint",
-		Help: "Number of http handled",
+		Help: "Number of RPCs handled",
 	})
 )
 
@@ -55,22 +54,6 @@ func main() {
 	//service := pickpoint.NewService(repo, redis, database)
 	service := pickpoint.NewService(repo, cache, database, pickpointCounter)
 
-	handler := logger.NewHandler()
-	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)
-	receiver, err := kafka.NewReceiverGroup(ctx, consumer, cfg.Kafka.Brokers)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = receiver.Subscribe([]string{cfg.Kafka.Topic})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if err := receiver.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
-
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {
 		log.Fatal(err)
@@ -84,7 +67,7 @@ func main() {
 	serv := server.NewServer(service, producer, reg)
 	log.Println("Ready to run")
 
-	if err := serv.Run(ctx, cfg); err != nil {
+	if err := serv.RunGRPC(ctx, cfg); err != nil {
 		log.Fatal(err)
 	}
 }
