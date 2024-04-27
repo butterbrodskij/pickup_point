@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
-	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
+	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/orders/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

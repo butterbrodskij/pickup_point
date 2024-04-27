@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v5.26.1
-// source: order.proto
+// source: homework/order/v1/order.proto
 
 package order_pb
 
@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,23 +19,23 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Orders_AcceptFromCourier_FullMethodName = "/orders.Orders/AcceptFromCourier"
-	Orders_Remove_FullMethodName            = "/orders.Orders/Remove"
-	Orders_Give_FullMethodName              = "/orders.Orders/Give"
-	Orders_List_FullMethodName              = "/orders.Orders/List"
-	Orders_Return_FullMethodName            = "/orders.Orders/Return"
-	Orders_ListReturn_FullMethodName        = "/orders.Orders/ListReturn"
+	Orders_AcceptFromCourier_FullMethodName = "/homework.orders.v1.Orders/AcceptFromCourier"
+	Orders_Remove_FullMethodName            = "/homework.orders.v1.Orders/Remove"
+	Orders_Give_FullMethodName              = "/homework.orders.v1.Orders/Give"
+	Orders_List_FullMethodName              = "/homework.orders.v1.Orders/List"
+	Orders_Return_FullMethodName            = "/homework.orders.v1.Orders/Return"
+	Orders_ListReturn_FullMethodName        = "/homework.orders.v1.Orders/ListReturn"
 )
 
 // OrdersClient is the client API for Orders service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrdersClient interface {
-	AcceptFromCourier(ctx context.Context, in *OrderInput, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Remove(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Give(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*OrderList, error)
-	Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AcceptFromCourier(ctx context.Context, in *AcceptFromCourierRequest, opts ...grpc.CallOption) (*AcceptFromCourierResponse, error)
+	Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error)
+	Give(ctx context.Context, in *GiveRequest, opts ...grpc.CallOption) (*GiveResponse, error)
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*ReturnResponse, error)
 	ListReturn(ctx context.Context, in *ListReturnRequest, opts ...grpc.CallOption) (*OrderList, error)
 }
 
@@ -48,8 +47,8 @@ func NewOrdersClient(cc grpc.ClientConnInterface) OrdersClient {
 	return &ordersClient{cc}
 }
 
-func (c *ordersClient) AcceptFromCourier(ctx context.Context, in *OrderInput, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *ordersClient) AcceptFromCourier(ctx context.Context, in *AcceptFromCourierRequest, opts ...grpc.CallOption) (*AcceptFromCourierResponse, error) {
+	out := new(AcceptFromCourierResponse)
 	err := c.cc.Invoke(ctx, Orders_AcceptFromCourier_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -57,8 +56,8 @@ func (c *ordersClient) AcceptFromCourier(ctx context.Context, in *OrderInput, op
 	return out, nil
 }
 
-func (c *ordersClient) Remove(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *ordersClient) Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error) {
+	out := new(RemoveResponse)
 	err := c.cc.Invoke(ctx, Orders_Remove_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -66,8 +65,8 @@ func (c *ordersClient) Remove(ctx context.Context, in *IdRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *ordersClient) Give(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *ordersClient) Give(ctx context.Context, in *GiveRequest, opts ...grpc.CallOption) (*GiveResponse, error) {
+	out := new(GiveResponse)
 	err := c.cc.Invoke(ctx, Orders_Give_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -75,8 +74,8 @@ func (c *ordersClient) Give(ctx context.Context, in *Ids, opts ...grpc.CallOptio
 	return out, nil
 }
 
-func (c *ordersClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*OrderList, error) {
-	out := new(OrderList)
+func (c *ordersClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+	out := new(ListResponse)
 	err := c.cc.Invoke(ctx, Orders_List_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,8 +83,8 @@ func (c *ordersClient) List(ctx context.Context, in *ListRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *ordersClient) Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *ordersClient) Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*ReturnResponse, error) {
+	out := new(ReturnResponse)
 	err := c.cc.Invoke(ctx, Orders_Return_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -106,11 +105,11 @@ func (c *ordersClient) ListReturn(ctx context.Context, in *ListReturnRequest, op
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility
 type OrdersServer interface {
-	AcceptFromCourier(context.Context, *OrderInput) (*emptypb.Empty, error)
-	Remove(context.Context, *IdRequest) (*emptypb.Empty, error)
-	Give(context.Context, *Ids) (*emptypb.Empty, error)
-	List(context.Context, *ListRequest) (*OrderList, error)
-	Return(context.Context, *ReturnRequest) (*emptypb.Empty, error)
+	AcceptFromCourier(context.Context, *AcceptFromCourierRequest) (*AcceptFromCourierResponse, error)
+	Remove(context.Context, *RemoveRequest) (*RemoveResponse, error)
+	Give(context.Context, *GiveRequest) (*GiveResponse, error)
+	List(context.Context, *ListRequest) (*ListResponse, error)
+	Return(context.Context, *ReturnRequest) (*ReturnResponse, error)
 	ListReturn(context.Context, *ListReturnRequest) (*OrderList, error)
 	mustEmbedUnimplementedOrdersServer()
 }
@@ -119,19 +118,19 @@ type OrdersServer interface {
 type UnimplementedOrdersServer struct {
 }
 
-func (UnimplementedOrdersServer) AcceptFromCourier(context.Context, *OrderInput) (*emptypb.Empty, error) {
+func (UnimplementedOrdersServer) AcceptFromCourier(context.Context, *AcceptFromCourierRequest) (*AcceptFromCourierResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AcceptFromCourier not implemented")
 }
-func (UnimplementedOrdersServer) Remove(context.Context, *IdRequest) (*emptypb.Empty, error) {
+func (UnimplementedOrdersServer) Remove(context.Context, *RemoveRequest) (*RemoveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
-func (UnimplementedOrdersServer) Give(context.Context, *Ids) (*emptypb.Empty, error) {
+func (UnimplementedOrdersServer) Give(context.Context, *GiveRequest) (*GiveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Give not implemented")
 }
-func (UnimplementedOrdersServer) List(context.Context, *ListRequest) (*OrderList, error) {
+func (UnimplementedOrdersServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedOrdersServer) Return(context.Context, *ReturnRequest) (*emptypb.Empty, error) {
+func (UnimplementedOrdersServer) Return(context.Context, *ReturnRequest) (*ReturnResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Return not implemented")
 }
 func (UnimplementedOrdersServer) ListReturn(context.Context, *ListReturnRequest) (*OrderList, error) {
@@ -151,7 +150,7 @@ func RegisterOrdersServer(s grpc.ServiceRegistrar, srv OrdersServer) {
 }
 
 func _Orders_AcceptFromCourier_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OrderInput)
+	in := new(AcceptFromCourierRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -163,13 +162,13 @@ func _Orders_AcceptFromCourier_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: Orders_AcceptFromCourier_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrdersServer).AcceptFromCourier(ctx, req.(*OrderInput))
+		return srv.(OrdersServer).AcceptFromCourier(ctx, req.(*AcceptFromCourierRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Orders_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IdRequest)
+	in := new(RemoveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -181,13 +180,13 @@ func _Orders_Remove_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: Orders_Remove_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrdersServer).Remove(ctx, req.(*IdRequest))
+		return srv.(OrdersServer).Remove(ctx, req.(*RemoveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Orders_Give_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Ids)
+	in := new(GiveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -199,7 +198,7 @@ func _Orders_Give_Handler(srv interface{}, ctx context.Context, dec func(interfa
 		FullMethod: Orders_Give_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrdersServer).Give(ctx, req.(*Ids))
+		return srv.(OrdersServer).Give(ctx, req.(*GiveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -262,7 +261,7 @@ func _Orders_ListReturn_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Orders_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "orders.Orders",
+	ServiceName: "homework.orders.v1.Orders",
 	HandlerType: (*OrdersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -291,5 +290,5 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "order.proto",
+	Metadata: "homework/order/v1/order.proto",
 }

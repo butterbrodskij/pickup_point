@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 )
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {

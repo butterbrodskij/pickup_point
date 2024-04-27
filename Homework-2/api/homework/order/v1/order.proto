@@ -1,9 +1,8 @@
 syntax = "proto3";
 
 package homework.orders.v1;
-option go_package = "homework/orders/v1;homework_orders_v1";
+option go_package = "homework/orders/v1;order_pb";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service Orders {

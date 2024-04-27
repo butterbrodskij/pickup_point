@@ -18,8 +18,8 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/metrics"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
-	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/orders/v1"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )

@@ -1,9 +1,8 @@
 syntax = "proto3";
 
 package homework.pickpoints.v1;
-option go_package = "homework/pickpoints/v1;homework_pickpoints_v1";
+option go_package = "homework/pickpoints/v1;pickpoint_pb";
 
-import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
 service PickPoints {

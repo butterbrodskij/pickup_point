@@ -8,7 +8,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
+	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/orders/v1"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"

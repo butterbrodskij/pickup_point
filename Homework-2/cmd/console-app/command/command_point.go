@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 )
 
 type servicePoint interface {

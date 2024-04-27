@@ -4,7 +4,7 @@ package handler
 import (
 	"context"
 
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

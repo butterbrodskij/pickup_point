@@ -73,20 +73,12 @@ delete-test-topics:
 gen-proto: clear
 	protoc \
 		--proto_path=api/ \
-		--go_out=internal/pkg/pb/pickpoint \
-		--go-grpc_out=internal/pkg/pb/pickpoint \
-		--grpc-gateway_out=internal/pkg/pb/pickpoint \
-		api/pickpoint.proto
-
-	protoc \
-		--proto_path=api/ \
-		--go_out=internal/pkg/pb/order \
-		--go-grpc_out=internal/pkg/pb/order \
-		--grpc-gateway_out=internal/pkg/pb/order \
-		api/order.proto
+		--go_out=internal/pkg/pb \
+		--go-grpc_out=internal/pkg/pb \
+		--grpc-gateway_out=internal/pkg/pb \
+		api/homework/**/**/*.proto
 
 .PHONY: clear
 clear:
 	rm -rf internal/pkg/pb
-	mkdir -p internal/pkg/pb/pickpoint
-	mkdir -p internal/pkg/pb/order
+	mkdir -p internal/pkg/pb
