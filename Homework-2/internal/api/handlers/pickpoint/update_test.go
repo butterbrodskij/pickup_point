@@ -25,7 +25,7 @@ func TestUpdate(t *testing.T) {
 		body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 		w := httptest.NewRecorder()
-		s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, nil)
+		s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 
 		s.handl.Update(w, req)
 
@@ -51,10 +51,10 @@ func TestUpdate(t *testing.T) {
 			t.Parallel()
 			s := setUp(t)
 			defer s.tearDown()
-			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
+			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 			w := httptest.NewRecorder()
-			s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
+			s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(assert.AnError)
 
 			s.handl.Update(w, req)
 
@@ -65,10 +65,10 @@ func TestUpdate(t *testing.T) {
 			t.Parallel()
 			s := setUp(t)
 			defer s.tearDown()
-			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contact":"+7(999)888-77-66"}`
+			body := `{"id":100, "name":"Chertanovo", "address":"Chertanovskaya street, 13", "contacts":"+7(999)888-77-66"}`
 			req, _ := http.NewRequestWithContext(ctx, "PUT", "/pickpoint", strings.NewReader(body))
 			w := httptest.NewRecorder()
-			s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, model.ErrorObjectNotFound)
+			s.mockServ.EXPECT().Update(gomock.Any(), gomock.Any()).Return(model.ErrorObjectNotFound)
 
 			s.handl.Update(w, req)
 

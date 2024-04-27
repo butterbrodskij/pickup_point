@@ -10,19 +10,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/tests/fixture"
 )
-
-func model2Pb(point *model.PickPoint) *pickpoint_pb.PickPoint {
-	return &pickpoint_pb.PickPoint{
-		Id:      point.ID,
-		Name:    point.Name,
-		Address: point.Address,
-		Contact: point.Contact,
-	}
-}
 
 func TestCreate(t *testing.T) {
 	t.Parallel()
@@ -33,10 +22,10 @@ func TestCreate(t *testing.T) {
 		t.Parallel()
 		s := setUp(t)
 		defer s.tearDown()
-		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 8", "contacts":"+7(999)888-77-66"}`
+		body := `{"name":"Chertanovo", "address":"Chertanovskaya street, 8", "contact":"+7(999)888-77-66"}`
 		req, _ := http.NewRequestWithContext(ctx, "POST", "/pickpoint", strings.NewReader(body))
 		w := httptest.NewRecorder()
-		s.mockServ.EXPECT().Create(gomock.Any(), gomock.Any()).Return(model2Pb(fixture.PickPoint().Valid1().P()), nil)
+		s.mockServ.EXPECT().Create(gomock.Any(), gomock.Any()).Return(fixture.PickPoint().Valid1().P(), nil)
 
 		s.handl.Create(w, req)
 

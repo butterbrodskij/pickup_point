@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 )
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +21,7 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	_, err = h.service.Delete(r.Context(), &pickpoint_pb.IdRequest{Id: id})
+	err = h.service.Delete(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, model.ErrorInvalidInput) {
 			w.WriteHeader(http.StatusBadRequest)

@@ -6,17 +6,16 @@ import (
 	"strconv"
 
 	"gitlab.ozon.dev/mer_marat/homework/cmd/console-app/parsing"
-	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/orders/v1"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 )
 
 type serviceOrder interface {
-	AcceptFromCourier(ctx context.Context, in *order_pb.OrderInput) (*emptypb.Empty, error)
-	Remove(ctx context.Context, idRequest *order_pb.IdRequest) (*emptypb.Empty, error)
-	Give(context.Context, *order_pb.Ids) (*emptypb.Empty, error)
-	List(ctx context.Context, req *order_pb.ListRequest) (*order_pb.OrderList, error)
-	Return(ctx context.Context, returnRequest *order_pb.ReturnRequest) (*emptypb.Empty, error)
-	ListReturn(ctx context.Context, request *order_pb.ListReturnRequest) (*order_pb.OrderList, error)
+	AcceptFromCourier(ctx context.Context, input model.OrderInput) error
+	Remove(ctx context.Context, id int64) error
+	Give(ctx context.Context, ids []int64) error
+	List(ctx context.Context, recipient int64, n int, onlyNotGivenOrders bool) ([]model.Order, error)
+	Return(ctx context.Context, id, recipient int64) error
+	ListReturn(ctx context.Context, pageNum, ordersPerPage int) ([]model.Order, error)
 }
 
 func Help() {
@@ -55,9 +54,9 @@ func Accept(serv serviceOrder, params parsing.Params) {
 		fmt.Println("miss required flags")
 		return
 	}
-	_, err := serv.AcceptFromCourier(context.Background(), &order_pb.OrderInput{
-		Id:           *params.ID,
-		RecipientId:  *params.RecipientID,
+	err := serv.AcceptFromCourier(context.Background(), model.OrderInput{
+		ID:           *params.ID,
+		RecipientID:  *params.RecipientID,
 		WeightGrams:  *params.WeightGrams,
 		PriceKopecks: *params.PriceKopecks,
 		Cover:        *params.Cover,
@@ -75,7 +74,7 @@ func Remove(serv serviceOrder, params parsing.Params) {
 		fmt.Println("miss required flags")
 		return
 	}
-	_, err := serv.Remove(context.Background(), &order_pb.IdRequest{Id: *params.ID})
+	err := serv.Remove(context.Background(), *params.ID)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -97,7 +96,7 @@ func Give(serv serviceOrder, params parsing.Params) {
 		}
 		ids[i] = idCur
 	}
-	_, err := serv.Give(context.Background(), &order_pb.Ids{Ids: ids})
+	err := serv.Give(context.Background(), ids)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -121,18 +120,14 @@ func List(serv serviceOrder, params parsing.Params) {
 			return
 		}
 	}
-	foundArr, err := serv.List(context.Background(), &order_pb.ListRequest{
-		Recipient:          *params.RecipientID,
-		N:                  int64(n),
-		OnlyNotGivenOrders: *params.NotGiven,
-	})
+	foundArr, err := serv.List(context.Background(), *params.RecipientID, n, *params.NotGiven)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("found %d orders:\n", len(foundArr.Orders))
-	for i, order := range foundArr.Orders {
-		fmt.Printf("%d.\tid: %d\tprice: %d\texpires: %s\n", i+1, order.Id, order.PriceKopecks, order.ExpireDate.AsTime().Format("01.02.2006"))
+	fmt.Printf("found %d orders:\n", len(foundArr))
+	for i, order := range foundArr {
+		fmt.Printf("%d.\tid: %d\tprice: %d\texpires: %s\n", i+1, order.ID, order.PriceKopecks, order.ExpireDate.Format("01.02.2006"))
 	}
 }
 
@@ -141,7 +136,7 @@ func Return(serv serviceOrder, params parsing.Params) {
 		fmt.Println("miss required flags")
 		return
 	}
-	_, err := serv.Return(context.Background(), &order_pb.ReturnRequest{Id: *params.ID, Recipient: *params.RecipientID})
+	err := serv.Return(context.Background(), *params.ID, *params.RecipientID)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -169,7 +164,7 @@ func ListReturn(serv serviceOrder, params parsing.Params) {
 			return
 		}
 	}
-	arr, err := serv.ListReturn(context.Background(), &order_pb.ListReturnRequest{PageNum: int64(pageNum), OrdersPerPage: int64(ordersPerPage)})
+	arr, err := serv.ListReturn(context.Background(), pageNum, ordersPerPage)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -179,10 +174,10 @@ func ListReturn(serv serviceOrder, params parsing.Params) {
 		fmt.Println("all returned not removed orders:")
 	} else {
 		startPos = ordersPerPage*(pageNum-1) + 1
-		fmt.Printf("returned not removed orders from page %d (%d-%d):\n", pageNum, startPos, startPos+len(arr.Orders)-1)
+		fmt.Printf("returned not removed orders from page %d (%d-%d):\n", pageNum, startPos, startPos+len(arr)-1)
 	}
 
-	for i, order := range arr.Orders {
-		fmt.Printf("%d.\tid: %d\trecipient: %d\tprice: %d\texpires: %s\n", startPos+i, order.Id, order.RecipientId, order.PriceKopecks, order.ExpireDate.AsTime().Format("01.02.2006"))
+	for i, order := range arr {
+		fmt.Printf("%d.\tid: %d\trecipient: %d\tprice: %d\texpires: %s\n", startPos+i, order.ID, order.RecipientID, order.PriceKopecks, order.ExpireDate.Format("01.02.2006"))
 	}
 }

@@ -6,6 +6,8 @@ import (
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
+	grpc_order "gitlab.ozon.dev/mer_marat/homework/internal/api/grpc_handlers/orders/v1"
+	grpc_pickpoint "gitlab.ozon.dev/mer_marat/homework/internal/api/grpc_handlers/pickpoints/v1"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
@@ -73,10 +75,10 @@ func main() {
 	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
 	defer cache.Close()
-	//service := pickpoint.NewService(repo, redis, database)
-	service := pickpoint.NewService(repo, cache, database)
-	service.AddCounterMetric(pickpointCounter)
-	service.AddRequestHistogram(requestPickpointMetrics)
+	//servicePoints := pickpoint.NewService(repo, redis, database)
+	servicePoints := pickpoint.NewService(repo, cache, database)
+	servicePoints.AddCounterMetric(pickpointCounter)
+	servicePoints.AddRequestHistogram(requestPickpointMetrics)
 
 	shutdown, err := tracer.InitProvider(ctx, "pickpoint")
 	if err != nil {
@@ -103,20 +105,22 @@ func main() {
 		log.Printf("can not connect to storage: %s\n", err)
 		return
 	}
-	servOrders := order.NewService(&storOrders, cover.NewService())
-	servOrders.AddGivenOrdersGauge(givenOrdersCounter)
-	servOrders.AddFailedRequestsCounter(failedOrderCounter)
+	serviceOrders := order.NewService(&storOrders, cover.NewService())
+	serviceOrders.AddGivenOrdersGauge(givenOrdersCounter)
+	serviceOrders.AddFailedRequestsCounter(failedOrderCounter)
 
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	reg.MustRegister(grpcMetrics)
 
-	serv := server.NewServer(service, producer, reg)
-	serv.AddOrderService(servOrders)
+	serv := server.NewServer(servicePoints, producer, reg)
 	serv.AddGRPCMetrics(grpcMetrics)
+
+	grpcServicePickpoint := grpc_pickpoint.NewGRPCPickpointService(servicePoints)
+	grpcServiceOrder := grpc_order.NewGRPCOrderService(serviceOrders)
 
 	log.Println("Ready to run")
 
-	if err := serv.RunGRPC(ctx, cfg); err != nil {
+	if err := serv.RunGRPC(ctx, cfg, grpcServicePickpoint, grpcServiceOrder); err != nil {
 		log.Fatal(err)
 	}
 }

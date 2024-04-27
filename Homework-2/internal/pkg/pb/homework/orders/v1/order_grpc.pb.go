@@ -36,7 +36,7 @@ type OrdersClient interface {
 	Give(ctx context.Context, in *GiveRequest, opts ...grpc.CallOption) (*GiveResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*ReturnResponse, error)
-	ListReturn(ctx context.Context, in *ListReturnRequest, opts ...grpc.CallOption) (*OrderList, error)
+	ListReturn(ctx context.Context, in *ListReturnRequest, opts ...grpc.CallOption) (*ListReturnResponse, error)
 }
 
 type ordersClient struct {
@@ -92,8 +92,8 @@ func (c *ordersClient) Return(ctx context.Context, in *ReturnRequest, opts ...gr
 	return out, nil
 }
 
-func (c *ordersClient) ListReturn(ctx context.Context, in *ListReturnRequest, opts ...grpc.CallOption) (*OrderList, error) {
-	out := new(OrderList)
+func (c *ordersClient) ListReturn(ctx context.Context, in *ListReturnRequest, opts ...grpc.CallOption) (*ListReturnResponse, error) {
+	out := new(ListReturnResponse)
 	err := c.cc.Invoke(ctx, Orders_ListReturn_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ type OrdersServer interface {
 	Give(context.Context, *GiveRequest) (*GiveResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Return(context.Context, *ReturnRequest) (*ReturnResponse, error)
-	ListReturn(context.Context, *ListReturnRequest) (*OrderList, error)
+	ListReturn(context.Context, *ListReturnRequest) (*ListReturnResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -133,7 +133,7 @@ func (UnimplementedOrdersServer) List(context.Context, *ListRequest) (*ListRespo
 func (UnimplementedOrdersServer) Return(context.Context, *ReturnRequest) (*ReturnResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Return not implemented")
 }
-func (UnimplementedOrdersServer) ListReturn(context.Context, *ListReturnRequest) (*OrderList, error) {
+func (UnimplementedOrdersServer) ListReturn(context.Context, *ListReturnRequest) (*ListReturnResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReturn not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}

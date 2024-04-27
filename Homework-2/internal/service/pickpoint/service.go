@@ -13,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type storage interface {
@@ -59,25 +58,7 @@ func (s *service) AddCounterMetric(counter prometheus.Counter) {
 	s.counter = counter
 }
 
-func pb2Model(point *pickpoint_pb.PickPoint) *model.PickPoint {
-	return &model.PickPoint{
-		ID:      point.Id,
-		Name:    point.Name,
-		Address: point.Address,
-		Contact: point.Contact,
-	}
-}
-
-func model2Pb(point *model.PickPoint) *pickpoint_pb.PickPoint {
-	return &pickpoint_pb.PickPoint{
-		Id:      point.ID,
-		Name:    point.Name,
-		Address: point.Address,
-		Contact: point.Contact,
-	}
-}
-
-func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (res *pickpoint_pb.PickPoint, err error) {
+func (s service) Read(ctx context.Context, id int64) (res *model.PickPoint, err error) {
 	start := time.Now()
 	defer func() {
 		if s.requestHandling != nil {
@@ -90,7 +71,7 @@ func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (r
 		}
 	}()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Read", trace.WithAttributes(
-		attribute.String("request", idRequest.String()),
+		attribute.String("request", fmt.Sprint(id)),
 	))
 	defer func() {
 		if err != nil {
@@ -101,14 +82,13 @@ func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (r
 		}
 		span.End()
 	}()
-	id := idRequest.Id
 	if !isValidID(ctx, id) {
 		return nil, model.ErrorInvalidInput
 	}
 	point := new(model.PickPoint)
 	err = s.cache.Get(ctx, fmt.Sprint(id), point)
 	if err == nil {
-		return model2Pb(point), nil
+		return point, nil
 	}
 	var pPoint *model.PickPoint
 	if err := s.transactor.RunSerializable(ctx, pgx.ReadOnly, func(ctxTX context.Context) error {
@@ -120,10 +100,10 @@ func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (r
 	}); err != nil {
 		return nil, err
 	}
-	return model2Pb(pPoint), nil
+	return pPoint, nil
 }
 
-func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (res *pickpoint_pb.PickPoint, err error) {
+func (s service) Create(ctx context.Context, point *model.PickPoint) (res *model.PickPoint, err error) {
 	start := time.Now()
 	defer func() {
 		if s.requestHandling != nil {
@@ -136,7 +116,7 @@ func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (res
 		}
 	}()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Create", trace.WithAttributes(
-		attribute.String("request", point.String()),
+		attribute.String("request", fmt.Sprint(point)),
 	))
 	defer func() {
 		if err != nil {
@@ -147,15 +127,15 @@ func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (res
 		}
 		span.End()
 	}()
-	id, err := s.repo.Add(ctx, pb2Model(point))
+	id, err := s.repo.Add(ctx, point)
 	if err != nil {
 		return nil, err
 	}
-	point.Id = id
+	point.ID = id
 	return point, nil
 }
 
-func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (_ *emptypb.Empty, err error) {
+func (s service) Update(ctx context.Context, point *model.PickPoint) (err error) {
 	start := time.Now()
 	defer func() {
 		if s.requestHandling != nil {
@@ -168,7 +148,7 @@ func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (_ *
 		}
 	}()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Update", trace.WithAttributes(
-		attribute.String("request", point.String()),
+		attribute.String("request", fmt.Sprint(point)),
 	))
 	defer func() {
 		if err != nil {
@@ -179,20 +159,19 @@ func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (_ *
 		}
 		span.End()
 	}()
-	modelPoint := pb2Model(point)
-	if !isValidPickPoint(ctx, modelPoint) {
-		return nil, model.ErrorInvalidInput
+	if !isValidPickPoint(ctx, point) {
+		return model.ErrorInvalidInput
 	}
-	return nil, s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
-		err := s.repo.Update(ctx, modelPoint)
+	return s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
+		err := s.repo.Update(ctx, point)
 		if err != nil {
 			return err
 		}
-		return s.cache.Delete(ctx, fmt.Sprint(modelPoint.ID))
+		return s.cache.Delete(ctx, fmt.Sprint(point.ID))
 	})
 }
 
-func (s service) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (_ *emptypb.Empty, err error) {
+func (s service) Delete(ctx context.Context, id int64) (err error) {
 	start := time.Now()
 	defer func() {
 		if s.requestHandling != nil {
@@ -205,7 +184,7 @@ func (s service) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) 
 		}
 	}()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Deelete", trace.WithAttributes(
-		attribute.String("request", idRequest.String()),
+		attribute.String("request", fmt.Sprint(id)),
 	))
 	defer func() {
 		if err != nil {
@@ -216,11 +195,10 @@ func (s service) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) 
 		}
 		span.End()
 	}()
-	id := idRequest.Id
 	if !isValidID(ctx, id) {
-		return nil, model.ErrorInvalidInput
+		return model.ErrorInvalidInput
 	}
-	return nil, s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
+	return s.transactor.RunSerializable(ctx, pgx.ReadWrite, func(ctxTX context.Context) error {
 		err := s.repo.Delete(ctx, id)
 		if err != nil {
 			return err

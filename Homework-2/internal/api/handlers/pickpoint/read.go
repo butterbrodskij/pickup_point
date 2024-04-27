@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/pickpoints/v1"
 )
 
 func (h *handler) Read(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +22,7 @@ func (h *handler) Read(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	point, err := h.service.Read(r.Context(), &pickpoint_pb.IdRequest{Id: id})
+	point, err := h.service.Read(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, model.ErrorObjectNotFound) {
 			w.WriteHeader(http.StatusNotFound)
