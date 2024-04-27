@@ -10,6 +10,7 @@ import (
 	grpc_pickpoint "gitlab.ozon.dev/mer_marat/homework/internal/api/grpc_handlers/pickpoints/v1"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/metrics"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
@@ -21,36 +22,6 @@ import (
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
-
-var (
-	reg = prometheus.NewRegistry()
-
-	pickpointCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "pickpoint_grpc",
-		Help: "Number of requests handled",
-	})
-
-	givenOrdersCounter = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "given_orders_grpc",
-		Help: "Number of given orders",
-	})
-
-	requestPickpointMetrics = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Namespace: "pickpoint",
-		Subsystem: "grpc",
-		Name:      "request",
-		Help:      "Requests handling histogram",
-	})
-
-	failedOrderCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "failed_orders_grpc",
-		Help: "Number of failed requests to order service",
-	})
-)
-
-func init() {
-	reg.MustRegister(pickpointCounter, givenOrdersCounter, requestPickpointMetrics, failedOrderCounter)
-}
 
 func main() {
 	cfg, err := config.GetConfig()
@@ -71,6 +42,9 @@ func main() {
 	if err := redis.Ping(ctx); err != nil {
 		log.Fatal(err)
 	}
+
+	pickpointCounter := metrics.PickpointCounter()
+	requestPickpointMetrics := metrics.RequestPickpointHistogram()
 
 	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
@@ -100,17 +74,22 @@ func main() {
 		}
 	}()
 
+	givenOrdersGauge := metrics.GivenOrdersGauge()
+	failedOrderCounter := metrics.FailedOrderCounter()
+
 	storOrders, err := storage.NewOrders("storage_orders.json")
 	if err != nil {
 		log.Printf("can not connect to storage: %s\n", err)
 		return
 	}
 	serviceOrders := order.NewService(&storOrders, cover.NewService())
-	serviceOrders.AddGivenOrdersGauge(givenOrdersCounter)
+	serviceOrders.AddGivenOrdersGauge(givenOrdersGauge)
 	serviceOrders.AddFailedRequestsCounter(failedOrderCounter)
 
+	reg := prometheus.NewRegistry()
+
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
-	reg.MustRegister(grpcMetrics)
+	reg.MustRegister(pickpointCounter, givenOrdersGauge, requestPickpointMetrics, failedOrderCounter, grpcMetrics)
 
 	serv := server.NewServer(servicePoints, producer, reg)
 	serv.AddGRPCMetrics(grpcMetrics)

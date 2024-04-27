@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
+	"gitlab.ozon.dev/mer_marat/homework/internal/metrics"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/db"
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
@@ -15,19 +16,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
 )
-
-var (
-	reg = prometheus.NewRegistry()
-
-	pickpointCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "pickpoint_http",
-		Help: "Number of requests handled",
-	})
-)
-
-func init() {
-	reg.MustRegister(pickpointCounter)
-}
 
 func main() {
 	cfg, err := config.GetConfig()
@@ -48,6 +36,8 @@ func main() {
 	if err := redis.Ping(ctx); err != nil {
 		log.Fatal(err)
 	}
+
+	pickpointCounter := metrics.PickpointCounter()
 
 	repo := postgres.NewRepo(database)
 	cache := inmemorycache.NewInMemoryCache()
@@ -81,6 +71,9 @@ func main() {
 			log.Println(err)
 		}
 	}()
+
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(pickpointCounter)
 
 	serv := server.NewServer(service, producer, reg)
 
