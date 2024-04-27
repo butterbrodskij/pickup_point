@@ -2,8 +2,8 @@ package tracer
 
 import (
 	"context"
-	"fmt"
 
+	jaegerPropogator "go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
@@ -13,31 +13,24 @@ import (
 )
 
 func InitProvider(ctx context.Context, serviceName string) (func(context.Context) error, error) {
-	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceName(serviceName),
-		),
-	)
+	exp, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpoint("localhost:14268"), otlptracehttp.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("failed to create resource: %w", err)
+		return nil, err
 	}
 
-	traceExporter, err := otlptracehttp.New(context.Background(),
-		otlptracehttp.WithInsecure(),
-		otlptracehttp.WithEndpoint("localhost:16686"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
-	}
+	otel.SetTextMapPropagator(jaegerPropogator.Jaeger{})
 
-	bsp := sdktrace.NewBatchSpanProcessor(traceExporter)
-	tracerProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(res),
-		sdktrace.WithSpanProcessor(bsp),
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(serviceName),
+		)),
+		//sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
-	otel.SetTracerProvider(tracerProvider)
 
+	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
-	return tracerProvider.Shutdown, nil
+	return tp.Shutdown, nil
 }

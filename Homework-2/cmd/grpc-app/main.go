@@ -18,7 +18,6 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
-	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -79,7 +78,7 @@ func main() {
 	service.AddCounterMetric(pickpointCounter)
 	service.AddRequestHistogram(requestPickpointMetrics)
 
-	shutdown, err := tracer.InitProvider(ctx, "grpc service")
+	shutdown, err := tracer.InitProvider(ctx, "pickpoint")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,8 +87,6 @@ func main() {
 			log.Println(err)
 		}
 	}()
-
-	service.AddTracer(otel.Tracer("pickpoint-tracer"))
 
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {
