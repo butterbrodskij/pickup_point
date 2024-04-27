@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/server"
 	"gitlab.ozon.dev/mer_marat/homework/internal/config"
@@ -95,8 +96,13 @@ func main() {
 	servOrders.AddGivenOrdersGauge(givenOrdersCounter)
 	servOrders.AddFailedRequestsCounter(failedOrderCounter)
 
+	grpcMetrics := grpc_prometheus.NewServerMetrics()
+	reg.MustRegister(grpcMetrics)
+
 	serv := server.NewServer(service, producer, reg)
 	serv.AddOrderService(servOrders)
+	serv.AddGRPCMetrics(grpcMetrics)
+
 	log.Println("Ready to run")
 
 	if err := serv.RunGRPC(ctx, cfg); err != nil {

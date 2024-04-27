@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/IBM/sarama"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	handler "gitlab.ozon.dev/mer_marat/homework/internal/api/handlers/pickpoint"
 	"gitlab.ozon.dev/mer_marat/homework/internal/api/middleware"
@@ -30,10 +31,11 @@ type server struct {
 	service_pickpoint pickpoint_pb.PickPointsServer
 	service_order     order_pb.OrdersServer
 	producer
-	reg prometheus.Gatherer
+	reg         *prometheus.Registry
+	grpcMetrics *grpc_prometheus.ServerMetrics
 }
 
-func NewServer(service_pickpoint pickpoint_pb.PickPointsServer, producer producer, reg prometheus.Gatherer) server {
+func NewServer(service_pickpoint pickpoint_pb.PickPointsServer, producer producer, reg *prometheus.Registry) server {
 	return server{
 		service_pickpoint: service_pickpoint,
 		producer:          producer,
@@ -43,6 +45,10 @@ func NewServer(service_pickpoint pickpoint_pb.PickPointsServer, producer produce
 
 func (s *server) AddOrderService(service_order order_pb.OrdersServer) {
 	s.service_order = service_order
+}
+
+func (s *server) AddGRPCMetrics(grpcMetrics *grpc_prometheus.ServerMetrics) {
+	s.grpcMetrics = grpcMetrics
 }
 
 func (s server) Run(ctx context.Context, cfg config.Config) error {
@@ -112,9 +118,26 @@ func (s server) RunGRPC(ctx context.Context, cfg config.Config) error {
 	defer lis.Close()
 
 	grpcServer := grpc.NewServer()
+
+	if s.grpcMetrics != nil {
+		grpcServer = grpc.NewServer(
+			//grpc.StatsHandler(otel.NewServerHandler()),
+			grpc.ChainUnaryInterceptor(
+				s.grpcMetrics.UnaryServerInterceptor(),
+			),
+			grpc.ChainStreamInterceptor(
+				s.grpcMetrics.StreamServerInterceptor(),
+			),
+		)
+	}
+
 	pickpoint_pb.RegisterPickPointsServer(grpcServer, s.service_pickpoint)
 	if s.service_order != nil {
 		order_pb.RegisterOrdersServer(grpcServer, s.service_order)
+	}
+
+	if s.grpcMetrics != nil {
+		s.grpcMetrics.InitializeMetrics(grpcServer)
 	}
 
 	errChan := make(chan error, 1)
