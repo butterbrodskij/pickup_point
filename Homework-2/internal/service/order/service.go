@@ -8,7 +8,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
-	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/homework/orders/v1"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 )
 
@@ -29,7 +28,6 @@ type storageInterface interface {
 }
 
 type service struct {
-	order_pb.UnimplementedOrdersServer
 	s                  storageInterface
 	cov                coverService
 	givenOrdersCounter prometheus.Gauge
