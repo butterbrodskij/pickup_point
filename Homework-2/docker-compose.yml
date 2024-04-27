@@ -110,3 +110,15 @@ services:
     ports:
       - 9100:9100
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+    networks: 
+      - tracing
+      
+networks:
+  tracing:
+    name: tracing
+

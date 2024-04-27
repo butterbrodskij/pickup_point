@@ -12,11 +12,13 @@ import (
 	inmemorycache "gitlab.ozon.dev/mer_marat/homework/internal/pkg/in_memory_cache"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/redis"
+	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/tracer"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/cover"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/order"
 	"gitlab.ozon.dev/mer_marat/homework/internal/service/pickpoint"
 	storage "gitlab.ozon.dev/mer_marat/homework/internal/storage/file"
 	"gitlab.ozon.dev/mer_marat/homework/internal/storage/postgres"
+	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -76,6 +78,18 @@ func main() {
 	service := pickpoint.NewService(repo, cache, database)
 	service.AddCounterMetric(pickpointCounter)
 	service.AddRequestHistogram(requestPickpointMetrics)
+
+	shutdown, err := tracer.InitProvider(ctx, "grpc service")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	service.AddTracer(otel.Tracer("pickpoint-tracer"))
 
 	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
 	if err != nil {

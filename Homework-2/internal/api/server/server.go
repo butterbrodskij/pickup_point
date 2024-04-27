@@ -20,6 +20,7 @@ import (
 	"gitlab.ozon.dev/mer_marat/homework/internal/pkg/kafka"
 	order_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/order"
 	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -121,7 +122,7 @@ func (s server) RunGRPC(ctx context.Context, cfg config.Config) error {
 
 	if s.grpcMetrics != nil {
 		grpcServer = grpc.NewServer(
-			//grpc.StatsHandler(otel.NewServerHandler()),
+			grpc.StatsHandler(otelgrpc.NewServerHandler()),
 			grpc.ChainUnaryInterceptor(
 				s.grpcMetrics.UnaryServerInterceptor(),
 			),

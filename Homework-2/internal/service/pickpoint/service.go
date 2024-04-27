@@ -10,6 +10,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	pickpoint_pb "gitlab.ozon.dev/mer_marat/homework/internal/pkg/pb/pickpoint"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -37,6 +39,7 @@ type service struct {
 	transactor      transactor
 	counter         prometheus.Counter
 	requestHandling prometheus.Histogram
+	tracer          trace.Tracer
 }
 
 // New returns type Service associated with storage
@@ -46,6 +49,10 @@ func NewService(stor storage, cache cache, transactor transactor) service {
 		cache:      cache,
 		transactor: transactor,
 	}
+}
+
+func (s *service) AddTracer(tracer trace.Tracer) {
+	s.tracer = tracer
 }
 
 func (s *service) AddRequestHistogram(hist prometheus.Histogram) {
@@ -86,6 +93,14 @@ func (s service) Read(ctx context.Context, idRequest *pickpoint_pb.IdRequest) (*
 			s.counter.Add(1)
 		}
 	}()
+	if s.tracer != nil {
+		var span trace.Span
+		ctx, span = s.tracer.Start(
+			ctx,
+			"CollectorExporter-Example",
+			trace.WithAttributes(attribute.String("method", "read")))
+		defer span.End()
+	}
 	id := idRequest.Id
 	if !isValidID(id) {
 		return nil, model.ErrorInvalidInput
@@ -120,6 +135,14 @@ func (s service) Create(ctx context.Context, point *pickpoint_pb.PickPoint) (*pi
 			s.counter.Add(1)
 		}
 	}()
+	if s.tracer != nil {
+		var span trace.Span
+		ctx, span = s.tracer.Start(
+			ctx,
+			"CollectorExporter-Example",
+			trace.WithAttributes(attribute.String("method", "create")))
+		defer span.End()
+	}
 	id, err := s.repo.Add(ctx, pb2Model(point))
 	if err != nil {
 		return nil, err
@@ -140,6 +163,14 @@ func (s service) Update(ctx context.Context, point *pickpoint_pb.PickPoint) (*em
 			s.counter.Add(1)
 		}
 	}()
+	if s.tracer != nil {
+		var span trace.Span
+		ctx, span = s.tracer.Start(
+			ctx,
+			"CollectorExporter-Example",
+			trace.WithAttributes(attribute.String("method", "update")))
+		defer span.End()
+	}
 	modelPoint := pb2Model(point)
 	if !isValidPickPoint(modelPoint) {
 		return nil, model.ErrorInvalidInput
@@ -165,6 +196,14 @@ func (s service) Delete(ctx context.Context, idRequest *pickpoint_pb.IdRequest) 
 			s.counter.Add(1)
 		}
 	}()
+	if s.tracer != nil {
+		var span trace.Span
+		ctx, span = s.tracer.Start(
+			ctx,
+			"CollectorExporter-Example",
+			trace.WithAttributes(attribute.String("method", "delete")))
+		defer span.End()
+	}
 	id := idRequest.Id
 	if !isValidID(id) {
 		return nil, model.ErrorInvalidInput
