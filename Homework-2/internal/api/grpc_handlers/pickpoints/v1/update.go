@@ -9,5 +9,8 @@ import (
 func (s *grpcService) Update(ctx context.Context, updateRequest *pickpoint_pb.UpdateRequest) (*pickpoint_pb.UpdateResponse, error) {
 	point := pb2Model(updateRequest.Point)
 	err := s.service.Update(ctx, point)
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &pickpoint_pb.UpdateResponse{}, nil
 }

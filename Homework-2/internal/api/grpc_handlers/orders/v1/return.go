@@ -8,5 +8,8 @@ import (
 
 func (s *grpcService) Return(ctx context.Context, req *order_pb.ReturnRequest) (*order_pb.ReturnResponse, error) {
 	err := s.service.Return(ctx, req.Id, req.Recipient)
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &order_pb.ReturnResponse{}, nil
 }

@@ -16,5 +16,8 @@ func (s *grpcService) AcceptFromCourier(ctx context.Context, req *order_pb.Accep
 		Cover:        req.Cover,
 		ExpireDate:   req.ExpireDate,
 	})
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &order_pb.AcceptFromCourierResponse{}, nil
 }

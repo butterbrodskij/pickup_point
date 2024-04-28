@@ -8,5 +8,8 @@ import (
 
 func (s *grpcService) Delete(ctx context.Context, deleteRequest *pickpoint_pb.DeleteRequest) (*pickpoint_pb.DeleteResponse, error) {
 	err := s.service.Delete(ctx, deleteRequest.Id)
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &pickpoint_pb.DeleteResponse{}, nil
 }

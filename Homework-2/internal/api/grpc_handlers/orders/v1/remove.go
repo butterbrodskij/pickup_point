@@ -8,5 +8,8 @@ import (
 
 func (s *grpcService) Remove(ctx context.Context, req *order_pb.RemoveRequest) (*order_pb.RemoveResponse, error) {
 	err := s.service.Remove(ctx, req.Id)
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &order_pb.RemoveResponse{}, nil
 }
