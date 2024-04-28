@@ -44,7 +44,7 @@ func main() {
 	defer cache.Close()
 	//service := pickpoint.NewService(repo, redis, database)
 	service := pickpoint.NewService(repo, cache, database)
-	service.AddCounterMetric(pickpointCounter)
+	service.AddCounterMetric(&pickpointCounter)
 
 	handler := logger.NewHandler()
 	consumer := kafka.NewConsumerGroup(map[string]kafka.Handler{cfg.Kafka.Topic: handler}, cfg.Kafka.Topic)

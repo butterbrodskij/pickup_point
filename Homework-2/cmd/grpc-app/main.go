@@ -51,8 +51,8 @@ func main() {
 	defer cache.Close()
 	//servicePoints := pickpoint.NewService(repo, redis, database)
 	servicePoints := pickpoint.NewService(repo, cache, database)
-	servicePoints.AddCounterMetric(pickpointCounter)
-	servicePoints.AddRequestHistogram(requestPickpointMetrics)
+	servicePoints.AddCounterMetric(&pickpointCounter)
+	servicePoints.AddRequestHistogram(&requestPickpointMetrics)
 
 	shutdown, err := tracer.InitProvider(ctx, "pickpoint")
 	if err != nil {
@@ -83,8 +83,8 @@ func main() {
 		return
 	}
 	serviceOrders := order.NewService(&storOrders, cover.NewService())
-	serviceOrders.AddGivenOrdersGauge(givenOrdersGauge)
-	serviceOrders.AddFailedRequestsCounter(failedOrderCounter)
+	serviceOrders.AddGivenOrdersGauge(&givenOrdersGauge)
+	serviceOrders.AddFailedRequestsCounter(&failedOrderCounter)
 
 	reg := prometheus.NewRegistry()
 

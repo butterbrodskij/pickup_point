@@ -38,7 +38,6 @@ message GiveRequest {
 }
 
 message GiveResponse {
-    repeated int64 ids = 1;
 }
 
 message ListRequest {

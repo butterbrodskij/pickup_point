@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/prometheus/client_golang/prometheus"
+	"gitlab.ozon.dev/mer_marat/homework/internal/metrics"
 	"gitlab.ozon.dev/mer_marat/homework/internal/model"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -31,12 +31,20 @@ type transactor interface {
 	RunSerializable(ctx context.Context, role pgx.TxAccessMode, f func(ctxTX context.Context) error) error
 }
 
+type counter interface {
+	CounterInc()
+}
+
+type histogram interface {
+	Observe(start time.Time)
+}
+
 type service struct {
 	repo            storage
 	cache           cache
 	transactor      transactor
-	counter         prometheus.Counter
-	requestHandling prometheus.Histogram
+	counter         counter
+	requestHandling histogram
 }
 
 // New returns type Service associated with storage
@@ -45,29 +53,22 @@ func NewService(stor storage, cache cache, transactor transactor) service {
 		repo:       stor,
 		cache:      cache,
 		transactor: transactor,
+		counter:    &metrics.UnImplementedCounter{},
 	}
 }
 
-func (s *service) AddRequestHistogram(hist prometheus.Histogram) {
+func (s *service) AddRequestHistogram(hist histogram) {
 	s.requestHandling = hist
 }
 
-func (s *service) AddCounterMetric(counter prometheus.Counter) {
+func (s *service) AddCounterMetric(counter counter) {
 	s.counter = counter
 }
 
 func (s service) Read(ctx context.Context, id int64) (res *model.PickPoint, err error) {
 	start := time.Now()
-	defer func() {
-		if s.requestHandling != nil {
-			s.requestHandling.Observe(time.Since(start).Seconds())
-		}
-	}()
-	defer func() {
-		if s.counter != nil {
-			s.counter.Add(1)
-		}
-	}()
+	defer s.requestHandling.Observe(start)
+	defer s.counter.CounterInc()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Read", trace.WithAttributes(
 		attribute.String("request", fmt.Sprint(id)),
 	))
@@ -103,16 +104,8 @@ func (s service) Read(ctx context.Context, id int64) (res *model.PickPoint, err 
 
 func (s service) Create(ctx context.Context, point *model.PickPoint) (res *model.PickPoint, err error) {
 	start := time.Now()
-	defer func() {
-		if s.requestHandling != nil {
-			s.requestHandling.Observe(time.Since(start).Seconds())
-		}
-	}()
-	defer func() {
-		if s.counter != nil {
-			s.counter.Add(1)
-		}
-	}()
+	defer s.requestHandling.Observe(start)
+	defer s.counter.CounterInc()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Create", trace.WithAttributes(
 		attribute.String("request", fmt.Sprint(point)),
 	))
@@ -135,16 +128,8 @@ func (s service) Create(ctx context.Context, point *model.PickPoint) (res *model
 
 func (s service) Update(ctx context.Context, point *model.PickPoint) (err error) {
 	start := time.Now()
-	defer func() {
-		if s.requestHandling != nil {
-			s.requestHandling.Observe(time.Since(start).Seconds())
-		}
-	}()
-	defer func() {
-		if s.counter != nil {
-			s.counter.Add(1)
-		}
-	}()
+	defer s.requestHandling.Observe(start)
+	defer s.counter.CounterInc()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Update", trace.WithAttributes(
 		attribute.String("request", fmt.Sprint(point)),
 	))
@@ -171,16 +156,8 @@ func (s service) Update(ctx context.Context, point *model.PickPoint) (err error)
 
 func (s service) Delete(ctx context.Context, id int64) (err error) {
 	start := time.Now()
-	defer func() {
-		if s.requestHandling != nil {
-			s.requestHandling.Observe(time.Since(start).Seconds())
-		}
-	}()
-	defer func() {
-		if s.counter != nil {
-			s.counter.Add(1)
-		}
-	}()
+	defer s.requestHandling.Observe(start)
+	defer s.counter.CounterInc()
 	ctx, span := otel.GetTracerProvider().Tracer("pickpoint").Start(ctx, "Deelete", trace.WithAttributes(
 		attribute.String("request", fmt.Sprint(id)),
 	))
