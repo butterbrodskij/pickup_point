@@ -3,3 +3,5 @@ notes
 storage_points.json
 **/.DS_Store
 settings.json
+.env
+images
